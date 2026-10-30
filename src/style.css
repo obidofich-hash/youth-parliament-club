@@ -23,3 +23,85 @@
 .form-card img {
   object-fit: contain;
 }
+/* YOSHLAR OVOZI — KATTA FON */
+.welcome-row {
+  position: relative;
+  isolation: isolate;
+  min-height: 520px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  padding: 70px 8%;
+  border-radius: 18px;
+  background: #07172b;
+}
+
+.welcome-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(
+    90deg,
+    rgba(5, 18, 35, 0.82),
+    rgba(5, 18, 35, 0.48),
+    rgba(5, 18, 35, 0.78)
+  );
+}
+
+.welcome-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+.welcome-content {
+  max-width: 760px;
+  text-align: center;
+  color: white;
+  position: relative;
+  z-index: 1;
+}
+
+.welcome-content h2 {
+  font-size: clamp(32px, 5vw, 58px);
+  line-height: 1.2;
+  color: white;
+  margin: 18px 0;
+}
+
+.welcome-content h2 em {
+  color: #e8c77f;
+}
+
+.welcome-content p {
+  color: rgba(255,255,255,.85);
+  font-size: 16px;
+  line-height: 1.8;
+  max-width: 600px;
+  margin: 20px auto 0;
+}
+
+.welcome-content .eyebrow {
+  color: #e8c77f;
+}
+
+@media (max-width: 600px) {
+  .welcome-row {
+    min-height: 430px;
+    padding: 45px 20px;
+    border-radius: 12px;
+  }
+
+  .welcome-content h2 {
+    font-size: 34px;
+  }
+
+  .welcome-content p {
+    font-size: 14px;
+  }
+}
