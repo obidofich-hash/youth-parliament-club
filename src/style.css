@@ -104,4 +104,17 @@
   .welcome-content p {
     font-size: 14px;
   }
+
+  /* Birinchi va ikkinchi bo‘lim orasidagi masofa */
+.hero {
+  margin-bottom: 24px;
+  border-radius: 18px;
+  overflow: hidden;
+}
+
+/* Ikkinchi bo‘lim burchaklari */
+.welcome-row {
+  border-radius: 18px;
+  overflow: hidden;
+}
 }
