@@ -89,7 +89,6 @@
 .welcome-content .eyebrow {
   color: #e8c77f;
 }
-
 @media (max-width: 600px) {
   .welcome-row {
     min-height: 430px;
