@@ -634,27 +634,128 @@ function App() {
                 </>
               )}
 
-              {page === 'about' && (
-                <>
-                  <PageHead
-                    kicker="BIZ HAQIMIZDA"
-                    title="G‘oya, maqsad va mas’uliyat."
-                    desc="Yoshlar parlamenti klubi — faol, bilimli va tashabbuskor yoshlarni birlashtiruvchi jamoaviy maydon."
-                  />
+             {page === 'about' && (
+  <div className="about-page">
+    <PageHead
+      kicker="BIZNING TARIXIMIZ"
+      title="O‘tmishdan — kelajak sari."
+      desc="Yoshlar parlamenti klubi: bilim, tashabbus va mas’uliyatni birlashtirgan yoshlar jamoasi."
+    />
 
-                  <div className="two-col">
-                    <Info
-                      title="Bizning missiya"
-                      text="Yoshlarning huquqiy ongi va madaniyatini yuksaltirish, ularning jamiyat hayotidagi ishtirokini kengaytirish hamda tashabbuslarini qo‘llab-quvvatlash."
-                    />
+    <motion.section
+      className="about-intro"
+      initial={{ opacity: 0, y: 45 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: 0.8 }}
+    >
+      <div className="about-intro-image">
+        <img
+          src="https://images.unsplash.com/photo-1523580494863-6f3031224c94?auto=format&fit=crop&w=1200&q=85"
+          alt="Universitet talabalari"
+        />
+      </div>
+      <div className="about-intro-text">
+        <span className="eyebrow">TASHKIL TOPISH TARIXI</span>
+        <h2>Yoshlar tashabbusidan boshlangan yo‘l.</h2>
+        <p>
+          Yoshlar parlamenti klubi Xalqaro ijtimoiy innovatsiyalar
+          universiteti hududida tashkil etilgan. Klub yoshlarning
+          huquqiy bilimini, siyosiy va ijtimoiy faolligini oshirish,
+          ularning tashabbuslarini qo‘llab-quvvatlash maqsadida
+          faoliyat yuritadi.
+        </p>
+      </div>
+    </motion.section>
 
-                    <Info
-                      title="Istiqboldagi maqsad"
-                      text="Yoshlar va davlat institutlari o‘rtasida muloqot ko‘prigini yaratish, yangi loyihalar va amaliy takliflarni ilgari surish."
-                    />
-                  </div>
-                </>
-              )}
+    <div className="about-timeline">
+      <motion.article
+        className="timeline-card past"
+        initial={{ opacity: 0, x: -45 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
+        <span className="timeline-number">01</span>
+        <span className="eyebrow">O‘TMISH</span>
+        <h2>G‘oyaning tug‘ilishi</h2>
+        <p>
+          2026-yil noyabr oyida Xalqaro ijtimoiy innovatsiyalar
+          universitetida Yoshlar parlamenti klubiga asos solindi.
+          Bu tashabbus yoshlar uchun yangi fikrlar, huquqiy bilim
+          va ijtimoiy faollik maydonini yaratishga qaratildi.
+        </p>
+      </motion.article>
+
+      <motion.article
+        className="timeline-card present"
+        initial={{ opacity: 0, y: 45 }}
+        whileInView={{ opacity: 1, y: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
+        <span className="timeline-number">02</span>
+        <span className="eyebrow">BUGUN</span>
+        <h2>12 kishilik faol jamoa</h2>
+        <p>
+          Bugun klub 12 nafar a’zodan iborat jamoa sifatida
+          shakllangan. Spiker, koordinatorlar, media bo‘limi
+          va a’zolar yagona maqsad yo‘lida faoliyat olib boradi.
+        </p>
+        <div className="team-stats">
+          <div><strong>1</strong><span>Spiker</span></div>
+          <div><strong>2</strong><span>Koordinator</span></div>
+          <div><strong>2</strong><span>Media</span></div>
+          <div><strong>7</strong><span>A’zo</span></div>
+        </div>
+      </motion.article>
+
+      <motion.article
+        className="timeline-card future"
+        initial={{ opacity: 0, x: 45 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.7 }}
+      >
+        <span className="timeline-number">03</span>
+        <span className="eyebrow">KELAJAK</span>
+        <h2>Yangi marralar sari</h2>
+        <p>
+          Klubning istiqboldagi maqsadi — universitet miqyosida
+          yoshlar tashabbuslarini kengaytirish, intellektual
+          va huquqiy loyihalarni amalga oshirish hamda faol
+          yoshlar hamkorligini rivojlantirish.
+        </p>
+      </motion.article>
+    </div>
+
+    <motion.section
+      className="about-team"
+      initial={{ opacity: 0, y: 35 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.8 }}
+    >
+      <div className="eyebrow">KLUB JAMOASI</div>
+      <h2>Bir maqsad — yagona jamoa.</h2>
+      <p>
+        Klubning tashkiliy tuzilmasi vazifalar taqsimoti va
+        hamkorlik tamoyili asosida shakllantirilgan.
+      </p>
+      <div className="team-total">
+        <Users size={30} />
+        <strong>12</strong>
+        <span>nafar jamoa a’zosi</span>
+      </div>
+      <div className="team-structure">
+        <div><Landmark /><strong>1</strong><span>Spiker</span></div>
+        <div><Users /><strong>2</strong><span>Koordinator</span></div>
+        <div><Users /><strong>2</strong><span>Media bo‘limi</span></div>
+        <div><Users /><strong>7</strong><span>Klub a’zolari</span></div>
+      </div>
+    </motion.section>
+  </div>
+)}
 
               {page === 'membership' && (
                 <>
