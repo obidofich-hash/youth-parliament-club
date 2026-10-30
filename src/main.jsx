@@ -20,7 +20,10 @@ const defaults = {
  email:'info@youthparliament.uz',
  address:'Toshkent shahri',
  instagram:'',
- youtube:''
+ youtube:'',
+ hero_image:'',
+club_logo:'',
+home_image:''
 }
 const formUrl='https://docs.google.com/forms/d/e/1FAIpQLSfBwqF-1CtsNfkWS9x8p5-1JMFbD8jIHB7Zf9z9e8pm3zbzMA/viewform?usp=dialog'
 
