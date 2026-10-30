@@ -634,163 +634,154 @@ function App() {
                 </>
               )}
 
-          {page === 'about' && (
-  <div className="about-page">
+{page === 'about' && (
+  <div className="about-v2">
     <PageHead
-      kicker="KLUB HAQIDA"
-      title="G‘oyadan — katta maqsadlarga."
-      desc="Yoshlar parlamenti klubi — bilim, tashabbus va mas’uliyatni birlashtiruvchi yoshlar platformasi."
+      kicker="YOSHLAR PARLAMENTI KLUBI"
+      title="G‘oyadan — <em>kelajakka.</em>"
+      desc="Bilim, tashabbus va yetakchilikni birlashtirgan yoshlar platformasi."
     />
 
     <motion.section
-      className="about-hero"
-      initial={{ opacity: 0, y: 45 }}
+      className="av-intro"
+      initial={{ opacity: 0, y: 55 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.85 }}
     >
-      <div className="about-hero-copy">
-        <span className="eyebrow">BIZNING TARIXIMIZ</span>
+      <div className="av-intro-copy">
+        <span className="av-kicker">BIZNING MISSIYAMIZ</span>
         <h2>Yoshlar ovozi — <em>jamiyat kelajagi.</em></h2>
         <p>
-          Klub Xalqaro ijtimoiy innovatsiyalar universiteti
-          hududida tashkil etilgan. Uning asosiy maqsadi —
-          yoshlarning huquqiy bilimini, ijtimoiy faolligini
-          va tashabbuskorligini rivojlantirish.
+          Yoshlarning huquqiy bilimini oshirish, ijtimoiy
+          faolligini kuchaytirish va yangi tashabbuslarini
+          qo‘llab-quvvatlash — klub faoliyatining asosiy
+          yo‘nalishidir.
         </p>
-        <div className="about-facts">
-          <span><CalendarDays size={18} /> 2026-yil, noyabr</span>
-          <span><Users size={18} /> 12 nafar jamoa a’zosi</span>
+        <div className="av-meta">
+          <span><CalendarDays size={17}/> 2026-yil, noyabr</span>
+          <span><Users size={17}/> 12 nafar jamoa a’zosi</span>
         </div>
       </div>
-      <div className="about-hero-photo">
-        <img
-          src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=85"
-          alt="Universitet binosi"
-        />
+      <div className="av-visual av-visual-one">
+        <div className="av-image-frame">
+          <img
+            src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=85"
+            alt="Universitet binosi"
+          />
+        </div>
+        <div className="av-image-caption">
+          <Landmark size={19}/>
+          <span>XALQARO IJTIMOIY INNOVATSIYALAR UNIVERSITETI</span>
+        </div>
+        <span className="av-number">01</span>
       </div>
     </motion.section>
 
-    <div className="about-section-label">
-      <span>01 / O‘TMISH</span><i />
+    <div className="av-divider">
+      <span>01</span><i/><b>O‘TMISH</b>
     </div>
 
     <motion.section
-      className="about-story about-story-reverse"
-      initial={{ opacity: 0, x: -45 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      className="av-history"
+      initial={{ opacity: 0, y: 55 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.8 }}
     >
-      <div className="about-story-image">
-        <img
-          src="https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1100&q=85"
-          alt="Universitet muhiti"
-        />
+      <div className="av-history-art">
+        <div className="av-history-frame">
+          <img
+            src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=85"
+            alt="Parlament majlisi zali"
+          />
+        </div>
+        <div className="av-photo-stamp">YOSHLAR<br/>TASHABBUSI</div>
       </div>
-      <div className="about-story-copy">
-        <span className="eyebrow">TASHKIL TOPISH TARIXI</span>
-        <h2>Har bir katta yo‘l bir g‘oyadan boshlanadi.</h2>
+      <motion.div
+        className="av-history-copy"
+        initial={{ opacity: 0, x: 55 }}
+        whileInView={{ opacity: 1, x: 0 }}
+        viewport={{ once: true, amount: 0.3 }}
+        transition={{ duration: 0.9, delay: 0.15 }}
+      >
+        <span className="av-kicker">TASHKIL TOPISH TARIXI</span>
+        <h2>Har bir katta o‘zgarish <em>bir g‘oyadan</em> boshlanadi.</h2>
         <p>
           2026-yil noyabr oyida Xalqaro ijtimoiy innovatsiyalar
-          universiteti hududida Yoshlar parlamenti klubiga
-          asos solindi. Klub yoshlarning fikr va takliflarini
-          ilgari surish, ularni ijtimoiy hayotga faol jalb etish
-          maqsadida tashkil etildi.
+          universiteti hududida Yoshlar parlamenti klubi ochilgan.
+          Klub yoshlarning fikr va takliflarini ilgari surish,
+          ularning ijtimoiy hayotdagi ishtirokini kuchaytirish
+          maqsadida tashkil etilgan.
         </p>
-        <div className="about-date">
-          <CalendarDays size={18} />
-          <span>2026-yil, noyabr — tashkil topgan sana</span>
+        <div className="av-date">
+          <CalendarDays size={19}/>
+          <div><small>TASHKIL TOPGAN SANA</small><strong>2026 / NOYABR</strong></div>
         </div>
-      </div>
+      </motion.div>
     </motion.section>
 
-    <div className="about-section-label">
-      <span>02 / BUGUN</span><i />
+    <div className="av-divider">
+      <span>02</span><i/><b>BUGUN</b>
     </div>
 
     <motion.section
-      className="about-story about-today"
-      initial={{ opacity: 0, x: 45 }}
-      whileInView={{ opacity: 1, x: 0 }}
+      className="av-today"
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
       transition={{ duration: 0.8 }}
     >
-      <div className="about-story-copy">
-        <span className="eyebrow">BUGUNGI FAOLIYAT</span>
-        <h2>Bir maqsad atrofida birlashgan jamoa.</h2>
+      <div className="av-today-copy">
+        <span className="av-kicker">BUGUNGI FAOLIYAT</span>
+        <h2>Bir maqsad — <em>yagona jamoa.</em></h2>
         <p>
-          Klub faoliyati aniq vazifalar taqsimoti va o‘zaro
-          hamkorlik tamoyiliga asoslanadi. Har bir a’zo
-          umumiy maqsad yo‘lida o‘z yo‘nalishi bo‘yicha
-          hissa qo‘shadi.
+          Klub faoliyati vazifalar taqsimoti, hamkorlik va
+          mas’uliyat tamoyillariga asoslanadi. Har bir ishtirokchi
+          umumiy maqsad yo‘lida o‘z yo‘nalishi bo‘yicha faoliyat
+          olib boradi.
         </p>
       </div>
-      <div className="about-story-image">
-        <img
-          src="https://images.unsplash.com/photo-1517457373958-b7bdd4587205?auto=format&fit=crop&w=1100&q=85"
-          alt="Jamoaviy uchrashuv"
-        />
+      <div className="av-roles">
+        <div><strong>01</strong><span>Spiker</span><b>1 nafar</b></div>
+        <div><strong>02</strong><span>Koordinatorlar</span><b>2 nafar</b></div>
+        <div><strong>03</strong><span>Media bo‘limi</span><b>2 nafar</b></div>
+        <div><strong>04</strong><span>Klub a’zolari</span><b>7 nafar</b></div>
+        <div className="av-total"><strong>12</strong><span>Jami jamoa a’zolari</span></div>
       </div>
     </motion.section>
 
-    <div className="about-section-label">
-      <span>03 / KELAJAK</span><i />
+    <div className="av-divider">
+      <span>03</span><i/><b>KELAJAK</b>
     </div>
 
     <motion.section
-      className="about-future"
-      initial={{ opacity: 0, y: 45 }}
+      className="av-future"
+      initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8 }}
+      transition={{ duration: 0.85 }}
     >
-      <span className="eyebrow">ISTIQBOLDAGI MAQSADLAR</span>
-      <h2>Kelajak — bugungi tashabbuslardan boshlanadi.</h2>
-      <p>
-        Klubning istiqboldagi maqsadi — yoshlar tashabbuslarini
-        kengaytirish, huquqiy va intellektual loyihalarni amalga
-        oshirish hamda universitet hayotida faol yoshlar
-        hamkorligini rivojlantirish.
-      </p>
-      <div className="about-goals">
-        <article>
-          <strong>01</strong>
-          <h3>Kengayish</h3>
-          <p>Yangi loyihalar va hamkorliklarni rivojlantirish.</p>
-        </article>
-        <article>
-          <strong>02</strong>
-          <h3>Tashabbus</h3>
-          <p>Yoshlar g‘oyalarini qo‘llab-quvvatlash.</p>
-        </article>
-        <article>
-          <strong>03</strong>
-          <h3>Ta’sir</h3>
-          <p>Jamiyat hayotida faol ishtirokni kuchaytirish.</p>
-        </article>
+      <div className="av-future-heading">
+        <span className="av-kicker">ISTIQBOL VA RIVOJLANISH</span>
+        <h2>Kelajakni bugundan <em>birgalikda quramiz.</em></h2>
+        <p>
+          Klubning istiqboldagi maqsadi — universitet miqyosida
+          yoshlar tashabbuslarini kengaytirish, huquqiy va
+          intellektual loyihalarni amalga oshirish hamda faol
+          yoshlar hamkorligini rivojlantirish.
+        </p>
       </div>
-    </motion.section>
-
-    <motion.section
-      className="about-team-final"
-      initial={{ opacity: 0, y: 40 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, amount: 0.2 }}
-      transition={{ duration: 0.8 }}
-    >
-      <span className="eyebrow">KLUB TARKIBI</span>
-      <h2>12 nafar a’zo — yagona maqsad.</h2>
-      <p>Klub jamoasi to‘rt asosiy tarkibiy yo‘nalishdan iborat.</p>
-      <div className="about-team-stats">
-        <div><strong>1</strong><span>Spiker</span></div>
-        <div><strong>2</strong><span>Koordinator</span></div>
-        <div><strong>2</strong><span>Media bo‘limi</span></div>
-        <div><strong>7</strong><span>Klub a’zolari</span></div>
+      <div className="av-future-grid">
+        <article><span>01</span><Landmark/><h3>Huquqiy bilim</h3><p>Huquqiy savodxonlik va fuqarolik faolligini oshirish.</p></article>
+        <article><span>02</span><Users/><h3>Yoshlar hamkorligi</h3><p>Tashabbuskor yoshlarni yagona maqsad atrofida birlashtirish.</p></article>
+        <article><span>03</span><ArrowUpRight/><h3>Yangi loyihalar</h3><p>Innovatsion va ijtimoiy ahamiyatga ega g‘oyalarni ro‘yobga chiqarish.</p></article>
       </div>
+      <div className="av-final-line">YOSHLAR OVOZI. YANGI G‘OYALAR. YANGI KELAJAK.</div>
     </motion.section>
   </div>
 )}
+
 
               {page === 'membership' && (
                 <>
