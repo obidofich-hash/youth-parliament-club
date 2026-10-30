@@ -601,34 +601,36 @@ function App() {
                     </div>
                   </section>
 
-                  <section className="welcome-row">
-                    {settings.home_image && (
-                      <img
-                        src={settings.home_image}
-                        alt="Klub faoliyati"
-                        style={{
-                          width: 'min(42%,420px)',
-                          maxHeight: '280px',
-                          objectFit: 'cover',
-                          borderRadius: '16px'
-                        }}
-                      />
-                    )}
-
-                    <div>
-                      <div className="eyebrow">BIZNING MAQSAD</div>
-                      <h2>
-                        Yoshlar ovozi —<br />
-                        <em>jamiyat kelajagi.</em>
-                      </h2>
-                    </div>
-
-                    <p>
-                      Yoshlarning huquqiy bilimini oshirish, ijtimoiy
-                      faolligini kuchaytirish va tashabbuslarini
-                      qo‘llab-quvvatlash.
-                    </p>
-                  </section>
+                  <section
+  className="welcome-row"
+  style={{
+    backgroundImage: settings.home_image
+      ? `linear-gradient(rgba(5,18,35,.45), rgba(5,18,35,.65)), url("${settings.home_image}")`
+      : 'none',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  }}
+>
+  <motion.div
+    className="welcome-content"
+    initial={{ opacity: 0, y: 65 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: false, amount: 0.25 }}
+    transition={{ duration: 1, ease: "easeOut" }}
+  >
+    <div className="eyebrow">BIZNING MAQSAD</div>
+    <h2>
+      Yoshlar ovozi —<br />
+      <em>jamiyat kelajagi.</em>
+    </h2>
+    <p>
+      Yoshlarning huquqiy bilimini oshirish, ijtimoiy
+      faolligini kuchaytirish va tashabbuslarini
+      qo‘llab-quvvatlash.
+    </p>
+  </motion.div>
+</section>
                 </>
               )}
 
