@@ -210,3 +210,42 @@ img { max-width: 100%; }
     min-height: 185px !important;
   }
 }
+/* FAQAT "KLUB HAQIDA" BO'LIMI: ikkita ixcham rasm ramkasi */
+.about-v2 .av-visual .av-image-frame,
+.about-v2 .av-history-art .av-history-frame {
+  width: min(100%, 320px) !important;
+  height: 205px !important;
+  min-height: 205px !important;
+  margin: 0 auto !important;
+  overflow: hidden !important;
+  border: 1px solid #c6a66a !important;
+  border-radius: 16px !important;
+  background: linear-gradient(145deg, #f7f3eb, #e8e0d2) !important;
+  box-shadow: 0 10px 26px rgba(10, 27, 45, .10) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: relative !important;
+}
+.about-v2 .av-visual .av-image-frame img,
+.about-v2 .av-history-art .av-history-frame img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important;
+  object-position: center !important;
+  display: block !important;
+}
+.about-v2 .av-empty-image {
+  color: #9b8152 !important;
+  font-size: 11px !important;
+  font-weight: 700 !important;
+  letter-spacing: 3px !important;
+}
+@media (max-width: 700px) {
+  .about-v2 .av-visual .av-image-frame,
+  .about-v2 .av-history-art .av-history-frame {
+    width: min(100%, 290px) !important;
+    height: 185px !important;
+    min-height: 185px !important;
+  }
+}
