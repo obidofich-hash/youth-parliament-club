@@ -634,11 +634,12 @@ function App() {
                 </>
               )}
 
+
 {page === 'about' && (
   <div className="about-v2">
     <PageHead
       kicker="YOSHLAR PARLAMENTI KLUBI"
-      title="G‘oyadan — <em>kelajakka.</em>"
+      title="G‘oyadan — kelajakka."
       desc="Bilim, tashabbus va yetakchilikni birlashtirgan yoshlar platformasi."
     />
 
@@ -663,6 +664,7 @@ function App() {
           <span><Users size={17}/> 12 nafar jamoa a’zosi</span>
         </div>
       </div>
+
       <div className="av-visual av-visual-one">
         <div className="av-image-frame">
           <img
@@ -698,6 +700,7 @@ function App() {
         </div>
         <div className="av-photo-stamp">YOSHLAR<br/>TASHABBUSI</div>
       </div>
+
       <motion.div
         className="av-history-copy"
         initial={{ opacity: 0, x: 55 }}
@@ -716,7 +719,10 @@ function App() {
         </p>
         <div className="av-date">
           <CalendarDays size={19}/>
-          <div><small>TASHKIL TOPGAN SANA</small><strong>2026 / NOYABR</strong></div>
+          <div>
+            <small>TASHKIL TOPGAN SANA</small>
+            <strong>2026 / NOYABR</strong>
+          </div>
         </div>
       </motion.div>
     </motion.section>
@@ -742,12 +748,16 @@ function App() {
           olib boradi.
         </p>
       </div>
+
       <div className="av-roles">
         <div><strong>01</strong><span>Spiker</span><b>1 nafar</b></div>
         <div><strong>02</strong><span>Koordinatorlar</span><b>2 nafar</b></div>
         <div><strong>03</strong><span>Media bo‘limi</span><b>2 nafar</b></div>
         <div><strong>04</strong><span>Klub a’zolari</span><b>7 nafar</b></div>
-        <div className="av-total"><strong>12</strong><span>Jami jamoa a’zolari</span></div>
+        <div className="av-total">
+          <strong>12</strong>
+          <span>Jami jamoa a’zolari</span>
+        </div>
       </div>
     </motion.section>
 
@@ -772,15 +782,32 @@ function App() {
           yoshlar hamkorligini rivojlantirish.
         </p>
       </div>
+
       <div className="av-future-grid">
-        <article><span>01</span><Landmark/><h3>Huquqiy bilim</h3><p>Huquqiy savodxonlik va fuqarolik faolligini oshirish.</p></article>
-        <article><span>02</span><Users/><h3>Yoshlar hamkorligi</h3><p>Tashabbuskor yoshlarni yagona maqsad atrofida birlashtirish.</p></article>
-        <article><span>03</span><ArrowUpRight/><h3>Yangi loyihalar</h3><p>Innovatsion va ijtimoiy ahamiyatga ega g‘oyalarni ro‘yobga chiqarish.</p></article>
+        <article>
+          <span>01</span><Landmark/>
+          <h3>Huquqiy bilim</h3>
+          <p>Huquqiy savodxonlik va fuqarolik faolligini oshirish.</p>
+        </article>
+        <article>
+          <span>02</span><Users/>
+          <h3>Yoshlar hamkorligi</h3>
+          <p>Tashabbuskor yoshlarni yagona maqsad atrofida birlashtirish.</p>
+        </article>
+        <article>
+          <span>03</span><ArrowUpRight/>
+          <h3>Yangi loyihalar</h3>
+          <p>Innovatsion va ijtimoiy ahamiyatga ega g‘oyalarni ro‘yobga chiqarish.</p>
+        </article>
       </div>
-      <div className="av-final-line">YOSHLAR OVOZI. YANGI G‘OYALAR. YANGI KELAJAK.</div>
+
+      <div className="av-final-line">
+        YOSHLAR OVOZI. YANGI G‘OYALAR. YANGI KELAJAK.
+      </div>
     </motion.section>
   </div>
 )}
+
 
 
               {page === 'membership' && (
