@@ -188,7 +188,7 @@ function App(){
     <Plus size={16}/> Saqlash
    </button>
   </div>
- ) const contentList=(type,rows)=>(
+ ); const contentList=(type,rows)=>(
   <div className="two-col">
    {rows.map(row=>(
     <article className="info-panel" key={row.id}>
