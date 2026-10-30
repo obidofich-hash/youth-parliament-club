@@ -105,16 +105,14 @@
     font-size: 14px;
   }
 
-  /* Birinchi va ikkinchi bo‘lim orasidagi masofa */
 .hero {
-  margin-bottom: 24px;
-  border-radius: 18px;
+  margin: 0 15px 24px !important;
+  border-radius: 18px !important;
   overflow: hidden;
 }
 
-/* Ikkinchi bo‘lim burchaklari */
 .welcome-row {
-  border-radius: 18px;
+  margin: 0 15px !important;
+  border-radius: 18px !important;
   overflow: hidden;
-}
 }
