@@ -177,7 +177,22 @@ error
 : 'Tizimga muvaffaqiyatli kirdingiz.'
 )
 }
+async function googleLogin() {
+  setBusy(true)
+  setNotice('')
 
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  })
+
+  if (error) {
+    setNotice('Google orqali kirishda xatolik: ' + error.message)
+    setBusy(false)
+  }
+}
 async function saveSettings() {
 setBusy(true)
 setNotice('')
