@@ -88,7 +88,8 @@ img { max-width: 100%; }
 
 /* Main layout — remove narrow dashboard feel */
 .shell {
-  display: block;
+  display: grid;
+  grid-template-columns: 250px minmax(0, 1fr);
   max-width: 1600px;
   min-height: calc(100vh - 82px);
   margin: 0 auto;
