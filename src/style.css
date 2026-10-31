@@ -158,3 +158,22 @@ img { max-width: 100%; }
 .welcome-content p { color: var(--muted); margin: 0; text-align: left; }
 .stats { padding: 28px 3%; margin-bottom: 75px; }
 .stats b { color: var(--gold); font-size: 28px; }
+.brand-logo {
+  display: block;
+  width: 48px !important;
+  height: 48px !important;
+  max-width: 48px !important;
+  object-fit: contain;
+  flex: 0 0 48px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+
+.brand-button {
+  display: flex;
+  align-items: center;
+}
