@@ -206,7 +206,22 @@ function App() {
     await supabase.auth.signOut()
     go('home')
   }
+async function googleLogin() {
+  setBusy(true)
+  setNotice('')
 
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: window.location.origin
+    }
+  })
+
+  if (error) {
+    setNotice('Google orqali kirishda xatolik: ' + error.message)
+    setBusy(false)
+  }
+}
   async function uploadSettingImage(key, file) {
     if (!file) return
 
@@ -877,7 +892,7 @@ function App() {
                     desc="Sayt ma’lumotlari, yangiliklar, tadbirlar va galereyani boshqaring."
                   />
 
-                  {!session ? (
+                  {!session || session.user.email !== 'obidofich@gmail.com' ? (
                     <form className="form-card" onSubmit={login}>
                       <label>
                         Email
@@ -902,6 +917,14 @@ function App() {
                       <button className="gold-btn" disabled={busy}>
                         {busy ? 'Kirilmoqda...' : 'Kirish'}
                       </button>
+                      <button
+  type="button"
+  className="gold-btn"
+  onClick={googleLogin}
+  disabled={busy}
+>
+  Google orqali kirish
+</button>
                     </form>
                   ) : (
                     <>
