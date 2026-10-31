@@ -968,7 +968,7 @@ title="Admin panel"
 desc="Sayt ma’lumotlari, yangiliklar, tadbirlar va galereyani boshqaring."
 />
 
-{!session ? (
+{!session || session.user.email !== 'obidofich@gmail.com' ? (
 <form className="form-card" onSubmit={login}>
 <label>
 Email
@@ -993,8 +993,16 @@ required
 <button className="gold-btn" disabled={busy}>
 {busy ? 'Kirilmoqda...' : 'Kirish'}
 </button>
+  <button
+  type="button"
+  className="gold-btn"
+  onClick={googleLogin}
+  disabled={busy}
+>
+  Google orqali kirish
+</button>
 </form>
-) : (
+  ) : (
 <>
 <div className="form-card">
 <h2>Aloqa ma’lumotlari</h2>
