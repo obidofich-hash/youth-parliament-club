@@ -684,25 +684,23 @@ function contentList(type, rows) {
 )
 }
 return (
+<div className="app">
 {applicationSuccess && (
   <div className="success-overlay">
     <div className="success-modal">
       <div className="success-check">
         <svg viewBox="0 0 52 52">
-          <circle cx="26" cy="26" r="24" />
           <path d="M14 27 L22 35 L39 17" />
         </svg>
       </div>
 
       <h2>Arizangiz muvaffaqiyatli yuborildi!</h2>
+      <p>Arizangiz tizimga qabul qilindi.</p>
 
-      <p>
-        Youth Parliament Club a’zoligiga arizangiz qabul qilindi.
-      </p>
-
-      <span className="success-label">SIZNING ARIZA RAQAMINGIZ</span>
-
-      <div className="success-code">{applicationSuccess}</div>
+      <div className="application-number">
+        Ariza raqamingiz:
+        <strong>{applicationSuccess}</strong>
+      </div>
 
       <button
         className="success-home-btn"
@@ -717,8 +715,7 @@ return (
     </div>
   </div>
 )}
-<div className="app">
-<header className="topbar">
+  <header className="topbar">
 <button
 className="icon-btn mobile-menu"
 onClick={() => setMenu(!menu)}
