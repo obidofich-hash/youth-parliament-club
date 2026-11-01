@@ -11,8 +11,15 @@ Image as ImageIcon
 import './style.css'
 
 const supabase = createClient(
-import.meta.env.VITE_SUPABASE_URL,
-import.meta.env.VITE_SUPABASE_ANON_KEY
+  import.meta.env.VITE_SUPABASE_URL,
+  import.meta.env.VITE_SUPABASE_ANON_KEY,
+  {
+    auth: {
+      autoRefreshToken: true,
+      persistSession: true,
+      detectSessionInUrl: true
+    }
+  }
 )
 
 const defaults = {
