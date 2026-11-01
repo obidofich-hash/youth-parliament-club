@@ -1345,3 +1345,116 @@ a,
     font-size: 21px;
   }
 }
+
+/* SUCCESS MODAL — NAVY & GOLD */
+
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(3, 10, 22, .88);
+  backdrop-filter: blur(8px);
+  animation: successFade .35s ease;
+}
+
+.success-modal {
+  width: 100%;
+  max-width: 460px;
+  padding: 42px 30px;
+  text-align: center;
+  color: #fff;
+  background: linear-gradient(145deg, #10233b, #081426);
+  border: 1px solid rgba(201,168,106,.6);
+  border-radius: 22px;
+  box-shadow: 0 25px 80px rgba(0,0,0,.5);
+  animation: successPop .5s ease;
+}
+
+.success-check {
+  width: 82px;
+  height: 82px;
+  margin: 0 auto 25px;
+  border: 2px solid #c9a86a;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+}
+
+.success-check svg {
+  width: 52px;
+  height: 52px;
+  fill: none;
+  stroke: #e5c98f;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.success-check path {
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: checkDraw .7s .25s ease forwards;
+}
+
+.success-modal h2 {
+  color: #fff;
+  font-size: 25px;
+  margin-bottom: 12px;
+}
+
+.success-modal p {
+  color: #c0c9d4;
+  margin-bottom: 22px;
+}
+
+.application-number {
+  padding: 15px;
+  margin-bottom: 25px;
+  border: 1px solid rgba(201,168,106,.35);
+  border-radius: 12px;
+  color: #d0d7e0;
+}
+
+.application-number strong {
+  display: block;
+  margin-top: 7px;
+  color: #e5c98f;
+  font-size: 20px;
+}
+
+.success-home-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 14px 25px;
+  background: #c9a86a;
+  color: #081426;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.success-home-btn:hover {
+  background: #e5c98f;
+  transform: translateY(-2px);
+}
+
+@keyframes successFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes successPop {
+  from { opacity: 0; transform: translateY(25px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes checkDraw {
+  to { stroke-dashoffset: 0; }
+}
