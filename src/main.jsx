@@ -25,6 +25,14 @@ youtube: '',
 hero_image: '',
 club_logo: '',
 home_image: ''
+hero_line1: 'Kelajakni',
+hero_emphasis: 'birgalikda',
+hero_line2: 'quramiz.',
+hero_description: 'Yoshlarning huquqiy salohiyati, yetakchiligi va tashabbuslarini birlashtiruvchi ochiq platforma.',
+
+welcome_line1: 'Yoshlar ovozi —',
+welcome_line2: 'jamiyat kelajagi.',
+welcome_description: 'Yoshlarning huquqiy bilimini oshirish, ijtimoiy faolligini kuchaytirish va tashabbuslarini qo‘llab-quvvatlash.'
 }
 
 const nav = [
@@ -736,15 +744,13 @@ YOSHLAR PARLAMENTI KLUBI
 </div>
 
 <h1>
-Kelajakni<br />
-<em>birgalikda</em> quramiz.
+  {settings.hero_line1}<br />
+  <em>{settings.hero_emphasis}</em> {settings.hero_line2}
 </h1>
 
 <p>
-Yoshlarning huquqiy salohiyati, yetakchiligi va
-tashabbuslarini birlashtiruvchi ochiq platforma.
+  {settings.hero_description}
 </p>
-
 <div className="hero-actions">
 <button
 className="gold-btn"
@@ -781,15 +787,13 @@ Klub haqida <ArrowUpRight />
   <div className="welcome-overlay" />
   <div className="welcome-content">
     <div className="eyebrow">BIZNING MAQSAD</div>
-    <h2>
-      Yoshlar ovozi —<br />
-      <em>jamiyat kelajagi.</em>
-    </h2>
-    <p>
-      Yoshlarning huquqiy bilimini oshirish, ijtimoiy
-      faolligini kuchaytirish va tashabbuslarini
-      qo‘llab-quvvatlash.
-    </p>
+   <h2>
+  {settings.welcome_line1}<br />
+  <em>{settings.welcome_line2}</em>
+</h2>
+<p>
+  {settings.welcome_description}
+</p>
   </div>
 </motion.section>
 </>
@@ -1198,7 +1202,38 @@ marginTop: '8px'
 <LogOut size={16} /> Chiqish
 </button>
 </div>
+<div className="form-card">
+  <h2>Bosh sahifa matnlari</h2>
 
+  {[
+    ['hero_line1', 'Banner — birinchi qator'],
+    ['hero_emphasis', 'Banner — ajratilgan so‘z'],
+    ['hero_line2', 'Banner — ikkinchi qator'],
+    ['hero_description', 'Banner — izoh'],
+    ['welcome_line1', 'Quyi blok — birinchi qator'],
+    ['welcome_line2', 'Quyi blok — ikkinchi qator'],
+    ['welcome_description', 'Quyi blok — izoh']
+  ].map(([key, label]) => (
+    <label key={key}>
+      {label}
+      <textarea
+        rows="2"
+        value={draft[key] || ''}
+        onChange={event =>
+          setDraft({ ...draft, [key]: event.target.value })
+        }
+      />
+    </label>
+  ))}
+
+  <button
+    className="gold-btn"
+    onClick={saveSettings}
+    disabled={busy}
+  >
+    <Save size={16} /> Matnlarni saqlash
+  </button>
+</div>
 <div className="two-col">
 {contentForm('news', 'Yangilik')}
 {contentForm('events', 'Tadbir')}
