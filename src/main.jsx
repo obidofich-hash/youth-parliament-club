@@ -607,8 +607,6 @@ function contentList(type, rows) {
         </article>
       ))}
     </div>
-  )
-}
 )
 }
 return (
