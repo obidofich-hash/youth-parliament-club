@@ -1476,7 +1476,7 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
           setNotice('Xatolik: ' + error.message)
         } else {
           setNotice('Parol muvaffaqiyatli o‘rnatildi!')
-          setPage('home')
+          setPage('member')
         }
       }}
     >
