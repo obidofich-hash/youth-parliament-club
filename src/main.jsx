@@ -1352,7 +1352,46 @@ required
 </form>
   ) : (
 <>
-<div className="form-card">
+<div className="form-card applications-admin">
+  <div className="applications-heading">
+    <h2>Klubga a’zolik arizalari</h2>
+    <button
+      className="gold-btn"
+      onClick={loadApplications}
+    >
+      Yangilash
+    </button>
+  </div>
+
+  <p>Jami arizalar: {applications.length} ta</p>
+
+  {applications.length === 0 ? (
+    <p>Hozircha arizalar mavjud emas.</p>
+  ) : (
+    <div className="applications-list">
+      {applications.map((app) => (
+        <div className="application-item" key={app.id}>
+          <h3>{app.full_name}</h3>
+          <p><b>Ariza raqami:</b> {app.application_code}</p>
+          <p><b>Telefon:</b> {app.phone}</p>
+          <p><b>Email:</b> {app.email}</p>
+          <p><b>Universitet:</b> {app.university}</p>
+          <p><b>Fakultet:</b> {app.faculty}</p>
+          <p><b>Yo‘nalish:</b> {app.study_direction}</p>
+          <p><b>Kurs:</b> {app.course}</p>
+          <p><b>Guruh:</b> {app.group_number}</p>
+          <p><b>Faoliyat:</b> {app.activity_direction}</p>
+          <p><b>Sabab:</b> {app.motivation || 'Ko‘rsatilmagan'}</p>
+          <p><b>Holati:</b> {app.status}</p>
+          <small>
+            {new Date(app.created_at).toLocaleString('uz-UZ')}
+          </small>
+        </div>
+      ))}
+    </div>
+  )}
+</div>
+  <div className="form-card">
 <h2>Aloqa ma’lumotlari</h2>
 
 {['phone', 'telegram', 'email', 'address', 'instagram', 'youtube'].map(key => (
