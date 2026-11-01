@@ -216,6 +216,26 @@ async function loadApplications() {
 
   setNotice('Ariza holati yangilandi.')
 }
+  async function deleteApplication(id) {
+  const confirmed = window.confirm(
+    'Ushbu arizani butunlay o‘chirishni tasdiqlaysizmi?'
+  )
+
+  if (!confirmed) return
+
+  const { error } = await supabase
+    .from('club_applications')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    setNotice('O‘chirishda xatolik: ' + error.message)
+    return
+  }
+
+  setApplications(prev => prev.filter(app => app.id !== id))
+  setNotice('Ariza muvaffaqiyatli o‘chirildi.')
+}
 function go(nextPage) {
 setPage(nextPage)
 setMenu(false)
@@ -1387,8 +1407,10 @@ required
   ) : (
     <div className="applications-list">
       {applications.map((app) => (
-        <div className="application-item" key={app.id}>
-          <h3>{app.full_name}</h3>
+       <details className="application-item" key={app.id}>
+          <summary>
+  <strong>{app.full_name}</strong> — {app.application_code} · {app.status}
+</summary>
           <p><b>Ariza raqami:</b> {app.application_code}</p>
           <p><b>Telefon:</b> {app.phone}</p>
           <p><b>Email:</b> {app.email}</p>
@@ -1421,11 +1443,17 @@ required
   >
     Rad etish
   </button>
+            <button
+  type="button"
+  onClick={() => deleteApplication(app.id)}
+>
+  O‘chirish
+</button>
 </div>
           <small>
             {new Date(app.created_at).toLocaleString('uz-UZ')}
           </small>
-        </div>
+        </details>
       ))}
     </div>
   )}
