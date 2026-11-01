@@ -1522,6 +1522,8 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
         <p><b>Kurs:</b> {memberApplication.course}</p>
         <p><b>Guruh:</b> {memberApplication.group_number}</p>
         <p><b>Email:</b> {memberApplication.email}</p>
+        <p><b>Guvohnoma berilgan sana:</b> {memberApplication.membership_issued_at ? new Date(memberApplication.membership_issued_at).toLocaleDateString('uz-UZ') : '—'}</p>
+<p><b>Amal qilish muddati:</b> {memberApplication.membership_expires_at ? new Date(memberApplication.membership_expires_at).toLocaleDateString('uz-UZ') : '—'}</p>
         <p><b>Maqom:</b> Faol a’zo</p>
       </div>
     )}
