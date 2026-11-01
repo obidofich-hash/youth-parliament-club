@@ -168,7 +168,6 @@ useEffect(() => {
   if (session.user.email === 'obidofich@gmail.com') {
     loadAttendanceEvents()
   }
-}
   } else {
     setMemberApplication(null)
   }
