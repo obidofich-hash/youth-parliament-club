@@ -650,25 +650,32 @@ backgroundPosition: 'center',
 backgroundRepeat: 'no-repeat'
 }}
 >
-<motion.div
-className="welcome-content"
-initial={{ opacity: 0, y: 65 }}
-whileInView={{ opacity: 1, y: 0 }}
-viewport={{ once: false, amount: 0.25 }}
-transition={{ duration: 1, ease: "easeOut" }}
+
+<motion.section
+  className="welcome-row"
+  initial={{ opacity: 0, y: 55 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, amount: 0.2 }}
+  transition={{ duration: 0.9, ease: "easeOut" }}
 >
-<div className="eyebrow">BIZNING MAQSAD</div>
-<h2>
-Yoshlar ovozi —<br />
-<em>jamiyat kelajagi.</em>
-</h2>
-<p>
-Yoshlarning huquqiy bilimini oshirish, ijtimoiy
-faolligini kuchaytirish va tashabbuslarini
-qo‘llab-quvvatlash.
-</p>
-</motion.div>
-</section>
+  {settings.home_image && (
+    <img
+      className="welcome-image"
+      src={settings.home_image}
+      alt="Klub faoliyati"
+    />
+  )}
+  <div className="welcome-overlay" />
+  <div className="welcome-content">
+    <div className="eyebrow">BIZNING MAQSAD</div>
+    <h2>Yoshlar ovozi —<br /><em>jamiyat kelajagi.</em></h2>
+    <p>
+      Yoshlarning huquqiy bilimini oshirish, ijtimoiy
+      faolligini kuchaytirish va tashabbuslarini
+      qo‘llab-quvvatlash.
+    </p>
+  </div>
+</motion.section>
 </>
 )}
 
