@@ -639,3 +639,328 @@ a,
     font-size: 34px;
   }
 }
+
+/* =========================================
+   UNIFIED PARLIAMENT DESIGN — ALL SECTIONS
+   Navy • Champagne Gold • Ivory
+   ========================================= */
+
+:root {
+  --navy: #081426;
+  --navy2: #10233b;
+  --gold: #c9a86a;
+  --gold2: #e5c98f;
+  --ink: #15243a;
+  --muted: #758092;
+  --line: #e8e3d9;
+  --paper: #f7f6f2;
+  --white: #ffffff;
+}
+
+/* Umumiy ichki sahifalar */
+.page {
+  background: transparent;
+}
+
+.page-head {
+  background: linear-gradient(135deg, #ffffff 0%, #f3f0e8 100%);
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--gold);
+  border-radius: 12px;
+  padding: 38px 34px;
+  box-shadow: 0 10px 30px rgba(8, 20, 38, .045);
+}
+
+.page-head h1 {
+  color: var(--navy);
+}
+
+.page-head h1 em {
+  color: var(--gold);
+}
+
+.page-head > p {
+  color: var(--muted);
+}
+
+/* Kartochkalar */
+.info-panel,
+.contact-card,
+.feature-card,
+.doc-card,
+.news-card,
+.event-card,
+.form-card {
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 13px;
+  box-shadow: 0 8px 28px rgba(8, 20, 38, .055);
+  transition: transform .25s ease, box-shadow .25s ease,
+    border-color .25s ease;
+}
+
+.info-panel:hover,
+.contact-card:hover,
+.feature-card:hover,
+.doc-card:hover,
+.news-card:hover,
+.event-card:hover {
+  transform: translateY(-4px);
+  border-color: #d5bd8e;
+  box-shadow: 0 15px 35px rgba(8, 20, 38, .09);
+}
+
+.info-panel.muted {
+  background: #f1eee6;
+}
+
+/* Sarlavhalar */
+.info-panel h2,
+.info-panel h3,
+.contact-card h3,
+.doc-info h3,
+.event-body h3,
+.news-copy h3,
+.membership-action h2 {
+  color: var(--navy);
+}
+
+.info-panel p,
+.contact-card p,
+.doc-info p,
+.event-body p,
+.news-copy p {
+  color: var(--muted);
+}
+
+/* Ikonkalar */
+.panel-icon,
+.feature-icon,
+.contact-icon {
+  background: #f2eee4;
+  color: #a48753;
+  border: 1px solid #e9dfca;
+  border-radius: 9px;
+}
+
+/* Tugmalar */
+.gold-btn {
+  background: var(--gold);
+  color: var(--navy);
+  border: 1px solid var(--gold);
+  border-radius: 7px;
+  font-weight: 700;
+  box-shadow: 0 5px 15px rgba(201, 168, 106, .15);
+}
+
+.gold-btn:hover {
+  background: var(--gold2);
+  border-color: var(--gold2);
+  transform: translateY(-2px);
+}
+
+.ghost-btn {
+  border-radius: 7px;
+}
+
+.link-btn,
+.news-copy button {
+  color: #a18450;
+}
+
+/* Yon menyu */
+.sidebar {
+  background: #fff;
+  border-right: 1px solid var(--line);
+}
+
+.nav-item {
+  color: #657184;
+  border-radius: 8px;
+}
+
+.nav-item:hover,
+.nav-item.active {
+  background: #f3f0e8;
+  color: var(--navy);
+}
+
+.nav-item.active {
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+
+.nav-item svg {
+  color: #a48753;
+}
+
+.side-card {
+  background: linear-gradient(145deg, #081426, #142b46);
+  border: 1px solid rgba(201, 168, 106, .35);
+  border-radius: 12px;
+}
+
+/* Prinsiplar */
+.principle {
+  border-color: var(--line);
+}
+
+.principle h3 {
+  color: var(--navy);
+}
+
+.principle > b {
+  color: var(--gold);
+}
+
+/* A'zolik */
+.membership-box {
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 12px 35px rgba(8, 20, 38, .07);
+}
+
+.membership-art,
+.feedback-note {
+  background: linear-gradient(145deg, #081426, #142b46);
+}
+
+.membership-art h2,
+.feedback-note h2 {
+  color: #fff;
+}
+
+/* Hujjatlar */
+.doc-card {
+  padding: 25px;
+}
+
+.paper {
+  background: #f8f7f3;
+  border-color: #e5dfd2;
+}
+
+.download-btn,
+.event-arrow {
+  background: #f2eee4;
+  color: #987b49;
+  border: 1px solid #e5dac2;
+  border-radius: 7px;
+}
+
+/* Filtrlar */
+.filters button {
+  background: #fff;
+  color: #687487;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  transition: .2s ease;
+}
+
+.filters button:hover {
+  border-color: var(--gold);
+  color: var(--navy);
+}
+
+.filters button.selected {
+  background: var(--navy);
+  color: #fff;
+  border-color: var(--navy);
+}
+
+/* Tadbirlar */
+.date-tile {
+  background: #f2eee4;
+  color: #9b7c48;
+  border-radius: 8px;
+}
+
+/* Formalar */
+.form-card {
+  padding: 30px;
+}
+
+.form-card label {
+  color: var(--navy);
+}
+
+.form-card input,
+.form-card select,
+.form-card textarea {
+  background: #fbfaf7;
+  color: var(--ink);
+  border: 1px solid #e5e1d8;
+  border-radius: 7px;
+}
+
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  border-color: var(--gold);
+  box-shadow: 0 0 0 3px rgba(201, 168, 106, .12);
+}
+
+/* Yangiliklar va galereya */
+.news-meta {
+  color: #a18450;
+}
+
+.gallery-photo:after {
+  background: linear-gradient(
+    0deg,
+    rgba(8, 20, 38, .88),
+    rgba(8, 20, 38, 0) 75%
+  );
+}
+
+/* Aloqa */
+.social-strip {
+  background: linear-gradient(120deg, #081426, #142b46);
+  border: 1px solid rgba(201, 168, 106, .3);
+  border-radius: 12px;
+}
+
+.socials a {
+  border-radius: 6px;
+  transition: .2s ease;
+}
+
+.socials a:hover {
+  background: var(--gold);
+  color: var(--navy);
+}
+
+/* Footer */
+.footer {
+  border-color: var(--line);
+}
+
+.footer > button {
+  color: #9b7c48;
+}
+
+/* Mobil qurilmalar */
+@media (max-width: 760px) {
+  .page-head {
+    padding: 26px 20px;
+    border-radius: 10px;
+  }
+
+  .form-card,
+  .doc-card {
+    padding: 20px;
+  }
+
+  .social-strip {
+    border-radius: 9px;
+  }
+
+  .mobile-nav {
+    background: #fff;
+    border-top: 2px solid var(--gold);
+  }
+
+  .mobile-nav button {
+    color: var(--navy);
+  }
+}
