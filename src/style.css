@@ -964,3 +964,248 @@ a,
     color: var(--navy);
   }
 }
+
+/* =========================================
+   NAVY PREMIUM — ALL INNER PAGES
+   ========================================= */
+
+:root {
+  --navy: #081426;
+  --navy2: #10233b;
+  --gold: #c9a86a;
+  --gold2: #e5c98f;
+}
+
+/* Ichki sahifa sarlavhalari */
+.page-head {
+  background: linear-gradient(135deg, #081426, #142b46) !important;
+  border: 1px solid rgba(201,168,106,.5);
+  border-left: 4px solid #c9a86a;
+  color: white;
+  box-shadow: 0 15px 40px rgba(8,20,38,.15);
+}
+
+.page-head h1,
+.page-head h1 em {
+  color: white !important;
+}
+
+.page-head h1 em {
+  color: #e5c98f !important;
+}
+
+.page-head > p {
+  color: #c4ccd7 !important;
+}
+
+.page-head .eyebrow {
+  color: #e5c98f !important;
+}
+
+/* Barcha asosiy kartochkalar */
+.info-panel,
+.info-panel.muted,
+.contact-card,
+.feature-card,
+.doc-card,
+.news-card,
+.event-card,
+.form-card {
+  background: linear-gradient(145deg, #10233b, #0b192d) !important;
+  color: white !important;
+  border: 1px solid rgba(201,168,106,.28) !important;
+  box-shadow: 0 12px 30px rgba(8,20,38,.14);
+}
+
+/* Kartochka sarlavhalari */
+.info-panel h2,
+.info-panel h3,
+.contact-card h3,
+.feature-card h3,
+.doc-info h3,
+.event-body h3,
+.news-copy h3,
+.membership-action h2 {
+  color: #fff !important;
+}
+
+/* Kartochka matnlari */
+.info-panel p,
+.contact-card p,
+.feature-card p,
+.doc-info p,
+.event-body p,
+.news-copy p {
+  color: #c0c9d4 !important;
+}
+
+/* Ikonkalar */
+.panel-icon,
+.feature-icon,
+.contact-icon {
+  background: rgba(201,168,106,.12) !important;
+  border: 1px solid rgba(201,168,106,.4);
+  color: #e5c98f !important;
+}
+
+/* Kartochka hover */
+.info-panel:hover,
+.contact-card:hover,
+.feature-card:hover,
+.doc-card:hover,
+.news-card:hover,
+.event-card:hover {
+  border-color: #c9a86a !important;
+  box-shadow: 0 18px 40px rgba(8,20,38,.25);
+  transform: translateY(-4px);
+}
+
+/* Prinsiplar */
+.principles {
+  background: #081426;
+  border: 1px solid rgba(201,168,106,.3);
+  padding: 10px 22px;
+  border-radius: 12px;
+}
+
+.principle {
+  border-color: rgba(255,255,255,.12) !important;
+}
+
+.principle h3 {
+  color: white !important;
+}
+
+.principle p {
+  color: #bdc7d3 !important;
+}
+
+.principle > b,
+.principle > svg {
+  color: #e5c98f !important;
+}
+
+/* A'zolik */
+.membership-box {
+  background: #081426 !important;
+  border: 1px solid rgba(201,168,106,.4);
+}
+
+.membership-action {
+  background: #10233b;
+  color: white;
+}
+
+.membership-action h2 {
+  color: white !important;
+}
+
+.membership-action p {
+  color: #c0c9d4 !important;
+}
+
+/* Hujjatlar */
+.paper {
+  background: #f8f7f3 !important;
+  border-radius: 5px;
+}
+
+.doc-top {
+  color: #e5c98f !important;
+}
+
+.doc-info small {
+  color: #e5c98f !important;
+}
+
+/* Filtrlar */
+.filters button {
+  background: #10233b;
+  color: #d7dce4;
+  border: 1px solid rgba(201,168,106,.3);
+}
+
+.filters button.selected,
+.filters button:hover {
+  background: #c9a86a;
+  color: #081426;
+  border-color: #c9a86a;
+}
+
+/* Tadbirlar */
+.date-tile {
+  background: rgba(201,168,106,.14);
+  color: #e5c98f;
+  border: 1px solid rgba(201,168,106,.3);
+}
+
+.event-meta span {
+  color: #c0c9d4;
+}
+
+/* Formalar */
+.form-card label {
+  color: #e5c98f !important;
+}
+
+.form-card input,
+.form-card select,
+.form-card textarea {
+  background: #f8f7f3 !important;
+  color: #15243a !important;
+  border: 1px solid #c9a86a !important;
+}
+
+.form-card input:focus,
+.form-card select:focus,
+.form-card textarea:focus {
+  box-shadow: 0 0 0 3px rgba(201,168,106,.2);
+}
+
+/* Yangiliklar */
+.news-copy {
+  background: #10233b;
+}
+
+.news-meta {
+  color: #e5c98f !important;
+}
+
+.news-meta time {
+  color: #bdc7d3 !important;
+}
+
+.news-copy button {
+  color: #e5c98f !important;
+}
+
+/* Aloqa */
+.social-strip {
+  background: linear-gradient(120deg, #081426, #142b46);
+  border: 1px solid rgba(201,168,106,.4);
+}
+
+/* Bildirishnomalar */
+.notice {
+  background: #10233b;
+  border: 1px solid rgba(201,168,106,.3);
+}
+
+.notice p {
+  color: #d0d7e0;
+}
+
+/* Mobil */
+@media (max-width: 760px) {
+  .page-head {
+    border-radius: 12px;
+  }
+
+  .principles {
+    padding: 8px 12px;
+  }
+
+  .membership-action {
+    padding: 28px 22px;
+  }
+}
