@@ -24,7 +24,7 @@ instagram: '',
 youtube: '',
 hero_image: '',
 club_logo: '',
-home_image: ''
+home_image: '',
 hero_line1: 'Kelajakni',
 hero_emphasis: 'birgalikda',
 hero_line2: 'quramiz.',
