@@ -136,6 +136,9 @@ const [applicationBusy, setApplicationBusy] = useState(false)
 const [applicationMessage, setApplicationMessage] = useState('')
 const [applicationSuccess, setApplicationSuccess] = useState('')
 const [applications, setApplications] = useState([])
+const [attendanceEvents, setAttendanceEvents] = useState([])
+const [selectedAttendanceEvent, setSelectedAttendanceEvent] = useState('')
+const [activeEventQR, setActiveEventQR] = useState(null)
 const [memberRecord, setMemberRecord] = useState(null)
 const [notice, setNotice] = useState('')
 const [editing,setEditing] = useState(null)
@@ -158,9 +161,14 @@ const { data: { subscription } } =
 return () => subscription.unsubscribe()
 }, [])
 useEffect(() => {
-  if (session) {
-    loadApplications()
-    loadMemberApplication(session.user)
+ if (session) {
+  loadApplications()
+  loadMemberApplication(session.user)
+
+  if (session.user.email === 'obidofich@gmail.com') {
+    loadAttendanceEvents()
+  }
+}
   } else {
     setMemberApplication(null)
   }
@@ -228,6 +236,57 @@ async function loadApplications() {
   }
 
   setMemberLoading(false)
+}
+  async function recordAttendance(payload) {
+  setNotice('Davomat tekshirilmoqda...')
+
+  const { data, error } = await supabase.functions.invoke(
+    'record-attendance',
+    { body: payload }
+  )
+
+  if (error || data?.error) {
+    setNotice('Xatolik: ' + (data?.error || error.message))
+    return null
+  }
+
+  setNotice(
+    data.memberName + ' — davomat muvaffaqiyatli tasdiqlandi!'
+  )
+
+  return data
+}
+  async function loadAttendanceEvents() {
+  const { data, error } = await supabase
+    .from('club_events')
+    .select('id, title, event_date')
+    .order('event_date', { ascending: false })
+
+  if (error) {
+    setNotice('Tadbirlarni yuklashda xatolik: ' + error.message)
+    return
+  }
+
+  setAttendanceEvents(data || [])
+}
+async function createEventQR(eventId) {
+  const { data, error } = await supabase
+    .from('club_event_qr')
+    .insert({
+      event_id: Number(eventId),
+      is_active: true
+    })
+    .select()
+    .single()
+
+  if (error) {
+    setNotice('QR-kod yaratishda xatolik: ' + error.message)
+    return
+  }
+
+ setActiveEventQR(data)
+setNotice('Tadbir QR-kodi muvaffaqiyatli yaratildi!')
+  return data
 }
   async function updateApplicationStatus(id, status) {
   if (status === 'Qabul qilindi') {
@@ -1513,6 +1572,41 @@ required
 </form>
   ) : (
 <>
+<div className="form-card">
+  <h2>Davomat boshqaruvi</h2>
+
+  <label>Tadbirni tanlang</label>
+  <select
+    value={selectedAttendanceEvent}
+    onChange={(e) => setSelectedAttendanceEvent(e.target.value)}
+  >
+    <option value="">Tadbirni tanlang</option>
+    {attendanceEvents.map((event) => (
+      <option key={event.id} value={event.id}>
+        {event.title}
+      </option>
+    ))}
+  </select>
+
+  <button
+    className="gold-btn"
+    disabled={!selectedAttendanceEvent}
+    onClick={() => createEventQR(selectedAttendanceEvent)}
+  >
+    Tadbir QR-kodini yaratish
+  </button>
+
+  {activeEventQR && (
+    <div>
+      <h3>Tadbir QR-kodi</h3>
+      <img
+        src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(activeEventQR.token)}`}
+        alt="Tadbir QR-kodi"
+        width="250"
+      />
+    </div>
+  )}
+</div>
 <div className="form-card applications-admin">
   <div className="applications-heading">
     <h2>Klubga a’zolik arizalari</h2>
