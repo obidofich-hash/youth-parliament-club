@@ -137,7 +137,6 @@ const [applicationMessage, setApplicationMessage] = useState('')
 const [applicationSuccess, setApplicationSuccess] = useState('')
 const [applications, setApplications] = useState([])
 const [memberRecord, setMemberRecord] = useState(null)
-const [memberLoading, setMemberLoading] = useState(false)
 const [notice, setNotice] = useState('')
 const [editing,setEditing] = useState(null)
 useEffect(() => {
