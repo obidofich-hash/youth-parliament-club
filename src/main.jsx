@@ -638,19 +638,6 @@ Klub haqida <ArrowUpRight />
 </div>
 </div>
 </section>
-
-<section
-className="welcome-row"
-style={{
-backgroundImage: settings.home_image
-? `linear-gradient(rgba(5,18,35,.45), rgba(5,18,35,.65)), url("${settings.home_image}")`
-: 'none',
-backgroundSize: 'cover',
-backgroundPosition: 'center',
-backgroundRepeat: 'no-repeat'
-}}
->
-
 <motion.section
   className="welcome-row"
   initial={{ opacity: 0, y: 55 }}
@@ -668,7 +655,10 @@ backgroundRepeat: 'no-repeat'
   <div className="welcome-overlay" />
   <div className="welcome-content">
     <div className="eyebrow">BIZNING MAQSAD</div>
-    <h2>Yoshlar ovozi —<br /><em>jamiyat kelajagi.</em></h2>
+    <h2>
+      Yoshlar ovozi —<br />
+      <em>jamiyat kelajagi.</em>
+    </h2>
     <p>
       Yoshlarning huquqiy bilimini oshirish, ijtimoiy
       faolligini kuchaytirish va tashabbuslarini
