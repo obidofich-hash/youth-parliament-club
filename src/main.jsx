@@ -114,6 +114,24 @@ image_url: ''
 })
 const [busy, setBusy] = useState(false)
 const [uploading, setUploading] = useState(null)
+const emptyApplication = {
+  full_name: '',
+  phone: '',
+  birth_date: '',
+  university: '',
+  faculty: '',
+  study_direction: '',
+  course: '',
+  group_number: '',
+  email: '',
+  motivation: '',
+  activity_direction: '',
+  activity_other: '',
+  confirmation: ''
+}
+const [application, setApplication] = useState(emptyApplication)
+const [applicationBusy, setApplicationBusy] = useState(false)
+const [applicationMessage, setApplicationMessage] = useState('')
 const [notice, setNotice] = useState('')
 const [editing,setEditing] = useState(null)
 useEffect(() => {
@@ -169,6 +187,35 @@ setNotice('')
 window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+async function submitApplication(event) {
+  event.preventDefault()
+  setApplicationBusy(true)
+  setApplicationMessage('')
+
+  if (application.confirmation !== 'Ha, tasdiqlayman') {
+    setApplicationMessage('Ma’lumotlarni tasdiqlashingiz kerak.')
+    setApplicationBusy(false)
+    return
+  }
+
+  const { data, error } = await supabase
+    .from('club_applications')
+    .insert([application])
+    .select('application_code')
+    .single()
+
+  setApplicationBusy(false)
+
+  if (error) {
+    setApplicationMessage('Xatolik: ' + error.message)
+    return
+  }
+
+  setApplicationMessage(
+    `Arizangiz yuborildi! Ariza raqami: ${data.application_code}`
+  )
+  setApplication(emptyApplication)
+}
 async function login(event) {
 event.preventDefault()
 setBusy(true)
@@ -984,14 +1031,139 @@ title="O‘zgarishlar sizdan boshlanadi."
 desc="Klub a’zoligiga ariza topshiring."
 />
 
-<a
-className="gold-btn link-btn"
-href={formUrl}
-target="_blank"
-rel="noreferrer"
->
-Anketani to‘ldirish <ArrowUpRight />
-</a>
+<form className="form-card application-form" onSubmit={submitApplication}>
+  <h2>YOUTH PARLIAMENT CLUB</h2>
+  <p>A'zolikka qabul qilish uchun rasmiy ro‘yxatdan o‘tish anketasi.</p>
+
+  <label>
+    Ism va familiyangizni kiriting.
+    <input
+      value={application.full_name}
+      onChange={e => setApplication({...application, full_name:e.target.value})}
+      placeholder="Ism va familiyangiz"
+    />
+  </label>
+
+  <label>
+    Telefon raqamingizni kiriting. *
+    <input
+      type="tel"
+      required
+      value={application.phone}
+      onChange={e => setApplication({...application, phone:e.target.value})}
+      placeholder="+998 90 123 45 67"
+    />
+  </label>
+
+  <label>
+    Tug‘ilgan sanangizni kiriting. *
+    <input
+      type="date"
+      required
+      value={application.birth_date}
+      onChange={e => setApplication({...application, birth_date:e.target.value})}
+    />
+  </label>
+
+  <label>
+    Universitet nomini kiriting. *
+    <select required value={application.university}
+      onChange={e => setApplication({...application, university:e.target.value})}>
+      <option value="">Universitetni tanlang</option>
+      <option>Toshkent xalqaro universiteti</option>
+      <option>Toshkent davlat yuridik universiteti</option>
+      <option>Toshkent afrosiyob universiteti</option>
+      <option>Xalqaro ijtimoiy innovatsiyalar universiteti</option>
+      <option>Diplomat university</option>
+      <option>Sarbon university</option>
+    </select>
+  </label>
+
+  <label>
+    Fakultetingiz nomini kiriting. *
+    <input required value={application.faculty}
+      onChange={e => setApplication({...application, faculty:e.target.value})}/>
+  </label>
+
+  <label>
+    Ta'lim yo‘nalishingizni kiriting. *
+    <input required value={application.study_direction}
+      onChange={e => setApplication({...application, study_direction:e.target.value})}/>
+  </label>
+
+  <label>
+    Nechanchi kursda tahsil olasiz? *
+    <select required value={application.course}
+      onChange={e => setApplication({...application, course:e.target.value})}>
+      <option value="">Kursni tanlang</option>
+      <option>1-kurs</option>
+      <option>2-kurs</option>
+      <option>3-kurs</option>
+      <option>4-kurs</option>
+      <option>Boshqa</option>
+    </select>
+  </label>
+
+  <label>
+    Guruhingiz raqamini kiriting. *
+    <input required value={application.group_number}
+      onChange={e => setApplication({...application, group_number:e.target.value})}/>
+  </label>
+
+  <label>
+    Elektron pochta manzilingizni kiriting. *
+    <input type="email" required value={application.email}
+      onChange={e => setApplication({...application, email:e.target.value})}/>
+  </label>
+
+  <label>
+    Nima uchun klub a'zosi bo‘lmoqchisiz?
+    <textarea rows="4" value={application.motivation}
+      onChange={e => setApplication({...application, motivation:e.target.value})}
+      placeholder="Fikringizni yozing..."/>
+  </label>
+
+  <label>
+    Qaysi yo‘nalishda faoliyat yuritishni xohlaysiz? *
+    <select required value={application.activity_direction}
+      onChange={e => setApplication({...application, activity_direction:e.target.value, activity_other:''})}>
+      <option value="">Yo‘nalishni tanlang</option>
+      <option>Qonunchilik va huquq ijodkorligi</option>
+      <option>Debat va notiqlik</option>
+      <option>Ilmiy-tadqiqot faoliyati</option>
+      <option>Yoshlar siyosati</option>
+      <option>Media va axborot</option>
+      <option>Tashkiliy faoliyat</option>
+      <option>Boshqa</option>
+    </select>
+  </label>
+
+  {application.activity_direction === 'Boshqa' && (
+    <label>
+      Boshqa yo‘nalishni kiriting.
+      <input value={application.activity_other}
+        onChange={e => setApplication({...application, activity_other:e.target.value})}/>
+    </label>
+  )}
+
+  <label>
+    Kiritilgan ma'lumotlarning to‘g‘riligini tasdiqlaysizmi? *
+    <select required value={application.confirmation}
+      onChange={e => setApplication({...application, confirmation:e.target.value})}>
+      <option value="">Javobni tanlang</option>
+      <option>Ha, tasdiqlayman</option>
+      <option>Yo‘q, bekor qilaman</option>
+    </select>
+  </label>
+
+  <button className="gold-btn" type="submit"
+    disabled={applicationBusy || application.confirmation !== 'Ha, tasdiqlayman'}>
+    {applicationBusy ? 'Yuborilmoqda...' : 'Arizani yuborish'}
+    <ArrowRight size={18}/>
+  </button>
+
+  {applicationMessage && <p className="admin-notice">{applicationMessage}</p>}
+</form>
 </>
 )}
 
