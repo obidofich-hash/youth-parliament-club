@@ -638,20 +638,22 @@ Klub haqida <ArrowUpRight />
 </div>
 </div>
 </section>
+
 <motion.section
   className="welcome-row"
+  style={{
+    backgroundImage: settings.home_image
+      ? `linear-gradient(rgba(5,18,35,.45), rgba(5,18,35,.65)), url("${settings.home_image}")`
+      : 'none',
+    backgroundSize: 'cover',
+    backgroundPosition: 'center',
+    backgroundRepeat: 'no-repeat'
+  }}
   initial={{ opacity: 0, y: 55 }}
   whileInView={{ opacity: 1, y: 0 }}
   viewport={{ once: true, amount: 0.2 }}
   transition={{ duration: 0.9, ease: "easeOut" }}
 >
-  {settings.home_image && (
-    <img
-      className="welcome-image"
-      src={settings.home_image}
-      alt="Klub faoliyati"
-    />
-  )}
   <div className="welcome-overlay" />
   <div className="welcome-content">
     <div className="eyebrow">BIZNING MAQSAD</div>
