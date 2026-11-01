@@ -198,11 +198,11 @@ async function submitApplication(event) {
     return
   }
 
-  const { data, error } = await supabase
-    .from('club_applications')
-    .insert([application])
-    .select('application_code')
-    .single()
+ const applicationCode = 'YPC-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
+
+const { error } = await supabase
+  .from('club_applications')
+  .insert([{ ...application, application_code: applicationCode }])
 
   setApplicationBusy(false)
 
@@ -211,8 +211,8 @@ async function submitApplication(event) {
     return
   }
 
-  setApplicationMessage(
-    `Arizangiz yuborildi! Ariza raqami: ${data.application_code}`
+ setApplicationMessage(
+  `Arizangiz muvaffaqiyatli yuborildi! Ariza raqamingiz: ${applicationCode}`
   )
   setApplication(emptyApplication)
 }
