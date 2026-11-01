@@ -98,6 +98,8 @@ return (
 function App() {
 const [page, setPage] = useState('home')
 const [menu, setMenu] = useState(false)
+const [memberApplication, setMemberApplication] = useState(null)
+const [memberLoading, setMemberLoading] = useState(false)
 const [session, setSession] = useState(null)
 const [email, setEmail] = useState('')
 const [password, setPassword] = useState('')
@@ -155,6 +157,9 @@ return () => subscription.unsubscribe()
 useEffect(() => {
   if (session) {
     loadApplications()
+    loadMemberApplication(session.user)
+  } else {
+    setMemberApplication(null)
   }
 }, [session])
 async function loadSettings() {
@@ -199,22 +204,63 @@ async function loadApplications() {
 
   setApplications(data || [])
 }
-  async function updateApplicationStatus(id, status) {
-  const { error } = await supabase
+  async function loadMemberApplication(user) {
+  if (!user?.email) return
+
+  setMemberLoading(true)
+
+  const { data, error } = await supabase
     .from('club_applications')
-    .update({ status })
-    .eq('id', id)
+    .select('*')
+    .eq('email', user.email)
+    .eq('status', 'Qabul qilindi')
+    .not('membership_code', 'is', null)
+    .maybeSingle()
 
   if (error) {
-    setNotice('Holatni yangilashda xatolik: ' + error.message)
-    return
+    setNotice('A’zolik ma’lumotlarini yuklashda xatolik.')
+    setMemberApplication(null)
+  } else {
+    setMemberApplication(data)
   }
 
-  setApplications(prev =>
-    prev.map(app => app.id === id ? { ...app, status } : app)
-  )
+  setMemberLoading(false)
+}
+  async function updateApplicationStatus(id, status) {
+  if (status === 'Qabul qilindi') {
+    setNotice('A’zo akkaunti yaratilmoqda...')
 
-  setNotice('Ariza holati yangilandi.')
+    const { data: result, error } = await supabase.functions.invoke(
+      'create-member',
+      {
+        body: { applicationId: id }
+      }
+    )
+
+    if (error || result?.error) {
+      setNotice('Xatolik: ' + (result?.error || error.message))
+      return
+    }
+
+    setNotice(
+      'A’zo muvaffaqiyatli qabul qilindi. A’zolik raqami: ' +
+      result.membershipCode
+    )
+  } else {
+    const { error } = await supabase
+      .from('club_applications')
+      .update({ status })
+      .eq('id', id)
+
+    if (error) {
+      setNotice('Holatni yangilashda xatolik: ' + error.message)
+      return
+    }
+
+    setNotice('Ariza holati yangilandi.')
+  }
+
+  await loadApplications()
 }
   async function deleteApplication(id) {
   const confirmed = window.confirm(
@@ -827,7 +873,13 @@ onClick={() => go(id)}
 <span>{label}</span>
 </button>
 ))}
-
+<button
+  className={`nav-item ${page === 'member' ? 'active' : ''}`}
+  onClick={() => go('member')}
+>
+  <ShieldCheck size={18} />
+  <span>Shaxsiy kabinet</span>
+</button>
 <button
 className={`nav-item ${page === 'admin' ? 'active' : ''}`}
 onClick={() => go('admin')}
