@@ -25,6 +25,7 @@ youtube: '',
 hero_image: '',
 club_logo: '',
 home_image: '',
+about_image: '',
 hero_line1: 'Kelajakni',
 hero_emphasis: 'birgalikda',
 hero_line2: 'quramiz.',
@@ -833,8 +834,8 @@ yo‘nalishidir.
 <div className="av-visual av-visual-one">
 <div className="av-image-frame">
 <img
-src="https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=85"
-alt="Universitet binosi"
+  src={settings.about_image || "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=85"}
+  alt="Universitet binosi"
 />
 </div>
 <div className="av-image-caption">
@@ -1169,7 +1170,8 @@ disabled={busy}
 {[
 ['hero_image', 'Bosh sahifa banneri'],
 ['club_logo', 'Klub logotipi'],
-['home_image', 'Bosh sahifadagi qo‘shimcha rasm']
+['home_image', 'Bosh sahifadagi qo‘shimcha rasm'],
+['about_image', 'Klub haqida — universitet rasmi']
 ].map(([key, label]) => (
 <label key={key}>
 {label}
