@@ -601,6 +601,40 @@ a,
     border-radius: 15px;
   }
 
+/* RASM VA MATN QATLAMLARINI TO‘G‘RILASH */
+.welcome-row {
+  position: relative;
+  isolation: isolate;
+  background-color: #081426;
+}
+
+.welcome-row .welcome-image {
+  z-index: 0 !important;
+  position: absolute;
+  inset: 0;
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  opacity: .72;
+}
+
+.welcome-row .welcome-overlay {
+  z-index: 1 !important;
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(8, 20, 38, .82),
+    rgba(8, 20, 38, .45),
+    rgba(8, 20, 38, .78)
+  );
+}
+
+.welcome-row .welcome-content {
+  position: relative;
+  z-index: 2 !important;
+}
+
   .welcome-content h2 {
     font-size: 34px;
   }
