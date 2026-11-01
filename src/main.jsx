@@ -199,6 +199,23 @@ async function loadApplications() {
 
   setApplications(data || [])
 }
+  async function updateApplicationStatus(id, status) {
+  const { error } = await supabase
+    .from('club_applications')
+    .update({ status })
+    .eq('id', id)
+
+  if (error) {
+    setNotice('Holatni yangilashda xatolik: ' + error.message)
+    return
+  }
+
+  setApplications(prev =>
+    prev.map(app => app.id === id ? { ...app, status } : app)
+  )
+
+  setNotice('Ariza holati yangilandi.')
+}
 function go(nextPage) {
 setPage(nextPage)
 setMenu(false)
@@ -1383,6 +1400,28 @@ required
           <p><b>Faoliyat:</b> {app.activity_direction}</p>
           <p><b>Sabab:</b> {app.motivation || 'Ko‘rsatilmagan'}</p>
           <p><b>Holati:</b> {app.status}</p>
+          <div className="application-actions">
+  <button
+    type="button"
+    onClick={() => updateApplicationStatus(app.id, 'Ko‘rib chiqilmoqda')}
+  >
+    Ko‘rib chiqish
+  </button>
+
+  <button
+    type="button"
+    onClick={() => updateApplicationStatus(app.id, 'Qabul qilindi')}
+  >
+    Qabul qilish
+  </button>
+
+  <button
+    type="button"
+    onClick={() => updateApplicationStatus(app.id, 'Rad etildi')}
+  >
+    Rad etish
+  </button>
+</div>
           <small>
             {new Date(app.created_at).toLocaleString('uz-UZ')}
           </small>
