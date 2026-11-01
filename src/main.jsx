@@ -149,10 +149,14 @@ setSession(data.session)
 
 const {
 data: { subscription }
-} = supabase.auth.onAuthStateChange((_event, currentSession) => {
-setSession(currentSession)
-})
+const { data: { subscription } } =
+  supabase.auth.onAuthStateChange((event, currentSession) => {
+    setSession(currentSession)
 
+    if (event === 'PASSWORD_RECOVERY') {
+      setPage('reset-password')
+    }
+  })
 return () => subscription.unsubscribe()
 }, [])
 useEffect(() => {
@@ -1397,7 +1401,41 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
 {settings.youtube && <p><Youtube /> {settings.youtube}</p>}
 </>
 )}
+{page === 'reset-password' && (
+  <>
+    <PageHead
+      kicker="AKKAUNT XAVFSIZLIGI"
+      title="Yangi parol o‘rnatish"
+      desc="Shaxsiy kabinetingiz uchun yangi parol yarating."
+    />
+    <form
+      className="form-card"
+      onSubmit={async (e) => {
+        e.preventDefault()
+        const password = e.currentTarget.password.value
 
+        const { error } = await supabase.auth.updateUser({ password })
+
+        if (error) {
+          setNotice('Xatolik: ' + error.message)
+        } else {
+          setNotice('Parol muvaffaqiyatli o‘rnatildi!')
+          setPage('home')
+        }
+      }}
+    >
+      <label>Yangi parol</label>
+      <input
+        type="password"
+        name="password"
+        minLength="6"
+        placeholder="Kamida 6 ta belgi"
+        required
+      />
+      <button type="submit">Parolni saqlash</button>
+    </form>
+  </>
+)}
 {page === 'admin' && (
 <>
 <PageHead
