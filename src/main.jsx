@@ -1168,10 +1168,10 @@ disabled={busy}
 </h2>
 
 {[
-['hero_image', 'Bosh sahifa banneri'],
-['club_logo', 'Klub logotipi'],
-['home_image', 'Bosh sahifadagi qo‘shimcha rasm'],
-['about_image', 'Klub haqida — universitet rasmi']
+  ['hero_image', 'Bosh sahifa banneri'],
+  ['club_logo', 'Klub logotipi'],
+  ['home_image', 'Bosh sahifadagi qo‘shimcha rasm'],
+  ['about_image', 'Klub haqida — universitet rasmi']
 ].map(([key, label]) => (
 <label key={key}>
 {label}
