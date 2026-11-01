@@ -147,8 +147,6 @@ supabase.auth.getSession().then(({ data }) => {
 setSession(data.session)
 })
 
-const {
-data: { subscription }
 const { data: { subscription } } =
   supabase.auth.onAuthStateChange((event, currentSession) => {
     setSession(currentSession)
