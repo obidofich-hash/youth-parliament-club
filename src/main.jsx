@@ -132,6 +132,8 @@ const emptyApplication = {
 const [application, setApplication] = useState(emptyApplication)
 const [applicationBusy, setApplicationBusy] = useState(false)
 const [applicationMessage, setApplicationMessage] = useState('')
+const [applicationSuccess, setApplicationSuccess] = useState('')
+const [applications, setApplications] = useState([])
 const [notice, setNotice] = useState('')
 const [editing,setEditing] = useState(null)
 useEffect(() => {
@@ -150,7 +152,11 @@ setSession(currentSession)
 
 return () => subscription.unsubscribe()
 }, [])
-
+useEffect(() => {
+  if (session) {
+    loadApplications()
+  }
+}, [session])
 async function loadSettings() {
 const { data, error } = await supabase
 .from('site_settings')
@@ -180,6 +186,19 @@ if (!newsResult.error) setNews(newsResult.data || [])
 if (!galleryResult.error) setGallery(galleryResult.data || [])
 }
 
+async function loadApplications() {
+  const { data, error } = await supabase
+    .from('club_applications')
+    .select('*')
+    .order('created_at', { ascending: false })
+
+  if (error) {
+    setNotice('Arizalarni yuklashda xatolik: ' + error.message)
+    return
+  }
+
+  setApplications(data || [])
+}
 function go(nextPage) {
 setPage(nextPage)
 setMenu(false)
@@ -211,10 +230,9 @@ const { error } = await supabase
     return
   }
 
- setApplicationMessage(
-  `Arizangiz muvaffaqiyatli yuborildi! Ariza raqamingiz: ${applicationCode}`
-  )
-  setApplication(emptyApplication)
+setApplicationMessage('')
+setApplicationSuccess(applicationCode)
+setApplication(emptyApplication)
 }
 async function login(event) {
 event.preventDefault()
@@ -666,6 +684,39 @@ function contentList(type, rows) {
 )
 }
 return (
+{applicationSuccess && (
+  <div className="success-overlay">
+    <div className="success-modal">
+      <div className="success-check">
+        <svg viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="24" />
+          <path d="M14 27 L22 35 L39 17" />
+        </svg>
+      </div>
+
+      <h2>Arizangiz muvaffaqiyatli yuborildi!</h2>
+
+      <p>
+        Youth Parliament Club a’zoligiga arizangiz qabul qilindi.
+      </p>
+
+      <span className="success-label">SIZNING ARIZA RAQAMINGIZ</span>
+
+      <div className="success-code">{applicationSuccess}</div>
+
+      <button
+        className="success-home-btn"
+        onClick={() => {
+          setApplicationSuccess('')
+          go('home')
+        }}
+      >
+        Bosh sahifaga
+        <ArrowRight size={18} />
+      </button>
+    </div>
+  </div>
+)}
 <div className="app">
 <header className="topbar">
 <button
