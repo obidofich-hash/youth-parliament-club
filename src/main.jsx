@@ -136,6 +136,8 @@ const [applicationBusy, setApplicationBusy] = useState(false)
 const [applicationMessage, setApplicationMessage] = useState('')
 const [applicationSuccess, setApplicationSuccess] = useState('')
 const [applications, setApplications] = useState([])
+const [memberRecord, setMemberRecord] = useState(null)
+const [memberLoading, setMemberLoading] = useState(false)
 const [notice, setNotice] = useState('')
 const [editing,setEditing] = useState(null)
 useEffect(() => {
@@ -205,14 +207,14 @@ async function loadApplications() {
   setApplications(data || [])
 }
   async function loadMemberApplication(user) {
-  if (!user?.email) return
+  if (!user?.id) return
 
   setMemberLoading(true)
 
   const { data, error } = await supabase
     .from('club_applications')
     .select('*')
-    .eq('email', user.email)
+    .eq('auth_user_id', user.id)
     .eq('status', 'Qabul qilindi')
     .not('membership_code', 'is', null)
     .maybeSingle()
