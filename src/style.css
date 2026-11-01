@@ -173,6 +173,349 @@ img { max-width: 100%; }
   gap: 13px;
 }
 
+/* ==========================================
+   YOUTH PARLIAMENT CLUB — DESIGN RESTORATION
+   ========================================== */
+
+/* Umumiy dizayn */
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  overflow-x: hidden;
+}
+
+button,
+a,
+.feature-card,
+.info-panel,
+.contact-card {
+  transition: all .3s ease;
+}
+
+/* Yuqori navigatsiya */
+.topbar {
+  box-shadow: 0 4px 22px rgba(7, 24, 45, .035);
+}
+
+.brand-mark {
+  border-radius: 9px;
+  overflow: hidden;
+}
+
+.brand-mark img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 3px;
+}
+
+/* Asosiy sahifa — katta banner */
+.hero {
+  position: relative;
+  min-height: 540px;
+  height: min(55vw, 650px);
+  border-radius: 20px;
+  overflow: hidden;
+  margin-bottom: 30px;
+  background-position: center 45%;
+  box-shadow: 0 18px 45px rgba(7, 24, 45, .12);
+}
+
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 14px;
+  border: 1px solid rgba(230, 201, 143, .55);
+  border-radius: 13px;
+  pointer-events: none;
+}
+
+.hero-content {
+  max-width: 720px;
+  padding: clamp(35px, 6vw, 78px);
+  animation: heroEnter .9s ease both;
+}
+
+.hero h1 {
+  font-size: clamp(44px, 5.5vw, 76px);
+  line-height: 1.08;
+}
+
+.hero-content > p {
+  max-width: 510px;
+}
+
+.hero-actions {
+  gap: 14px;
+  flex-wrap: wrap;
+}
+
+.gold-btn,
+.ghost-btn {
+  border-radius: 9px;
+}
+
+.gold-btn:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(201, 168, 106, .25);
+}
+
+.ghost-btn:hover {
+  background: rgba(255, 255, 255, .14);
+  border-color: var(--gold2);
+}
+
+/* Bosh sahifadagi ikkinchi katta rasm */
+.welcome-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr);
+  align-items: center;
+  gap: 34px;
+  min-height: 340px;
+  padding: 34px;
+  margin: 30px 0 55px;
+  border: 1px solid #e8e3d8;
+  border-radius: 20px;
+  background: #fff;
+  box-shadow: 0 12px 35px rgba(7, 24, 45, .07);
+  overflow: hidden;
+}
+
+.welcome-row > img {
+  width: 100% !important;
+  height: 290px !important;
+  max-height: none !important;
+  object-fit: cover !important;
+  border-radius: 15px !important;
+  box-shadow: 0 12px 30px rgba(7, 24, 45, .12);
+}
+
+.welcome-row > div {
+  min-width: 0;
+}
+
+.welcome-row h2 {
+  color: var(--navy);
+  font: 600 clamp(27px, 3vw, 39px)/1.25 'Playfair Display', serif;
+  margin: 15px 0;
+}
+
+.welcome-row h2 em {
+  color: #b1945d;
+}
+
+.welcome-row > p {
+  grid-column: 2;
+  color: #758092;
+  font-size: 13px;
+  line-height: 1.9;
+  margin-top: -65px;
+}
+
+/* Statistik va kartalar */
+.stats {
+  border-radius: 15px;
+  background: #fff;
+  padding: 28px 3%;
+  box-shadow: 0 8px 28px rgba(7, 24, 45, .035);
+}
+
+.feature-card,
+.info-panel,
+.contact-card,
+.form-card,
+.event-card,
+.news-card,
+.doc-card {
+  border-radius: 15px;
+  overflow: hidden;
+  box-shadow: 0 8px 28px rgba(7, 24, 45, .045);
+}
+
+.feature-card:hover,
+.info-panel:hover,
+.contact-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 16px 35px rgba(7, 24, 45, .10);
+}
+
+/* Ichki sahifalar */
+.page-head {
+  border-radius: 14px;
+  padding: 35px 30px;
+  background: linear-gradient(135deg, #fff, #f5f2eb);
+}
+
+.page-head h1 {
+  line-height: 1.15;
+}
+
+.info-panel {
+  padding: 30px;
+}
+
+.contact-card {
+  padding: 28px;
+}
+
+.form-card {
+  border-radius: 16px;
+}
+
+.form-card input,
+.form-card textarea,
+.form-card select {
+  border-radius: 9px;
+}
+
+/* Yon menyu */
+.sidebar {
+  background: #fff;
+}
+
+.nav-item {
+  border-radius: 9px;
+  transition: all .25s ease;
+}
+
+.nav-item:hover {
+  background: #f5f2eb;
+  transform: translateX(3px);
+}
+
+.nav-item.active {
+  border-radius: 9px;
+}
+
+.side-card {
+  border-radius: 14px;
+}
+
+/* Animatsiyalar */
+@keyframes heroEnter {
+  from {
+    opacity: 0;
+    transform: translateY(25px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes cardEnter {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feature-card,
+.info-panel,
+.contact-card,
+.event-card,
+.news-card {
+  animation: cardEnter .65s ease both;
+}
+
+.feature-card:nth-child(2),
+.info-panel:nth-child(2) {
+  animation-delay: .12s;
+}
+
+.feature-card:nth-child(3) {
+  animation-delay: .22s;
+}
+
+/* Pastki qism */
+.footer {
+  margin-top: 45px;
+  border-radius: 12px 12px 0 0;
+}
+
+/* Planshet */
+@media (max-width: 1050px) {
+  .hero {
+    min-height: 460px;
+  }
+
+  .welcome-row {
+    gap: 22px;
+    padding: 25px;
+  }
+}
+
+/* Telefon */
+@media (max-width: 760px) {
+  .hero {
+    min-height: 480px;
+    height: auto;
+    border-radius: 14px;
+  }
+
+  .hero::after {
+    inset: 9px;
+    border-radius: 9px;
+  }
+
+  .hero-content {
+    padding: 45px 28px;
+  }
+
+  .hero h1 {
+    font-size: clamp(39px, 10vw, 53px);
+  }
+
+  .welcome-row {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+    padding: 20px;
+    border-radius: 15px;
+  }
+
+  .welcome-row > img {
+    width: 100% !important;
+    height: 230px !important;
+  }
+
+  .welcome-row > p {
+    margin: 0;
+  }
+
+  .page-head {
+    padding: 25px 20px;
+  }
+
+  .feature-card,
+  .info-panel,
+  .contact-card {
+    border-radius: 12px;
+  }
+}
+
+/* Harakatni kamaytirishni xohlaganlar uchun */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: .01ms !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 .brand-button {
   display: flex;
   align-items: center;
