@@ -104,8 +104,9 @@ event_date: '',
 image_url: ''
 })
 const [busy, setBusy] = useState(false)
-const [uploading, setUploading] = useState(false)
+const [uploading, setUploading] = useState(null)
 const [notice, setNotice] = useState('')
+const [editing,setEditing] = useState(null)
 useEffect(() => {
 loadSettings()
 loadContent()
@@ -343,7 +344,60 @@ image_url: ''
 setNotice('Kontent muvaffaqiyatli qo‘shildi.')
 loadContent()
 }
+function startEdit(type, row) {
+  setEditing({
+    type,
+    id: row.id,
+    title: row.title || '',
+    description: row.description || '',
+    event_date: row.event_date
+      ? new Date(row.event_date).toISOString().slice(0, 16)
+      : '',
+    image_url: row.image_url || ''
+  })
+}
 
+async function updateContent() {
+  if (!editing.title.trim()) {
+    setNotice('Sarlavhani kiriting.')
+    return
+  }
+
+  setBusy(true)
+  setNotice('')
+
+  const table = editing.type === 'events'
+    ? 'club_events'
+    : editing.type === 'news'
+      ? 'club_news'
+      : 'club_gallery'
+
+  const payload = {
+    title: editing.title,
+    description: editing.description,
+    image_url: editing.image_url
+  }
+
+  if (editing.type === 'events') {
+    payload.event_date = editing.event_date || null
+  }
+
+  const { error } = await supabase
+    .from(table)
+    .update(payload)
+    .eq('id', editing.id)
+
+  setBusy(false)
+
+  if (error) {
+    setNotice('Tahrirlashda xatolik: ' + error.message)
+    return
+  }
+
+  setEditing(null)
+  setNotice('Ma’lumot muvaffaqiyatli yangilandi.')
+  loadContent()
+}
 async function deleteContent(type, id) {
 const table =
 type === 'events'
@@ -443,46 +497,118 @@ onClick={() => addContent(type)}
 }
 
 function contentList(type, rows) {
-if (!rows.length) {
-return <p className="empty-state">Hozircha ma’lumot mavjud emas.</p>
+  if (!rows.length) {
+    return <p className="empty-state">Hozircha ma’lumot mavjud emas.</p>
+  }
+
+  return (
+    <div className="two-col">
+      {rows.map(row => (
+        <article className="info-panel" key={row.id}>
+          {row.image_url && (
+            <img
+              src={row.image_url}
+              alt={row.title}
+              style={{
+                width: '100%',
+                maxHeight: '220px',
+                objectFit: 'cover',
+                marginBottom: '12px'
+              }}
+            />
+          )}
+          {editing?.id === row.id && editing?.type === type ? (
+            <>
+              <label>
+                Sarlavha
+                <input
+                  value={editing.title}
+                  onChange={e => setEditing({
+                    ...editing,
+                    title: e.target.value
+                  })}
+                />
+              </label>
+
+              {type !== 'gallery' && (
+                <label>
+                  Ma’lumot
+                  <textarea
+                    rows="3"
+                    value={editing.description}
+                    onChange={e => setEditing({
+                      ...editing,
+                      description: e.target.value
+                    })}
+                  />
+                </label>
+              )}
+
+              {type === 'events' && (
+                <label>
+                  Sana va vaqt
+                  <input
+                    type="datetime-local"
+                    value={editing.event_date}
+                    onChange={e => setEditing({
+                      ...editing,
+                      event_date: e.target.value
+                    })}
+                  />
+                </label>
+              )}
+
+              <button
+                className="gold-btn"
+                disabled={busy}
+                onClick={updateContent}
+              >
+                <Save size={15} /> Saqlash
+              </button>
+
+              <button
+                className="ghost-btn"
+                onClick={() => setEditing(null)}
+              >
+                Bekor qilish
+              </button>
+            </>
+          ) : (
+            <>
+              <h2>{row.title}</h2>
+
+              {row.description && <p>{row.description}</p>}
+
+              {row.event_date && (
+                <p>
+                  {new Date(row.event_date).toLocaleString('uz-UZ')}
+                </p>
+              )}
+
+              {session && session.user.email === 'obidofich@gmail.com' && (
+                <>
+                  <button
+                    className="gold-btn"
+                    onClick={() => startEdit(type, row)}
+                  >
+                    <FileText size={15} /> Tahrirlash
+                  </button>
+
+                  <button
+                    className="ghost-btn"
+                    onClick={() => deleteContent(type, row.id)}
+                  >
+                    <Trash2 size={15} /> O‘chirish
+                  </button>
+                </>
+              )}
+            </>
+          )}
+        </article>
+      ))}
+    </div>
+  )
 }
-
-return (
-<div className="two-col">
-{rows.map(row => (
-<article className="info-panel" key={row.id}>
-{row.image_url && (
-<img
-src={row.image_url}
-alt={row.title}
-style={{
-width: '100%',
-maxHeight: '220px',
-objectFit: 'cover',
-marginBottom: '12px'
-}}
-/>
-)}
-
-<h2>{row.title}</h2>
-
-{row.description && <p>{row.description}</p>}
-
-{row.event_date && (
-<p>{new Date(row.event_date).toLocaleString('uz-UZ')}</p>
-)}
-
-{session && (
-<button
-className="ghost-btn"
-onClick={() => deleteContent(type, row.id)}
->
-<Trash2 size={15} /> O‘chirish
-</button>
-)}
-</article>
-))}
-</div>
 )
 }
 return (
