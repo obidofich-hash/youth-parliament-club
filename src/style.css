@@ -1209,3 +1209,139 @@ a,
     padding: 28px 22px;
   }
 }
+/* SUCCESS MODAL — NAVY & GOLD */
+
+.success-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(3, 10, 22, 0.82);
+  backdrop-filter: blur(8px);
+  animation: overlayFade .35s ease;
+}
+
+.success-modal {
+  width: 100%;
+  max-width: 480px;
+  padding: 42px 32px;
+  border: 1px solid rgba(201, 168, 106, .55);
+  border-radius: 22px;
+  background: linear-gradient(145deg, #10233b, #081426);
+  color: #f8f7f3;
+  text-align: center;
+  box-shadow: 0 25px 80px rgba(0,0,0,.45);
+  animation: modalAppear .55s cubic-bezier(.2,.8,.2,1);
+}
+
+.success-check {
+  width: 86px;
+  height: 86px;
+  margin: 0 auto 25px;
+}
+
+.success-check svg {
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.success-check circle {
+  fill: rgba(201,168,106,.12);
+  stroke: #c9a86a;
+  stroke-width: 2;
+  stroke-dasharray: 151;
+  stroke-dashoffset: 151;
+  animation: circleDraw .8s ease forwards;
+}
+
+.success-check path {
+  fill: none;
+  stroke: #e5c98f;
+  stroke-width: 4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 40;
+  stroke-dashoffset: 40;
+  animation: checkDraw .5s .65s ease forwards;
+}
+
+.success-modal h2 {
+  color: #fff;
+  font-size: 25px;
+  margin-bottom: 12px;
+}
+
+.success-modal p {
+  color: #c4ccd7;
+  line-height: 1.7;
+  margin-bottom: 25px;
+}
+
+.success-label {
+  display: block;
+  color: #c9a86a;
+  font-size: 11px;
+  letter-spacing: 2px;
+  margin-bottom: 10px;
+}
+
+.success-code {
+  color: #e5c98f;
+  font-size: 27px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin-bottom: 28px;
+}
+
+.success-home-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 16px;
+  border: none;
+  border-radius: 10px;
+  background: #c9a86a;
+  color: #081426;
+  font-weight: 700;
+  cursor: pointer;
+  transition: .25s;
+}
+
+.success-home-btn:hover {
+  background: #e5c98f;
+  transform: translateY(-2px);
+}
+
+@keyframes overlayFade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalAppear {
+  from { opacity: 0; transform: translateY(25px) scale(.94); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes circleDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@keyframes checkDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+@media (max-width: 480px) {
+  .success-modal {
+    padding: 34px 22px;
+  }
+
+  .success-modal h2 {
+    font-size: 21px;
+  }
+}
