@@ -1772,9 +1772,9 @@ a,
 .idcard {
   position: relative;
   width: 100%;
-  aspect-ratio: 1.5 / 1;
-  min-height: 390px;
-  padding: 3.5%;
+ aspect-ratio: 1.586 / 1;
+min-height: 0;
+padding: 2.8%;
   overflow: hidden;
   border-radius: 25px;
   color: #fff;
@@ -2014,11 +2014,11 @@ a,
   }
 
   .idcard {
-    padding: 4%;
-    border-radius: 13px;
-    border-width: 2px;
-    min-height: 0;
-    aspect-ratio: 1.15 / 1;
+   padding: 3%;
+border-radius: 13px;
+border-width: 2px;
+min-height: 0;
+aspect-ratio: 1.586 / 1;
   }
 
   .idcard-emblem {
@@ -2052,9 +2052,9 @@ a,
   }
 
   .idcard-photo {
-    width: 24%;
-    min-height: 105px;
-    max-height: 145px;
+   width: 24%;
+min-height: 0;
+max-height: 100px;
   }
 
   .idcard-name {
@@ -2128,7 +2128,8 @@ a,
     top: 0;
     width: 100%;
     height: auto;
-    aspect-ratio: 1.5 / 1;
+    aspect-ratio: 1.586 / 1;
+min-height: 0;
     border-radius: 0;
     box-shadow: none;
     -webkit-print-color-adjust: exact;
