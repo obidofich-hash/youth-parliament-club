@@ -1758,6 +1758,34 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
 
   {uploading && <p>Rasm yuklanmoqda...</p>}
 </div>
+        <div className="form-card">
+  <h3>Tadbirda davomatni tasdiqlash</h3>
+  <p>Tadbir joyidagi QR-kodni kamerangiz orqali skanerlang.</p>
+
+  {!scannerOpen && (
+    <button
+      className="primary-btn"
+      type="button"
+      onClick={() => setScannerOpen(true)}
+    >
+      QR-kodni skanerlash
+    </button>
+  )}
+
+  {scannerOpen && (
+    <>
+      <div id="member-qr-reader" style={{ width: '100%' }} />
+
+      <button
+        className="ghost-btn"
+        type="button"
+        onClick={() => setScannerOpen(false)}
+      >
+        Kamerani yopish
+      </button>
+    </>
+  )}
+</div>
         <MembershipCertificate
   member={memberApplication}
   settings={settings}
