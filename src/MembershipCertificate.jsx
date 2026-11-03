@@ -1,7 +1,7 @@
 
 import { QRCodeSVG } from 'qrcode.react'
 
-export default function MembershipCertificate({ member }) {
+export default function MembershipCertificate({ member, settings = {} }) {
   if (!member) return null
 
   const issued = member.membership_issued_at
@@ -20,18 +20,44 @@ export default function MembershipCertificate({ member }) {
     .join('')
     .toUpperCase()
 
+  const clubName = settings.certificate_club_name || 'YOUTH PARLIAMENT'
+  const logo = settings.certificate_logo
+  const background = settings.certificate_background
+
   return (
     <div className="idcard-wrapper">
-
-      <div className="idcard">
-
+      <div
+        className="idcard"
+        style={{
+          backgroundImage: background
+            ? `url("${background}")`
+            : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center'
+        }}
+      >
         <div className="idcard-glow" />
 
         <div className="idcard-header">
           <div className="idcard-brand">
-            <div className="idcard-emblem">YP</div>
+            <div className="idcard-emblem">
+              {logo ? (
+                <img
+                  src={logo}
+                  alt="Klub logotipi"
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    objectFit: 'contain'
+                  }}
+                />
+              ) : (
+                'YP'
+              )}
+            </div>
+
             <div>
-              <strong>YOUTH PARLIAMENT</strong>
+              <strong>{clubName}</strong>
               <span>CLUB · UZBEKISTAN</span>
             </div>
           </div>
@@ -42,22 +68,16 @@ export default function MembershipCertificate({ member }) {
         </div>
 
         <div className="idcard-content">
-
           <div className="idcard-photo">
             {member.photo_url ? (
               <img src={member.photo_url} alt={member.full_name} />
             ) : (
-              <div className="idcard-initials">
-                {initials}
-              </div>
+              <div className="idcard-initials">{initials}</div>
             )}
           </div>
 
           <div className="idcard-details">
-
-            <div className="idcard-name">
-              {member.full_name}
-            </div>
+            <div className="idcard-name">{member.full_name}</div>
 
             <div className="idcard-line">
               <b>UNIVERSITET</b>
@@ -80,7 +100,6 @@ export default function MembershipCertificate({ member }) {
                 {member.course || '—'} / {member.group_number || '—'}
               </span>
             </div>
-
           </div>
 
           <div className="idcard-qr">
@@ -95,11 +114,9 @@ export default function MembershipCertificate({ member }) {
             </div>
             <span>DAVOMAT QR</span>
           </div>
-
         </div>
 
         <div className="idcard-footer">
-
           <div className="idcard-number">
             <small>A’ZOLIK RAQAMI</small>
             <strong>{member.membership_code || '—'}</strong>
@@ -118,13 +135,11 @@ export default function MembershipCertificate({ member }) {
           <div className="idcard-status">
             <span>✓</span> FAOL A’ZO
           </div>
-
         </div>
 
         <div className="idcard-bottom-line">
-          YOSHLAR PARLAMENTI KLUBI · YOSHLAR OVOZI · YANGI KELAJAK
+          {clubName} · YOSHLAR OVOZI · YANGI KELAJAK
         </div>
-
       </div>
 
       <div className="idcard-actions">
@@ -135,7 +150,6 @@ export default function MembershipCertificate({ member }) {
           PDF shaklida yuklab olish
         </button>
       </div>
-
     </div>
   )
 }
