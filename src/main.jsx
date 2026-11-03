@@ -9,7 +9,7 @@ Instagram, Youtube, ShieldCheck, Save, LogOut, Plus, Trash2,
 Image as ImageIcon
 } from 'lucide-react'
 import './style.css'
-
+import MembershipCertificate from './MembershipCertificate'
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY,
@@ -1518,21 +1518,7 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
         Sizda tasdiqlangan a’zolik guvohnomasi mavjud emas.
       </div>
     ) : (
-      <div className="form-card">
-        <h2>Yoshlar parlamenti klubi</h2>
-        <h3>A’ZOLIK GUVOHNOMASI</h3>
-        <p><b>A’zolik raqami:</b> {memberApplication.membership_code}</p>
-        <p><b>F.I.Sh.:</b> {memberApplication.full_name}</p>
-        <p><b>Universitet:</b> {memberApplication.university}</p>
-        <p><b>Fakultet:</b> {memberApplication.faculty}</p>
-        <p><b>Yo‘nalish:</b> {memberApplication.study_direction}</p>
-        <p><b>Kurs:</b> {memberApplication.course}</p>
-        <p><b>Guruh:</b> {memberApplication.group_number}</p>
-        <p><b>Email:</b> {memberApplication.email}</p>
-        <p><b>Guvohnoma berilgan sana:</b> {memberApplication.membership_issued_at ? new Date(memberApplication.membership_issued_at).toLocaleDateString('uz-UZ') : '—'}</p>
-<p><b>Amal qilish muddati:</b> {memberApplication.membership_expires_at ? new Date(memberApplication.membership_expires_at).toLocaleDateString('uz-UZ') : '—'}</p>
-        <p><b>Maqom:</b> Faol a’zo</p>
-      </div>
+      <MembershipCertificate member={memberApplication} />
     )}
   </>
 )}
