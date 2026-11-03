@@ -338,6 +338,52 @@ async function loadApplications() {
   setUploading(false)
   setNotice('Profil rasmi muvaffaqiyatli yangilandi!')
 }
+  useEffect(() => {
+  if (!scannerOpen) return
+
+  if (!window.Html5Qrcode) {
+    setNotice('QR skaner kutubxonasi yuklanmadi. Sahifani yangilang.')
+    setScannerOpen(false)
+    return
+  }
+
+  const scanner = new window.Html5Qrcode('member-qr-reader')
+  let processing = false
+  let cancelled = false
+
+  scanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    async (decodedText) => {
+      if (processing || cancelled) return
+      processing = true
+      setScannerBusy(true)
+
+      try {
+        await scanner.stop()
+        setScannerOpen(false)
+
+        await recordAttendance({
+          method: 'member_scan',
+          eventToken: decodedText
+        })
+      } catch (error) {
+        setNotice('QR skanerlashda xatolik: ' + error.message)
+      } finally {
+        setScannerBusy(false)
+      }
+    },
+    () => {}
+  ).catch(error => {
+    setNotice('Kamerani ishga tushirib bo‘lmadi: ' + error)
+    setScannerOpen(false)
+  })
+
+  return () => {
+    cancelled = true
+    scanner.stop().catch(() => {})
+  }
+}, [scannerOpen])
   async function recordAttendance(payload) {
   setNotice('Davomat tekshirilmoqda...')
 
