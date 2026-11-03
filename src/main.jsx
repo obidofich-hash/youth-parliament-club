@@ -286,6 +286,55 @@ async function loadApplications() {
   setMemberLoading(false)
   return data || null
 }
+  async function uploadMemberPhoto(file) {
+  if (!file || !session?.user?.id || !memberApplication?.id) return
+
+  if (!file.type.startsWith('image/')) {
+    setNotice('Faqat rasm faylini yuklash mumkin.')
+    return
+  }
+
+  if (file.size > 5 * 1024 * 1024) {
+    setNotice('Rasm hajmi 5 MB dan oshmasligi kerak.')
+    return
+  }
+
+  setUploading(true)
+  setNotice('Rasm yuklanmoqda...')
+
+  const extension = file.name.split('.').pop()?.toLowerCase() || 'jpg'
+  const path = `${session.user.id}/${Date.now()}.${extension}`
+
+  const { error: uploadError } = await supabase.storage
+    .from('club-images')
+    .upload(path, file, { upsert: false })
+
+  if (uploadError) {
+    setNotice('Rasm yuklashda xatolik: ' + uploadError.message)
+    setUploading(false)
+    return
+  }
+
+  const { data } = supabase.storage
+    .from('club-images')
+    .getPublicUrl(path)
+
+  const { error: updateError } = await supabase
+    .from('club_applications')
+    .update({ photo_url: data.publicUrl })
+    .eq('id', memberApplication.id)
+    .eq('auth_user_id', session.user.id)
+
+  if (updateError) {
+    setNotice('Rasmni saqlashda xatolik: ' + updateError.message)
+    setUploading(false)
+    return
+  }
+
+  await loadMemberApplication(session.user)
+  setUploading(false)
+  setNotice('Profil rasmi muvaffaqiyatli yangilandi!')
+}
   async function recordAttendance(payload) {
   setNotice('Davomat tekshirilmoqda...')
 
@@ -1630,6 +1679,36 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
       </div>
     ) : (
       <>
+        <div className="form-card">
+  <h3>Profil rasmini yangilash</h3>
+  <p>Guvohnomada ko‘rinadigan rasmingizni yuklang.</p>
+
+  {memberApplication.photo_url && (
+    <img
+      src={memberApplication.photo_url}
+      alt="Profil rasmi"
+      style={{
+        width: '110px',
+        height: '130px',
+        objectFit: 'cover',
+        borderRadius: '10px',
+        marginBottom: '12px'
+      }}
+    />
+  )}
+
+  <input
+    type="file"
+    accept="image/*"
+    disabled={uploading}
+    onChange={e => {
+      uploadMemberPhoto(e.target.files?.[0])
+      e.target.value = ''
+    }}
+  />
+
+  {uploading && <p>Rasm yuklanmoqda...</p>}
+</div>
         <MembershipCertificate
   member={memberApplication}
   settings={settings}
