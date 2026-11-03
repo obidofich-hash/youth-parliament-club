@@ -33,6 +33,9 @@ hero_image: '',
 club_logo: '',
 home_image: '',
 about_image: '',
+certificate_club_name: 'YOUTH PARLIAMENT',
+certificate_logo: '',
+certificate_background: '',
 hero_line1: 'Kelajakni',
 hero_emphasis: 'birgalikda',
 hero_line2: 'quramiz.',
@@ -1627,7 +1630,10 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
       </div>
     ) : (
       <>
-        <MembershipCertificate member={memberApplication} />
+        <MembershipCertificate
+  member={memberApplication}
+  settings={settings}
+/>
         <button className="ghost-btn" type="button" onClick={logout}>
           <LogOut size={16} /> Kabinetdan chiqish
         </button>
@@ -1854,6 +1860,69 @@ marginTop: '8px'
 <button className="ghost-btn" onClick={logout}>
 <LogOut size={16} /> Chiqish
 </button>
+</div>
+<div className="form-card">
+  <h2>Guvohnoma dizayni</h2>
+
+  <label>
+    Guvohnomadagi klub nomi
+    <input
+      value={draft.certificate_club_name || ''}
+      onChange={event =>
+        setDraft({
+          ...draft,
+          certificate_club_name: event.target.value
+        })
+      }
+      placeholder="YOUTH PARLIAMENT"
+    />
+  </label>
+
+  <label>
+    Guvohnoma logotipi
+    <input
+      type="file"
+      accept="image/*"
+      onChange={event =>
+        uploadSettingImage('certificate_logo', event.target.files?.[0])
+      }
+    />
+  </label>
+
+  {draft.certificate_logo && (
+    <img
+      src={draft.certificate_logo}
+      alt="Guvohnoma logotipi"
+      style={{ maxWidth: '120px', display: 'block', margin: '10px 0' }}
+    />
+  )}
+
+  <label>
+    Guvohnoma fon rasmi
+    <input
+      type="file"
+      accept="image/*"
+      onChange={event =>
+        uploadSettingImage('certificate_background', event.target.files?.[0])
+      }
+    />
+  </label>
+
+  {draft.certificate_background && (
+    <img
+      src={draft.certificate_background}
+      alt="Guvohnoma foni"
+      style={{ maxWidth: '260px', display: 'block', margin: '10px 0' }}
+    />
+  )}
+
+  <button
+    className="gold-btn"
+    onClick={saveSettings}
+    disabled={busy || uploading}
+  >
+    <Save size={16} /> Dizaynni saqlash
+  </button>
 </div>
 <div className="form-card">
   <h2>Bosh sahifa matnlari</h2>
