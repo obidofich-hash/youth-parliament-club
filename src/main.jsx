@@ -47,6 +47,7 @@ const nav = [
 ['home', 'Bosh sahifa', Home],
 ['about', 'Klub haqida', Landmark],
 ['membership', 'A’zolikka ariza', Users],
+['member', 'Shaxsiy kabinet', ShieldCheck],
 ['documents', 'Hujjatlar', FileText],
 ['feedback', 'Murojaatlar', MessageCircle],
 ['events', 'Tadbirlar', CalendarDays],
@@ -103,7 +104,8 @@ return (
 }
 
 function App() {
-const [page, setPage] = useState('home')
+const requestedPage = new URLSearchParams(window.location.search).get('page')
+const [page, setPage] = useState(requestedPage === 'member' ? 'member' : 'home')
 const [menu, setMenu] = useState(false)
 const [memberApplication, setMemberApplication] = useState(null)
 const [memberLoading, setMemberLoading] = useState(false)
@@ -389,10 +391,17 @@ setNotice('Tadbir QR-kodi muvaffaqiyatli yaratildi!')
   setNotice('Ariza muvaffaqiyatli o‘chirildi.')
 }
 function go(nextPage) {
-setPage(nextPage)
-setMenu(false)
-setNotice('')
-window.scrollTo({ top: 0, behavior: 'smooth' })
+  setPage(nextPage)
+  setMenu(false)
+  setNotice('')
+
+  // A'zolar uchun yagona, ulashish mumkin bo'lgan kabinet havolasi: /?page=member
+  const url = new URL(window.location.href)
+  if (nextPage === 'member') url.searchParams.set('page', 'member')
+  else url.searchParams.delete('page')
+  window.history.replaceState({}, document.title, url.pathname + url.search + url.hash)
+
+  window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
 async function submitApplication(event) {
@@ -458,26 +467,29 @@ async function updatePassword(event) {
     await loadMemberApplication(currentUser)
   }
   setPage('member')
-  window.history.replaceState({}, document.title, window.location.pathname)
+  window.history.replaceState({}, document.title, window.location.pathname + '?page=member')
 }
 
 async function login(event) {
-event.preventDefault()
-setBusy(true)
-setNotice('')
+  event.preventDefault()
+  setBusy(true)
+  setNotice('')
 
-const { error } = await supabase.auth.signInWithPassword({
-email,
-password
-})
+  const { error } = await supabase.auth.signInWithPassword({
+    email: email.trim(),
+    password
+  })
 
-setBusy(false)
+  setBusy(false)
 
-setNotice(
-error
-? 'Kirish amalga oshmadi. Email va parolni tekshiring.'
-: 'Tizimga muvaffaqiyatli kirdingiz.'
-)
+  if (error) {
+    setNotice('Kirish amalga oshmadi. Email yoki parol noto‘g‘ri.')
+    return
+  }
+
+  setPassword('')
+  setNotice('Tizimga muvaffaqiyatli kirdingiz. Shaxsiy kabinetingiz yuklanmoqda.')
+  go('member')
 }
 async function googleLogin() {
   setBusy(true)
@@ -968,7 +980,8 @@ onClick={() => setMenu(!menu)}
     ['events', 'Faoliyat'],
     ['news', 'Loyihalar'],
     ['gallery', 'Galereya'],
-    ['membership', 'A’zolik']
+    ['membership', 'A’zolik'],
+    ['member', 'Shaxsiy kabinet']
   ].map(([id, label]) => (
     <button
       key={id}
@@ -1017,13 +1030,6 @@ onClick={() => go(id)}
 <span>{label}</span>
 </button>
 ))}
-<button
-  className={`nav-item ${page === 'member' ? 'active' : ''}`}
-  onClick={() => go('member')}
->
-  <ShieldCheck size={18} />
-  <span>Shaxsiy kabinet</span>
-</button>
 <button
 className={`nav-item ${page === 'admin' ? 'active' : ''}`}
 onClick={() => go('admin')}
@@ -1587,15 +1593,45 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
     {memberLoading ? (
       <div className="form-card">Ma’lumotlar yuklanmoqda...</div>
     ) : !session ? (
-      <div className="form-card">
-        Kabinetga kirish uchun tizimga kiring.
-      </div>
+      <form className="form-card member-login-form" onSubmit={login}>
+        <h2>A’zolar uchun yagona kirish</h2>
+        <p>Qabul qilingan a’zolar ro‘yxatdan o‘tgan elektron pochta manzili va shaxsiy paroli orqali kiradi.</p>
+        <label htmlFor="member-login-email">Elektron pochta</label>
+        <input
+          id="member-login-email"
+          type="email"
+          autoComplete="username"
+          value={email}
+          onChange={event => setEmail(event.target.value)}
+          placeholder="email@example.com"
+          required
+        />
+        <label htmlFor="member-login-password">Parol</label>
+        <input
+          id="member-login-password"
+          type="password"
+          autoComplete="current-password"
+          value={password}
+          onChange={event => setPassword(event.target.value)}
+          placeholder="Shaxsiy parolingiz"
+          required
+        />
+        <button className="gold-btn" type="submit" disabled={busy}>
+          {busy ? 'Tekshirilmoqda...' : 'Shaxsiy kabinetga kirish'}
+          <ArrowRight size={18} />
+        </button>
+      </form>
     ) : !memberApplication ? (
       <div className="form-card">
         Sizda tasdiqlangan a’zolik guvohnomasi mavjud emas.
       </div>
     ) : (
-      <MembershipCertificate member={memberApplication} />
+      <>
+        <MembershipCertificate member={memberApplication} />
+        <button className="ghost-btn" type="button" onClick={logout}>
+          <LogOut size={16} /> Kabinetdan chiqish
+        </button>
+      </>
     )}
   </>
 )}
