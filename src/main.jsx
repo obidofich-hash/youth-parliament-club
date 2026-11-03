@@ -110,6 +110,7 @@ const [memberLoading, setMemberLoading] = useState(false)
 const [session, setSession] = useState(null)
 const [email, setEmail] = useState('')
 const [password, setPassword] = useState('')
+const [resetBusy, setResetBusy] = useState(false)
 const [settings, setSettings] = useState(defaults)
 const [draft, setDraft] = useState(defaults)
 const [events, setEvents] = useState([])
@@ -150,34 +151,70 @@ const [memberRecord, setMemberRecord] = useState(null)
 const [notice, setNotice] = useState('')
 const [editing,setEditing] = useState(null)
 useEffect(() => {
-loadSettings()
-loadContent()
+  loadSettings()
+  loadContent()
 
-supabase.auth.getSession().then(({ data }) => {
-setSession(data.session)
-})
+  // Supabase invite/recovery links include type=invite or type=recovery.
+  // Read it before Supabase processes and clears the URL hash.
+  const hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''))
+  const queryParams = new URLSearchParams(window.location.search)
+  const authType = hashParams.get('type') || queryParams.get('type')
 
-const { data: { subscription } } =
-  supabase.auth.onAuthStateChange((event, currentSession) => {
-    setSession(currentSession)
+  if (authType === 'invite' || authType === 'recovery') {
+    setPage('reset-password')
+  }
 
-    if (event === 'PASSWORD_RECOVERY') {
-      setPage('reset-password')
+  supabase.auth.getSession().then(({ data, error }) => {
+    if (error) {
+      setNotice('Sessiyani tekshirishda xatolik yuz berdi.')
+      return
     }
+    setSession(data.session)
   })
-return () => subscription.unsubscribe()
-}, [])
-useEffect(() => {
- if (session) {
-  loadApplications()
-  loadMemberApplication(session.user)
 
+  const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    (event, currentSession) => {
+      setSession(currentSession)
+
+      const currentHashParams = new URLSearchParams(
+        window.location.hash.replace(/^#/, '')
+      )
+      const currentAuthType =
+        currentHashParams.get('type') ||
+        new URLSearchParams(window.location.search).get('type')
+
+      if (
+        event === 'PASSWORD_RECOVERY' ||
+        (event === 'SIGNED_IN' &&
+          (authType === 'invite' ||
+            authType === 'recovery' ||
+            currentAuthType === 'invite' ||
+            currentAuthType === 'recovery'))
+      ) {
+        setPage('reset-password')
+      }
+    }
+  )
+
+  return () => subscription.unsubscribe()
+}, [])
+
+useEffect(() => {
+  if (!session) {
+    setMemberApplication(null)
+    setApplications([])
+    setAttendanceEvents([])
+    return
+  }
+
+  // Only the administrator should load the full applications list.
   if (session.user.email === 'obidofich@gmail.com') {
+    loadApplications()
     loadAttendanceEvents()
   }
-  } else {
-    setMemberApplication(null)
-  }
+
+  // Every authenticated member may load only their own approved record.
+  loadMemberApplication(session.user)
 }, [session])
 async function loadSettings() {
 const { data, error } = await supabase
@@ -242,6 +279,7 @@ async function loadApplications() {
   }
 
   setMemberLoading(false)
+  return data || null
 }
   async function recordAttendance(payload) {
   setNotice('Davomat tekshirilmoqda...')
@@ -385,6 +423,44 @@ setApplicationMessage('')
 setApplicationSuccess(applicationCode)
 setApplication(emptyApplication)
 }
+async function updatePassword(event) {
+  event.preventDefault()
+  setNotice('')
+
+  const form = event.currentTarget
+  const newPassword = form.elements.newPassword.value
+  const confirmPassword = form.elements.confirmPassword.value
+
+  if (newPassword.length < 8) {
+    setNotice('Parol kamida 8 ta belgidan iborat bo‘lishi kerak.')
+    return
+  }
+
+  if (newPassword !== confirmPassword) {
+    setNotice('Kiritilgan parollar bir-biriga mos kelmadi.')
+    return
+  }
+
+  setResetBusy(true)
+  const { data, error } = await supabase.auth.updateUser({
+    password: newPassword
+  })
+  setResetBusy(false)
+
+  if (error) {
+    setNotice('Parolni saqlashda xatolik: ' + error.message)
+    return
+  }
+
+  setNotice('Parol muvaffaqiyatli o‘rnatildi!')
+  const currentUser = data?.user || session?.user
+  if (currentUser) {
+    await loadMemberApplication(currentUser)
+  }
+  setPage('member')
+  window.history.replaceState({}, document.title, window.location.pathname)
+}
+
 async function login(event) {
 event.preventDefault()
 setBusy(true)
@@ -1471,35 +1547,36 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
       title="Yangi parol o‘rnatish"
       desc="Shaxsiy kabinetingiz uchun yangi parol yarating."
     />
-    <form
-      className="form-card"
-      onSubmit={async (e) => {
-        e.preventDefault()
-        const password = e.currentTarget.password.value
-
-        const { error } = await supabase.auth.updateUser({ password })
-
-        if (error) {
-          setNotice('Xatolik: ' + error.message)
-        } else {
-          setNotice('Parol muvaffaqiyatli o‘rnatildi!')
-          setPage('member')
-        }
-      }}
-    >
-      <label>Yangi parol</label>
+    <form className="form-card" onSubmit={updatePassword}>
+      <label htmlFor="new-member-password">Yangi parol</label>
       <input
+        id="new-member-password"
         type="password"
-        name="password"
-        minLength="6"
-        placeholder="Kamida 6 ta belgi"
+        name="newPassword"
+        minLength="8"
+        autoComplete="new-password"
+        placeholder="Kamida 8 ta belgi"
         required
       />
-      <button type="submit">Parolni saqlash</button>
+
+      <label htmlFor="confirm-member-password">Yangi parolni takrorlang</label>
+      <input
+        id="confirm-member-password"
+        type="password"
+        name="confirmPassword"
+        minLength="8"
+        autoComplete="new-password"
+        placeholder="Parolni qayta kiriting"
+        required
+      />
+
+      <button className="gold-btn" type="submit" disabled={resetBusy}>
+        {resetBusy ? 'Saqlanmoqda...' : 'Parolni saqlash'}
+      </button>
     </form>
   </>
 )}
-  {page === 'member' && (
+{page === 'member' && (
   <>
     <PageHead
       kicker="A’ZOLAR UCHUN"
