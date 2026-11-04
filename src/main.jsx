@@ -417,6 +417,22 @@ async function loadApplications() {
   setAttendanceEvents(data || [])
 }
 async function createEventQR(eventId) {
+  const { data: existing, error: findError } = await supabase
+    .from('club_event_qr')
+    .select('*')
+    .eq('event_id', Number(eventId))
+    .maybeSingle()
+
+  if (findError) {
+    setNotice('QR-kodni tekshirishda xatolik: ' + findError.message)
+    return
+  }
+
+  if (existing) {
+    setActiveEventQR(existing)
+    setNotice('Bu tadbir uchun mavjud QR-kod topildi!')
+    return existing
+  }
   const { data, error } = await supabase
     .from('club_event_qr')
     .insert({
@@ -431,8 +447,8 @@ async function createEventQR(eventId) {
     return
   }
 
- setActiveEventQR(data)
-setNotice('Tadbir QR-kodi muvaffaqiyatli yaratildi!')
+  setActiveEventQR(data)
+  setNotice('Tadbir QR-kodi muvaffaqiyatli yaratildi!')
   return data
 }
   async function updateApplicationStatus(id, status) {
