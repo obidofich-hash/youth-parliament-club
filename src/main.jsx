@@ -1802,6 +1802,15 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
     </>
   )}
 </div>
+        {scannerBusy && (
+  <p className="admin-notice">Davomat tasdiqlanmoqda...</p>
+)}
+
+{notice && (
+  <p className="admin-notice" role="status">
+    {notice}
+  </p>
+)}
         <MembershipCertificate
   member={memberApplication}
   settings={settings}
