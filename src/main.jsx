@@ -205,7 +205,17 @@ useEffect(() => {
     }
   )
 
-  return () => subscription.unsubscribe()
+  const handlePopState = () => {
+    const route = new URLSearchParams(window.location.search).get('page')
+    setPage(allowedPages.has(route) ? route : 'home')
+    setMenu(false)
+  }
+  window.addEventListener('popstate', handlePopState)
+
+  return () => {
+    subscription.unsubscribe()
+    window.removeEventListener('popstate', handlePopState)
+  }
 }, [])
 
 useEffect(() => {
@@ -217,7 +227,7 @@ useEffect(() => {
   }
 
   // Only the administrator should load the full applications list.
-  if (session.user.email === 'obidofich@gmail.com') {
+  if (session.user.email?.toLowerCase() === 'obidofich@gmail.com') {
     loadApplications()
     loadAttendanceEvents()
   }
@@ -255,6 +265,8 @@ if (!galleryResult.error) setGallery(galleryResult.data || [])
 }
 
 async function loadApplications() {
+  if (session?.user?.email?.toLowerCase() !== 'obidofich@gmail.com') return
+
   const { data, error } = await supabase
     .from('club_applications')
     .select('*')
@@ -340,51 +352,73 @@ async function loadApplications() {
   setNotice('Profil rasmi muvaffaqiyatli yangilandi!')
 }
   useEffect(() => {
-  if (!scannerOpen) return
+    if (!scannerOpen) return
 
-  if (!window.Html5Qrcode) {
-    setNotice('QR skaner kutubxonasi yuklanmadi. Sahifani yangilang.')
-    setScannerOpen(false)
-    return
-  }
+    if (!window.Html5Qrcode) {
+      setNotice('QR skaner kutubxonasi yuklanmadi. Sahifani yangilang.')
+      setScannerOpen(false)
+      return
+    }
 
-  const scanner = new window.Html5Qrcode('member-qr-reader')
-  let processing = false
-  let cancelled = false
+    const scanner = new window.Html5Qrcode('member-qr-reader')
+    let processing = false
+    let cancelled = false
+    let started = false
 
-  scanner.start(
-    { facingMode: 'environment' },
-    { fps: 10, qrbox: { width: 250, height: 250 } },
-    async (decodedText) => {
-      if (processing || cancelled) return
-      processing = true
-      setScannerBusy(true)
-
+    const stopScanner = async () => {
       try {
-        await scanner.stop()
-        setScannerOpen(false)
-
-        await recordAttendance({
-          method: 'member_scan',
-          eventToken: decodedText
-        })
-      } catch (error) {
-        setNotice('QR skanerlashda xatolik: ' + error.message)
-      } finally {
-        setScannerBusy(false)
+        if (started) await scanner.stop()
+      } catch {
+        // Scanner may already have stopped after a successful scan.
       }
-    },
-    () => {}
-  ).catch(error => {
-    setNotice('Kamerani ishga tushirib bo‘lmadi: ' + error)
-    setScannerOpen(false)
-  })
+      try {
+        scanner.clear()
+      } catch {
+        // Clearing an already-disposed scanner is harmless.
+      }
+    }
 
-  return () => {
-    cancelled = true
-    scanner.stop().catch(() => {})
-  }
-}, [scannerOpen])
+    const startPromise = scanner.start(
+      { facingMode: 'environment' },
+      { fps: 10, qrbox: { width: 250, height: 250 } },
+      async decodedText => {
+        if (processing || cancelled) return
+        processing = true
+        setScannerBusy(true)
+
+        try {
+          await stopScanner()
+          setScannerOpen(false)
+          await recordAttendance({
+            method: 'member_scan',
+            eventToken: decodedText
+          })
+        } catch (error) {
+          setNotice('QR skanerlashda xatolik: ' + (error?.message || 'Noma’lum xatolik'))
+        } finally {
+          setScannerBusy(false)
+        }
+      },
+      () => {}
+    ).then(async () => {
+      started = true
+      if (cancelled) await stopScanner()
+    }).catch(error => {
+      if (!cancelled) {
+        setNotice('Kamerani ishga tushirib bo‘lmadi: ' + (error?.message || error))
+        setScannerOpen(false)
+      }
+    })
+
+    return () => {
+      cancelled = true
+      if (started) {
+        stopScanner()
+      } else {
+        startPromise.then(stopScanner).catch(() => {})
+      }
+    }
+  }, [scannerOpen])
   async function recordAttendance(payload) {
   setNotice('Davomat tekshirilmoqda...')
 
@@ -394,17 +428,19 @@ async function loadApplications() {
   )
 
   if (error || data?.error) {
-    setNotice('Xatolik: ' + (data?.error || error.message))
+    setNotice('Xatolik: ' + (data?.error || error?.message || 'Davomatni tasdiqlab bo‘lmadi.'))
     return null
   }
 
   setNotice(
-    data.memberName + ' — davomat muvaffaqiyatli tasdiqlandi!'
+    (data?.memberName || 'A’zo') + ' — davomat muvaffaqiyatli tasdiqlandi!'
   )
 
   return data
 }
   async function loadAttendanceEvents() {
+  if (session?.user?.email?.toLowerCase() !== 'obidofich@gmail.com') return
+
   try {
     const { data, error } = await supabase
       .from('club_events')
@@ -438,7 +474,7 @@ async function createEventQR(eventId) {
     return
   }
 
-  if (!session?.user || session.user.email !== 'obidofich@gmail.com') {
+  if (!session?.user || session.user.email?.toLowerCase() !== 'obidofich@gmail.com') {
     setNotice('QR-kod yaratish uchun administrator sifatida kiring.')
     return
   }
@@ -483,13 +519,13 @@ async function createEventQR(eventId) {
     )
 
     if (error || result?.error) {
-      setNotice('Xatolik: ' + (result?.error || error.message))
+      setNotice('Xatolik: ' + (result?.error || error?.message || 'A’zoni qabul qilib bo‘lmadi.'))
       return
     }
 
     setNotice(
       'A’zo muvaffaqiyatli qabul qilindi. A’zolik raqami: ' +
-      result.membershipCode
+      (result?.membershipCode || 'yaratildi')
     )
   } else {
     const { error } = await supabase
@@ -528,16 +564,18 @@ async function createEventQR(eventId) {
   setNotice('Ariza muvaffaqiyatli o‘chirildi.')
 }
 function go(nextPage) {
+  if (!allowedPages.has(nextPage)) return
+
   setPage(nextPage)
   setMenu(false)
   setNotice('')
 
-  // A'zolar uchun yagona, ulashish mumkin bo'lgan kabinet havolasi: /?page=member
+  // Har bir bo‘limga to‘g‘ridan-to‘g‘ri havola orqali kirish mumkin.
   const url = new URL(window.location.href)
-  if (nextPage === 'member') url.searchParams.set('page', 'member')
-  else url.searchParams.delete('page')
-  window.history.replaceState({}, document.title, url.pathname + url.search + url.hash)
+  if (nextPage === 'home') url.searchParams.delete('page')
+  else url.searchParams.set('page', nextPage)
 
+  window.history.pushState({}, document.title, url.pathname + url.search + url.hash)
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
@@ -552,22 +590,21 @@ async function submitApplication(event) {
     return
   }
 
- const applicationCode = 'YPC-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
+  try {
+    const applicationCode = 'YPC-' + crypto.randomUUID().replace(/-/g, '').slice(0, 8).toUpperCase()
+    const { error } = await supabase
+      .from('club_applications')
+      .insert([{ ...application, application_code: applicationCode }])
 
-const { error } = await supabase
-  .from('club_applications')
-  .insert([{ ...application, application_code: applicationCode }])
+    if (error) throw error
 
-  setApplicationBusy(false)
-
-  if (error) {
-    setApplicationMessage('Xatolik: ' + error.message)
-    return
+    setApplicationSuccess(applicationCode)
+    setApplication(emptyApplication)
+  } catch (error) {
+    setApplicationMessage('Xatolik: ' + (error?.message || 'Arizani yuborib bo‘lmadi.'))
+  } finally {
+    setApplicationBusy(false)
   }
-
-setApplicationMessage('')
-setApplicationSuccess(applicationCode)
-setApplication(emptyApplication)
 }
 async function updatePassword(event) {
   event.preventDefault()
@@ -612,25 +649,28 @@ async function login(event) {
   setBusy(true)
   setNotice('')
 
-  const { error } = await supabase.auth.signInWithPassword({
-    email: email.trim(),
-    password
-  })
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password
+    })
 
-  setBusy(false)
+    if (error) throw error
 
-  if (error) {
-    setNotice('Kirish amalga oshmadi. Email yoki parol noto‘g‘ri.')
-    return
-  }
+    const signedInEmail = (data?.user?.email || '').toLowerCase()
+    setPassword('')
 
-  setPassword('')
-  if (session?.user?.email === 'obidofich@gmail.com' || email.trim().toLowerCase() === 'obidofich@gmail.com') {
-    setNotice('Administrator sifatida muvaffaqiyatli kirdingiz.')
-    go('admin')
-  } else {
-    setNotice('Tizimga muvaffaqiyatli kirdingiz. Shaxsiy kabinetingiz yuklanmoqda.')
-    go('member')
+    if (signedInEmail === 'obidofich@gmail.com') {
+      setNotice('Administrator sifatida muvaffaqiyatli kirdingiz.')
+      go('admin')
+    } else {
+      setNotice('Tizimga muvaffaqiyatli kirdingiz. Shaxsiy kabinetingiz yuklanmoqda.')
+      go('member')
+    }
+  } catch (error) {
+    setNotice('Kirish amalga oshmadi: ' + (error?.message || 'Email yoki parolni tekshiring.'))
+  } finally {
+    setBusy(false)
   }
 }
 async function googleLogin() {
@@ -650,27 +690,28 @@ async function googleLogin() {
   }
 }
 async function saveSettings() {
-setBusy(true)
-setNotice('')
+  setBusy(true)
+  setNotice('')
 
-for (const [key, value] of Object.entries(draft)) {
-const { error } = await supabase
-.from('site_settings')
-.upsert(
-{ setting_key: key, setting_value: value },
-{ onConflict: 'setting_key' }
-)
+  try {
+    const rows = Object.entries(draft).map(([setting_key, setting_value]) => ({
+      setting_key,
+      setting_value: setting_value ?? ''
+    }))
 
-if (error) {
-setNotice('Saqlashda xatolik: ' + error.message)
-setBusy(false)
-return
-}
-}
+    const { error } = await supabase
+      .from('site_settings')
+      .upsert(rows, { onConflict: 'setting_key' })
 
-setSettings({ ...draft })
-setBusy(false)
-setNotice('Aloqa ma’lumotlari saqlandi.')
+    if (error) throw error
+
+    setSettings({ ...draft })
+    setNotice('Sozlamalar muvaffaqiyatli saqlandi.')
+  } catch (error) {
+    setNotice('Saqlashda xatolik: ' + (error?.message || 'Noma’lum xatolik'))
+  } finally {
+    setBusy(false)
+  }
 }
 
 async function logout() {
@@ -1040,7 +1081,7 @@ function contentList(type, rows) {
                 </p>
               )}
 
-              {session && session.user.email === 'obidofich@gmail.com' && (
+              {session && session.user.email?.toLowerCase() === 'obidofich@gmail.com' && (
                 <>
                   <button
                     className="gold-btn"
@@ -1855,7 +1896,7 @@ title="Admin panel"
 desc="Sayt ma’lumotlari, yangiliklar, tadbirlar va galereyani boshqaring."
 />
 
-{!session || session.user.email !== 'obidofich@gmail.com' ? (
+{!session || session.user.email?.toLowerCase() !== 'obidofich@gmail.com' ? (
 <form className="form-card" onSubmit={login}>
 <label>
 Email
