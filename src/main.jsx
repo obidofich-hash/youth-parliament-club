@@ -1865,11 +1865,13 @@ required
   </select>
 
   <button
-    className="gold-btn"
-    onClick={() => alert('TUGMA ISHLADI')}
-  setNotice('TUGMA BOSILDI');
-  createEventQR(selectedAttendanceEvent);
-}}
+  className="gold-btn"
+  onClick={() => {
+    alert('TUGMA ISHLADI');
+  }}
+>
+  Tadbir QR-kodini yaratish
+</button>
   >
     Tadbir QR-kodini yaratish
   </button>
