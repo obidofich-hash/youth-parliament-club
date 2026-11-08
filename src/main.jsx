@@ -1866,8 +1866,7 @@ required
 
   <button
     className="gold-btn"
-    disabled={!selectedAttendanceEvent}
-    onClick={() => {
+    onClick={() => alert('TUGMA ISHLADI')}
   setNotice('TUGMA BOSILDI');
   createEventQR(selectedAttendanceEvent);
 }}
