@@ -178,7 +178,7 @@ function setNotice(message) {
   }
   const normalized = String(message).toLowerCase()
   if (/tekshirilmoqda|tayyorlanmoqda|yuklanmoqda|yaratilmoqda/.test(normalized)) return
-  const isError = /xatolik|xato:|amalga oshmadi|bo\u2018lmadi|bo\u0027lmadi|mos kelmadi|kamida|tanlang|kerak/.test(normalized)
+  const isError = /xatolik|xato:|amalga oshmadi|muvaffaqiyatsiz|bo\u2018lmadi|bo\u0027lmadi|mos kelmadi|noto\u2018g\u2018ri|noto\u0027g\u0027ri|kamida|tanlang|kerak|rad etildi|tekshiring/.test(normalized)
   setToast({ id: Date.now(), type: isError ? 'error' : 'success', message: String(message) })
 }
 
@@ -655,6 +655,7 @@ async function submitApplication(event) {
 
   if (application.confirmation !== 'Ha, tasdiqlayman') {
     setApplicationMessage('Ma’lumotlarni tasdiqlashingiz kerak.')
+    setNotice('Ma’lumotlarni tasdiqlashingiz kerak.')
     setApplicationBusy(false)
     return
   }
@@ -668,9 +669,11 @@ async function submitApplication(event) {
     if (error) throw error
 
     setApplicationSuccess(applicationCode)
+    setNotice('Arizangiz muvaffaqiyatli yuborildi! Raqam: ' + applicationCode)
     setApplication(emptyApplication)
   } catch (error) {
     setApplicationMessage('Xatolik: ' + (error?.message || 'Arizani yuborib bo‘lmadi.'))
+    setNotice('Arizani yuborishda xatolik: ' + (error?.message || 'Noma’lum xatolik'))
   } finally {
     setApplicationBusy(false)
   }
@@ -784,8 +787,14 @@ async function saveSettings() {
 }
 
 async function logout() {
-await supabase.auth.signOut()
-go('home')
+  try {
+    const { error } = await supabase.auth.signOut()
+    if (error) throw error
+    go('home')
+    setNotice('Tizimdan muvaffaqiyatli chiqdingiz.')
+  } catch (error) {
+    setNotice('Tizimdan chiqishda xatolik: ' + (error?.message || 'Noma’lum xatolik'))
+  }
 }
 
 async function uploadSettingImage(key, file) {
