@@ -2140,3 +2140,31 @@ min-height: 0;
     display: none !important;
   }
 }
+
+/* Updated club sections */
+.about-v2,.about-v2 *{font-family:'Times New Roman',Times,serif}
+.about-v2 p{font-size:16px;line-height:1.75;color:#596575}
+.av-image-frame,.av-history-frame{width:min(100%,420px);height:250px;border-radius:48% 12% 42% 12%;overflow:hidden;border:7px solid #fff;box-shadow:0 15px 40px #0b1b3020;transform:rotate(-2deg)}
+.av-image-frame img,.av-history-frame img{width:100%;height:100%;object-fit:cover}
+.av-visual-one{display:flex;flex-direction:column;align-items:center}
+.av-history-frame{border-radius:12% 48% 12% 42%;transform:rotate(2deg)}
+.about-editor{margin-top:35px;border:1px dashed #c9a86a}
+.about-editor h2{font:600 24px 'Times New Roman',serif}
+.about-editor p{font-size:13px;color:#778}
+.about-editor textarea{min-height:80px;resize:vertical}
+.feedback-anon{display:flex!important;flex-direction:row!important;align-items:center;gap:10px!important}
+.feedback-anon input{width:17px;height:17px}
+.document-backdrop{position:fixed;inset:0;z-index:2147483000;background:rgba(3,12,25,.58);display:flex;align-items:flex-end;justify-content:center}
+.document-sheet{width:min(100%,1100px);height:min(94vh,1000px);background:#ecebe7;border-radius:20px 20px 0 0;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 -20px 70px #0004}
+.document-sheet-handle{width:48px;height:5px;border-radius:99px;background:#b9b8b3;margin:10px auto 8px;flex:0 0 auto}
+.document-sheet header{height:52px;flex:0 0 auto;background:#fff;border-bottom:1px solid #ddd;display:flex;align-items:center;justify-content:space-between;padding:0 20px;color:#10233b}
+.document-sheet header button{border:0;background:#f2f0eb;border-radius:50%;width:34px;height:34px;font-size:24px;color:#26364b}
+.document-paper-view{flex:1;min-height:0;padding:12px;overflow:auto}
+.document-paper-view iframe{width:100%;height:100%;min-height:600px;border:0;background:#fff;box-shadow:0 5px 25px #10233b1a}
+@media(max-width:600px){
+ .document-sheet{height:94dvh;border-radius:18px 18px 0 0}
+ .document-paper-view{padding:6px}
+ .document-paper-view iframe{min-height:100%;height:100%}
+ .av-image-frame,.av-history-frame{height:205px;width:88%}
+ .about-editor{padding:18px}
+}
