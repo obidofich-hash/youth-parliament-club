@@ -168,6 +168,13 @@ const [memberRecord, setMemberRecord] = useState(null)
 const [notice, setNoticeState] = useState('')
 const [toast, setToast] = useState(null)
 const [editing,setEditing] = useState(null)
+const [documentViewer, setDocumentViewer] = useState(null)
+const [feedbackName, setFeedbackName] = useState('')
+const [feedbackAnonymous, setFeedbackAnonymous] = useState(false)
+const [feedbackMessage, setFeedbackMessage] = useState('')
+const [feedbackBusy, setFeedbackBusy] = useState(false)
+const [feedbackRows, setFeedbackRows] = useState([])
+const [feedbackLoading, setFeedbackLoading] = useState(false)
 
 // Barcha amaliyotlar uchun yagona yuqori bildirishnoma.
 function setNotice(message) {
@@ -519,7 +526,13 @@ async function loadAttendanceRecords(eventId = selectedAttendanceEvent) {
         status,
         member:club_applications (
           full_name,
-          application_code
+          application_code,
+          phone,
+          email,
+          faculty,
+          study_direction,
+          course,
+          group_number
         )
       `)
       .eq('event_id', numericEventId)
@@ -632,6 +645,43 @@ async function createEventQR(eventId) {
   setApplications(prev => prev.filter(app => app.id !== id))
   setNotice('Ariza muvaffaqiyatli o‘chirildi.')
 }
+async function submitFeedback(event) {
+  event.preventDefault()
+  if (!feedbackMessage.trim()) {
+    setNotice('Murojaat matnini kiriting.')
+    return
+  }
+  setFeedbackBusy(true)
+  try {
+    const { error } = await supabase.from('club_feedback').insert({
+      full_name: feedbackAnonymous ? null : (feedbackName.trim() || null),
+      message: feedbackMessage.trim(),
+      is_anonymous: feedbackAnonymous
+    })
+    if (error) throw error
+    setFeedbackName('')
+    setFeedbackMessage('')
+    setFeedbackAnonymous(false)
+    setNotice('Murojaatingiz muvaffaqiyatli yuborildi.')
+  } catch (error) {
+    setNotice('Murojaat yuborilmadi: ' + (error?.message || 'Jadval sozlamasini tekshiring.'))
+  } finally {
+    setFeedbackBusy(false)
+  }
+}
+
+async function loadFeedback() {
+  if (session?.user?.email?.toLowerCase() !== 'obidofich@gmail.com') return
+  setFeedbackLoading(true)
+  const { data, error } = await supabase
+    .from('club_feedback')
+    .select('id, full_name, message, is_anonymous, created_at')
+    .order('created_at', { ascending: false })
+  if (error) setNotice('Murojaatlarni yuklashda xatolik: ' + error.message)
+  else setFeedbackRows(data || [])
+  setFeedbackLoading(false)
+}
+
 function go(nextPage) {
   if (!allowedPages.has(nextPage)) return
 
@@ -1193,7 +1243,7 @@ return (
 .toast-message{flex:1;line-height:1.4;overflow-wrap:anywhere}
 .toast-close{border:0;background:transparent;color:#fff;font-size:24px;line-height:1;cursor:pointer;padding:0 2px}
 .toast-progress{position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(255,255,255,.9);transform-origin:left center}
-@media(max-width:600px){.global-toast{top:10px;padding:11px 13px 14px;font-size:13px;border-radius:11px}}
+@media(max-width:600px){.global-toast{top:50%;left:50%;translate:-50% -50%;padding:13px 14px 16px;font-size:13px;border-radius:13px;width:min(440px,calc(100vw - 34px))}}
 `}</style>
 {typeof document !== 'undefined' && createPortal(
   <AnimatePresence>
@@ -1221,6 +1271,18 @@ return (
     )}
   </AnimatePresence>,
   document.body
+)}
+{documentViewer && (
+  <div className="document-backdrop" onClick={() => setDocumentViewer(null)}>
+    <motion.section className="document-sheet" role="dialog" aria-modal="true" aria-label={documentViewer.title}
+      onClick={e => e.stopPropagation()}
+      initial={{ y: '100%' }} animate={{ y: 0 }} exit={{ y: '100%' }}
+      transition={{ type: 'spring', damping: 30, stiffness: 260 }}>
+      <div className="document-sheet-handle"/>
+      <header><strong>{documentViewer.title}</strong><button type="button" onClick={() => setDocumentViewer(null)} aria-label="Yopish">×</button></header>
+      <div className="document-paper-view"><iframe title={documentViewer.title} src={`${documentViewer.src}#toolbar=0&navpanes=0&view=FitH`} /></div>
+    </motion.section>
+  </div>
 )}
 {applicationSuccess && (
   <div className="success-overlay">
@@ -1459,10 +1521,7 @@ transition={{ duration: 0.85 }}
 <span className="av-kicker">BIZNING MISSIYAMIZ</span>
 <h2>Yoshlar ovozi — <em>jamiyat kelajagi.</em></h2>
 <p>
-Yoshlarning huquqiy bilimini oshirish, ijtimoiy
-faolligini kuchaytirish va yangi tashabbuslarini
-qo‘llab-quvvatlash — klub faoliyatining asosiy
-yo‘nalishidir.
+{settings.about_intro || 'Yoshlarning huquqiy bilimini oshirish, ijtimoiy faolligini kuchaytirish va yangi tashabbuslarini qo‘llab-quvvatlash — klub faoliyatining asosiy yo‘nalishidir.'}
 </p>
 <div className="av-meta">
 <span><CalendarDays size={17}/> 2026-yil, noyabr</span>
@@ -1499,7 +1558,7 @@ transition={{ duration: 0.8 }}
 <div className="av-history-art">
 <div className="av-history-frame">
 <img
-src="https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=85"
+src={settings.about_history_image || "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=85"}
 alt="Parlament majlisi zali"
 />
 </div>
@@ -1516,11 +1575,7 @@ transition={{ duration: 0.9, delay: 0.15 }}
 <span className="av-kicker">TASHKIL TOPISH TARIXI</span>
 <h2>Har bir katta o‘zgarish <em>bir g‘oyadan</em> boshlanadi.</h2>
 <p>
-2026-yil noyabr oyida Xalqaro ijtimoiy innovatsiyalar
-universiteti hududida Yoshlar parlamenti klubi ochilgan.
-Klub yoshlarning fikr va takliflarini ilgari surish,
-ularning ijtimoiy hayotdagi ishtirokini kuchaytirish
-maqsadida tashkil etilgan.
+{settings.about_history || '2026-yil noyabr oyida Xalqaro ijtimoiy innovatsiyalar universiteti hududida Yoshlar parlamenti klubi ochilgan. Klub yoshlarning fikr va takliflarini ilgari surish, ularning ijtimoiy hayotdagi ishtirokini kuchaytirish maqsadida tashkil etilgan.'}
 </p>
 <div className="av-date">
 <CalendarDays size={19}/>
@@ -1547,10 +1602,7 @@ transition={{ duration: 0.8 }}
 <span className="av-kicker">BUGUNGI FAOLIYAT</span>
 <h2>Bir maqsad — <em>yagona jamoa.</em></h2>
 <p>
-Klub faoliyati vazifalar taqsimoti, hamkorlik va
-mas’uliyat tamoyillariga asoslanadi. Har bir ishtirokchi
-umumiy maqsad yo‘lida o‘z yo‘nalishi bo‘yicha faoliyat
-olib boradi.
+{settings.about_today || 'Klub faoliyati vazifalar taqsimoti, hamkorlik va mas’uliyat tamoyillariga asoslanadi. Har bir ishtirokchi umumiy maqsad yo‘lida o‘z yo‘nalishi bo‘yicha faoliyat olib boradi.'}
 </p>
 </div>
 
@@ -1581,10 +1633,7 @@ transition={{ duration: 0.85 }}
 <span className="av-kicker">ISTIQBOL VA RIVOJLANISH</span>
 <h2>Kelajakni bugundan <em>birgalikda quramiz.</em></h2>
 <p>
-Klubning istiqboldagi maqsadi — universitet miqyosida
-yoshlar tashabbuslarini kengaytirish, huquqiy va
-intellektual loyihalarni amalga oshirish hamda faol
-yoshlar hamkorligini rivojlantirish.
+{settings.about_future || 'Klubning istiqboldagi maqsadi — universitet miqyosida yoshlar tashabbuslarini kengaytirish, huquqiy va intellektual loyihalarni amalga oshirish hamda faol yoshlar hamkorligini rivojlantirish.'}
 </p>
 </div>
 
@@ -1610,6 +1659,19 @@ yoshlar hamkorligini rivojlantirish.
 YOSHLAR OVOZI. YANGI G‘OYALAR. YANGI KELAJAK.
 </div>
 </motion.section>
+{session?.user?.email?.toLowerCase() === 'obidofich@gmail.com' && (
+  <section className="form-card about-editor">
+    <h2>“Klub haqida” bo‘limini tahrirlash</h2>
+    <p>Matnlarni o‘zgartiring, rasmlarni yuklang va saqlang. O‘zgarishlar ommaga ko‘rinadi.</p>
+    <label>Kirish matni<textarea rows="3" value={draft.about_intro || ''} onChange={e=>setDraft({...draft,about_intro:e.target.value})} placeholder="Missiya matni"/></label>
+    <label>Tarix matni<textarea rows="4" value={draft.about_history || ''} onChange={e=>setDraft({...draft,about_history:e.target.value})} placeholder="Klub tashkil topishi tarixi"/></label>
+    <label>Bugungi faoliyat matni<textarea rows="3" value={draft.about_today || ''} onChange={e=>setDraft({...draft,about_today:e.target.value})} placeholder="Bugungi faoliyat"/></label>
+    <label>Kelajak matni<textarea rows="3" value={draft.about_future || ''} onChange={e=>setDraft({...draft,about_future:e.target.value})} placeholder="Istiqboldagi maqsadlar"/></label>
+    <label>Universitet rasmi<input type="file" accept="image/*" onChange={e=>uploadSettingImage('about_image',e.target.files?.[0])}/></label>
+    <label>Tarix rasmi<input type="file" accept="image/*" onChange={e=>uploadSettingImage('about_history_image',e.target.files?.[0])}/></label>
+    <button className="gold-btn" type="button" onClick={saveSettings} disabled={busy}>O‘zgarishlarni saqlash <Save size={16}/></button>
+  </section>
+)}
 </div>
 )}
 
@@ -1761,41 +1823,35 @@ desc="Klub a’zoligiga ariza topshiring."
 
 {page === 'documents' && (
 <>
-<PageHead
-kicker="RASMIY HUJJATLAR"
-title="Faoliyatimizning huquqiy asoslari."
-desc="Klub nizomi va konsepsiyasi bilan tanishing."
-/>
-
-<div className="two-col">
-<Info
-title="NIZOM"
-text="Klubning maqsadi, vazifalari, a’zolik tartibi va boshqaruv mexanizmlari."
-/>
-
-<Info
-title="KONSEPSIYA"
-text="Klubning strategik yo‘nalishlari va rivojlanish istiqbollari."
-/>
+<PageHead kicker="RASMIY HUJJATLAR" title="Faoliyatimizning huquqiy asoslari." desc="Klub nizomi va konsepsiyasi bilan tanishing." />
+<div className="doc-grid">
+  <article className="doc-card">
+    <div className="doc-top"><span>ASOSIY HUJJAT</span><FileText size={18}/></div>
+    <div className="paper"><div className="paper-seal"><Landmark size={22}/></div><div className="paper-title">NIZOM</div><div className="paper-lines"/><div className="paper-lines short"/></div>
+    <div className="doc-info"><div><h3>Klub Nizomi</h3><p>Klubning maqomi, maqsadlari, a’zolik va boshqaruv tartibi.</p></div></div>
+    <button className="gold-btn" type="button" onClick={() => setDocumentViewer({title:'Yoshlar parlamenti klubi — Nizom',src:'/Nizom.pdf'})}>Hujjatni ochish <ArrowUpRight size={16}/></button>
+  </article>
+  <article className="doc-card">
+    <div className="doc-top"><span>STRATEGIK HUJJAT</span><FileText size={18}/></div>
+    <div className="paper"><div className="paper-seal"><Landmark size={22}/></div><div className="paper-title">KONSEPSIYA</div><div className="paper-lines"/><div className="paper-lines short"/></div>
+    <div className="doc-info"><div><h3>Klub Konsepsiyasi</h3><p>Klubning missiyasi, ustuvor yo‘nalishlari va rivojlanish rejasi.</p></div></div>
+    <button className="gold-btn" type="button" onClick={() => setDocumentViewer({title:'Yoshlar parlamenti klubi — Konsepsiya',src:'/Konsepsiya.pdf'})}>Hujjatni ochish <ArrowUpRight size={16}/></button>
+  </article>
 </div>
 </>
 )}
 {page === 'feedback' && (
 <>
-<PageHead
-kicker="OCHIQ MULOQOT"
-title="Sizning fikringiz biz uchun muhim."
-desc="Taklif, savol yoki murojaatingiz bormi? Biz bilan bog‘laning."
-/>
-
-<a
-className="gold-btn link-btn"
-href={`https://t.me/${(settings.telegram || '').replace('@', '')}`}
-target="_blank"
-rel="noreferrer"
->
-Telegram orqali murojaat <Send />
-</a>
+<PageHead kicker="OCHIQ MULOQOT" title="Sizning fikringiz biz uchun muhim." desc="Taklif, savol yoki murojaatingizni yuboring. Ismingizni ko‘rsatmasdan ham murojaat qilishingiz mumkin." />
+<div className="feedback-layout">
+  <div className="feedback-note"><MessageCircle size={28}/><h2>Talaba ovozi — muhim.</h2><p>Har bir taklif va murojaat klub faoliyatini yaxshilashga xizmat qiladi.</p><div className="note-line"/><span>FIKR · MULOQOT · TASHABBUS · YECHIM</span></div>
+  <form className="form-card" onSubmit={submitFeedback}>
+    <label className="feedback-anon"><input type="checkbox" checked={feedbackAnonymous} onChange={e=>setFeedbackAnonymous(e.target.checked)}/> Anonim murojaat qilish</label>
+    {!feedbackAnonymous && <label>Ism va familiya<input value={feedbackName} onChange={e=>setFeedbackName(e.target.value)} placeholder="Ism-familiyangiz"/></label>}
+    <label>Murojaat matni<textarea rows="6" value={feedbackMessage} onChange={e=>setFeedbackMessage(e.target.value)} placeholder="Taklif yoki murojaatingizni yozing..." required/></label>
+    <button className="gold-btn" type="submit" disabled={feedbackBusy}>{feedbackBusy?'Yuborilmoqda...':'Murojaatni yuborish'} <Send size={16}/></button>
+  </form>
+</div>
 </>
 )}
 
@@ -2095,6 +2151,8 @@ required
         <article className="application-item" key={record.id}>
           <strong>{index + 1}. {record.member?.full_name || 'Ism topilmadi'}</strong>
           <p><b>A’zolik raqami:</b> {record.member?.application_code || '—'}</p>
+          <p><b>Telefon:</b> {record.member?.phone || '—'} · <b>Email:</b> {record.member?.email || '—'}</p>
+          <p><b>Yo‘nalish:</b> {record.member?.study_direction || record.member?.faculty || '—'} · <b>Kurs/guruh:</b> {record.member?.course || '—'} / {record.member?.group_number || '—'}</p>
           <p><b>Davomat vaqti:</b> {record.attendance_time
             ? new Date(record.attendance_time).toLocaleString('uz-UZ', { dateStyle: 'short', timeStyle: 'short' })
             : '—'}</p>
@@ -2131,6 +2189,19 @@ required
       <p>Token: <code>{activeEventQR.token}</code></p>
     </div>
   )}
+</div>
+<div className="form-card">
+  <div className="applications-heading">
+    <h2>Kelgan murojaatlar</h2>
+    <button className="gold-btn" type="button" onClick={loadFeedback} disabled={feedbackLoading}>{feedbackLoading?'Yuklanmoqda...':'Murojaatlarni ko‘rish'}</button>
+  </div>
+  {feedbackRows.length === 0 ? <p>Hozircha murojaatlar yuklanmagan yoki mavjud emas.</p> : feedbackRows.map(row => (
+    <article className="application-item" key={row.id}>
+      <strong>{row.is_anonymous ? 'Anonim murojaat' : (row.full_name || 'Ism ko‘rsatilmagan')}</strong>
+      <p>{row.message}</p>
+      <small>{row.created_at ? new Date(row.created_at).toLocaleString('uz-UZ') : ''}</small>
+    </article>
+  ))}
 </div>
 <div className="form-card applications-admin">
   <div className="applications-heading">
