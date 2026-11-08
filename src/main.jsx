@@ -1867,7 +1867,10 @@ required
   <button
     className="gold-btn"
     disabled={!selectedAttendanceEvent}
-    onClick={() => createEventQR(selectedAttendanceEvent)}
+    onClick={() => {
+  setNotice('TUGMA BOSILDI');
+  createEventQR(selectedAttendanceEvent);
+}}
   >
     Tadbir QR-kodini yaratish
   </button>
