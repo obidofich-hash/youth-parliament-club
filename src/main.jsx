@@ -1871,7 +1871,11 @@ required
   >
     Tadbir QR-kodini yaratish
   </button>
-
+{notice && (
+  <p className="admin-notice" role="status">
+    {notice}
+  </p>
+)}
   {activeEventQR && (
     <div>
       <h3>Tadbir QR-kodi</h3>
