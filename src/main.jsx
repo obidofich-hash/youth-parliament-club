@@ -107,9 +107,8 @@ return (
 }
 
 function App() {
-const validPages = ['home', 'about', 'membership', 'member', 'documents', 'feedback', 'events', 'news', 'gallery', 'contact', 'admin', 'reset-password']
 const requestedPage = new URLSearchParams(window.location.search).get('page')
-const [page, setPage] = useState(validPages.includes(requestedPage) ? requestedPage : 'home')
+const [page, setPage] = useState(requestedPage === 'member' ? 'member' : 'home')
 const [menu, setMenu] = useState(false)
 const [memberApplication, setMemberApplication] = useState(null)
 const [scannerOpen, setScannerOpen] = useState(false)
@@ -156,6 +155,7 @@ const [applications, setApplications] = useState([])
 const [attendanceEvents, setAttendanceEvents] = useState([])
 const [selectedAttendanceEvent, setSelectedAttendanceEvent] = useState('')
 const [activeEventQR, setActiveEventQR] = useState(null)
+const [qrBusy, setQrBusy] = useState(false)
 const [memberRecord, setMemberRecord] = useState(null)
 const [notice, setNotice] = useState('')
 const [editing,setEditing] = useState(null)
@@ -405,46 +405,70 @@ async function loadApplications() {
   return data
 }
   async function loadAttendanceEvents() {
-  const { data, error } = await supabase
-    .from('club_events')
-    .select('id, title, event_date')
-    .order('event_date', { ascending: false })
-
-  if (error) {
-    setNotice('Tadbirlarni yuklashda xatolik: ' + error.message)
-    return
-  }
-
-  setAttendanceEvents(data || [])
-}
-async function createEventQR(eventId) {
-  if (!eventId) {
-    setNotice('Avval tadbirni tanlang.')
-    setActiveEventQR(null)
-    return
-  }
-
-  setNotice('QR-kod yuklanmoqda...')
-  setActiveEventQR(null)
-
   try {
     const { data, error } = await supabase
+      .from('club_events')
+      .select('id, title, event_date')
+      .order('event_date', { ascending: false })
+
+    if (error) throw error
+
+    const rows = data || []
+    setAttendanceEvents(rows)
+    setSelectedAttendanceEvent(current =>
+      current && rows.some(row => String(row.id) === String(current))
+        ? current
+        : rows.length ? String(rows[0].id) : ''
+    )
+
+    if (!rows.length) {
+      setNotice('QR yaratish uchun avval kamida bitta tadbir qo‘shing.')
+    }
+  } catch (error) {
+    setAttendanceEvents([])
+    setSelectedAttendanceEvent('')
+    setNotice('Tadbirlarni yuklashda xatolik: ' + (error?.message || 'Noma’lum xatolik'))
+  }
+}
+
+async function createEventQR(eventId) {
+  const numericEventId = Number(eventId)
+  if (!Number.isInteger(numericEventId) || numericEventId <= 0) {
+    setNotice('Avval ro‘yxatdan tadbirni tanlang.')
+    return
+  }
+
+  if (!session?.user || session.user.email !== 'obidofich@gmail.com') {
+    setNotice('QR-kod yaratish uchun administrator sifatida kiring.')
+    return
+  }
+
+  setQrBusy(true)
+  setActiveEventQR(null)
+  setNotice('QR-kod tayyorlanmoqda...')
+
+  try {
+    // Event uchun QR yozuvi mavjud bo‘lsa faollashtiradi, bo‘lmasa yaratadi.
+    const { data, error } = await supabase
       .from('club_event_qr')
+      .upsert(
+        { event_id: numericEventId, is_active: true },
+        { onConflict: 'event_id' }
+      )
       .select('id, event_id, token, is_active')
-      .eq('event_id', Number(eventId))
-      .eq('is_active', true)
-      .maybeSingle()
+      .single()
 
     if (error) throw error
     if (!data?.token) {
-      setNotice('Bu tadbir uchun faol QR-kod topilmadi. Supabase club_event_qr jadvalida ushbu event_id uchun yozuv va token borligini tekshiring.')
-      return
+      throw new Error('Bazadan QR token qaytmadi. club_event_qr jadvalidagi token ustunini tekshiring.')
     }
 
     setActiveEventQR(data)
-    setNotice('QR-kod tayyor!')
+    setNotice('QR-kod muvaffaqiyatli tayyorlandi. Uni skanerlab tekshiring.')
   } catch (error) {
-    setNotice('QR-kodni yuklashda xatolik: ' + (error?.message || String(error)))
+    setNotice('QR yaratishda xatolik: ' + (error?.message || 'Noma’lum xatolik'))
+  } finally {
+    setQrBusy(false)
   }
 }
   async function updateApplicationStatus(id, status) {
@@ -508,10 +532,10 @@ function go(nextPage) {
   setMenu(false)
   setNotice('')
 
-  // Har bir bo‘lim uchun qayta ochiladigan havola.
+  // A'zolar uchun yagona, ulashish mumkin bo'lgan kabinet havolasi: /?page=member
   const url = new URL(window.location.href)
-  if (nextPage === 'home') url.searchParams.delete('page')
-  else url.searchParams.set('page', nextPage)
+  if (nextPage === 'member') url.searchParams.set('page', 'member')
+  else url.searchParams.delete('page')
   window.history.replaceState({}, document.title, url.pathname + url.search + url.hash)
 
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -601,9 +625,13 @@ async function login(event) {
   }
 
   setPassword('')
-  const isAdmin = email.trim().toLowerCase() === 'obidofich@gmail.com'
-  setNotice(isAdmin ? 'Admin panelga kirildi.' : 'Tizimga muvaffaqiyatli kirdingiz. Shaxsiy kabinetingiz yuklanmoqda.')
-  go(isAdmin ? 'admin' : 'member')
+  if (session?.user?.email === 'obidofich@gmail.com' || email.trim().toLowerCase() === 'obidofich@gmail.com') {
+    setNotice('Administrator sifatida muvaffaqiyatli kirdingiz.')
+    go('admin')
+  } else {
+    setNotice('Tizimga muvaffaqiyatli kirdingiz. Shaxsiy kabinetingiz yuklanmoqda.')
+    go('member')
+  }
 }
 async function googleLogin() {
   setBusy(true)
@@ -1694,7 +1722,6 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
         {resetBusy ? 'Saqlanmoqda...' : 'Parolni saqlash'}
       </button>
     </form>
-    {notice && <p className="admin-notice" role="status">{notice}</p>}
   </>
 )}
 {page === 'member' && (
@@ -1870,11 +1897,7 @@ required
   <label>Tadbirni tanlang</label>
   <select
     value={selectedAttendanceEvent}
-    onChange={(e) => {
-      setSelectedAttendanceEvent(e.target.value)
-      setActiveEventQR(null)
-      setNotice('')
-    }}
+    onChange={(e) => setSelectedAttendanceEvent(e.target.value)}
   >
     <option value="">Tadbirni tanlang</option>
     {attendanceEvents.map((event) => (
@@ -1885,15 +1908,15 @@ required
   </select>
 
  <button
-  type="button"
   className="gold-btn"
-  disabled={!selectedAttendanceEvent}
+  type="button"
   onClick={() => createEventQR(selectedAttendanceEvent)}
+  disabled={qrBusy || !selectedAttendanceEvent}
 >
-  Tadbir QR-kodini yaratish
+  {qrBusy ? 'QR-kod tayyorlanmoqda...' : 'Tadbir QR-kodini yaratish'}
 </button>
 {notice && (
-  <p className="admin-notice" role="status">
+  <p className="admin-notice" role="status" aria-live="polite">
     {notice}
   </p>
 )}
@@ -1901,10 +1924,13 @@ required
     <div>
       <h3>Tadbir QR-kodi</h3>
       <img
-        src={`https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(activeEventQR.token)}`}
+        src={`https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=12&data=${encodeURIComponent(activeEventQR.token)}`}
         alt="Tadbir QR-kodi"
-        width="250"
+        width="300"
+        height="300"
+        loading="eager"
       />
+      <p>Token: <code>{activeEventQR.token}</code></p>
     </div>
   )}
 </div>
@@ -2001,7 +2027,6 @@ setDraft({ ...draft, [key]: event.target.value })
 ))}
 
 <button
-type="button"
 className="gold-btn"
 onClick={saveSettings}
 disabled={busy}
@@ -2046,7 +2071,7 @@ marginTop: '8px'
 </label>
 ))}
 
-<button type="button" className="ghost-btn" onClick={logout}>
+<button className="ghost-btn" onClick={logout}>
 <LogOut size={16} /> Chiqish
 </button>
 </div>
