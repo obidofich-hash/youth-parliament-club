@@ -164,8 +164,28 @@ const [attendanceLoading, setAttendanceLoading] = useState(false)
 const [activeEventQR, setActiveEventQR] = useState(null)
 const [qrBusy, setQrBusy] = useState(false)
 const [memberRecord, setMemberRecord] = useState(null)
-const [notice, setNotice] = useState('')
+const [notice, setNoticeState] = useState('')
+const [toast, setToast] = useState(null)
 const [editing,setEditing] = useState(null)
+
+// Barcha amaliyotlar uchun yagona yuqori bildirishnoma.
+function setNotice(message) {
+  setNoticeState(message)
+  if (!message) {
+    setToast(null)
+    return
+  }
+  const normalized = String(message).toLowerCase()
+  if (/tekshirilmoqda|tayyorlanmoqda|yuklanmoqda|yaratilmoqda/.test(normalized)) return
+  const isError = /xatolik|xato:|amalga oshmadi|bo\u2018lmadi|bo\u0027lmadi|mos kelmadi|kamida|tanlang|kerak/.test(normalized)
+  setToast({ id: Date.now(), type: isError ? 'error' : 'success', message: String(message) })
+}
+
+useEffect(() => {
+  if (!toast) return
+  const timer = window.setTimeout(() => setToast(null), 5000)
+  return () => window.clearTimeout(timer)
+}, [toast?.id])
 useEffect(() => {
   loadSettings()
   loadContent()
@@ -1155,6 +1175,40 @@ function contentList(type, rows) {
 }
 return (
 <div className="app">
+<style>{`
+.global-toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:99999;display:flex;align-items:center;gap:12px;width:min(560px,calc(100vw - 28px));min-height:58px;padding:13px 18px 16px;border-radius:13px;color:#fff;box-shadow:0 12px 36px rgba(0,0,0,.22);overflow:hidden;font-size:14px;font-weight:600}
+.global-toast.success{background:#168447;border:1px solid #36b56f}
+.global-toast.error{background:#c83232;border:1px solid #ed6666}
+.toast-icon{display:grid;place-items:center;flex:0 0 27px;width:27px;height:27px;border:2px solid rgba(255,255,255,.9);border-radius:50%;font-size:17px;font-weight:800}
+.toast-message{flex:1;line-height:1.4;overflow-wrap:anywhere}
+.toast-close{border:0;background:transparent;color:#fff;font-size:24px;line-height:1;cursor:pointer;padding:0 2px}
+.toast-progress{position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(255,255,255,.9);transform-origin:left center}
+@media(max-width:600px){.global-toast{top:10px;padding:11px 13px 14px;font-size:13px;border-radius:11px}}
+`}</style>
+<AnimatePresence>
+  {toast && (
+    <motion.div
+      key={toast.id}
+      className={`global-toast ${toast.type}`}
+      role="status"
+      aria-live="polite"
+      initial={{ y: -90, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={{ y: -90, opacity: 0 }}
+      transition={{ type: 'spring', stiffness: 420, damping: 32 }}
+    >
+      <span className="toast-icon">{toast.type === 'success' ? '✓' : '!'}</span>
+      <span className="toast-message">{toast.message}</span>
+      <button className="toast-close" onClick={() => setToast(null)} aria-label="Yopish">×</button>
+      <motion.span
+        className="toast-progress"
+        initial={{ scaleX: 1 }}
+        animate={{ scaleX: 0 }}
+        transition={{ duration: 5, ease: 'linear' }}
+      />
+    </motion.div>
+  )}
+</AnimatePresence>
 {applicationSuccess && (
   <div className="success-overlay">
     <div className="success-modal">
