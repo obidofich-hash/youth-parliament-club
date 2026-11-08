@@ -416,7 +416,28 @@ async function loadApplications() {
 
   setAttendanceEvents(data || [])
 }
+async function createEventQR(eventId) {
+  const { data, error } = await supabase
+    .from('club_event_qr')
+    .upsert(
+      {
+        event_id: Number(eventId),
+        is_active: true
+      },
+      { onConflict: 'event_id' }
+    )
+    .select()
+    .single()
 
+  if (error) {
+    setNotice('QR-kod xatoligi: ' + error.message)
+    return
+  }
+
+  setActiveEventQR(data)
+  setNotice('Tadbir QR-kodi tayyor!')
+  return data
+}
   async function updateApplicationStatus(id, status) {
   if (status === 'Qabul qilindi') {
     setNotice('A’zo akkaunti yaratilmoqda...')
