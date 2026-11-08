@@ -107,8 +107,9 @@ return (
 }
 
 function App() {
+const validPages = ['home', 'about', 'membership', 'member', 'documents', 'feedback', 'events', 'news', 'gallery', 'contact', 'admin', 'reset-password']
 const requestedPage = new URLSearchParams(window.location.search).get('page')
-const [page, setPage] = useState(requestedPage === 'member' ? 'member' : 'home')
+const [page, setPage] = useState(validPages.includes(requestedPage) ? requestedPage : 'home')
 const [menu, setMenu] = useState(false)
 const [memberApplication, setMemberApplication] = useState(null)
 const [scannerOpen, setScannerOpen] = useState(false)
@@ -417,21 +418,34 @@ async function loadApplications() {
   setAttendanceEvents(data || [])
 }
 async function createEventQR(eventId) {
-  setNotice('QR-kod yuklanmoqda...')
-
-  const { data, error } = await supabase
-    .from('club_event_qr')
-    .select('*')
-    .eq('event_id', Number(eventId))
-    .single()
-
-  if (error) {
-    setNotice('QR xatoligi: ' + error.message)
+  if (!eventId) {
+    setNotice('Avval tadbirni tanlang.')
+    setActiveEventQR(null)
     return
   }
 
-  setActiveEventQR(data)
-  setNotice('QR-kod tayyor!')
+  setNotice('QR-kod yuklanmoqda...')
+  setActiveEventQR(null)
+
+  try {
+    const { data, error } = await supabase
+      .from('club_event_qr')
+      .select('id, event_id, token, is_active')
+      .eq('event_id', Number(eventId))
+      .eq('is_active', true)
+      .maybeSingle()
+
+    if (error) throw error
+    if (!data?.token) {
+      setNotice('Bu tadbir uchun faol QR-kod topilmadi. Supabase club_event_qr jadvalida ushbu event_id uchun yozuv va token borligini tekshiring.')
+      return
+    }
+
+    setActiveEventQR(data)
+    setNotice('QR-kod tayyor!')
+  } catch (error) {
+    setNotice('QR-kodni yuklashda xatolik: ' + (error?.message || String(error)))
+  }
 }
   async function updateApplicationStatus(id, status) {
   if (status === 'Qabul qilindi') {
@@ -494,10 +508,10 @@ function go(nextPage) {
   setMenu(false)
   setNotice('')
 
-  // A'zolar uchun yagona, ulashish mumkin bo'lgan kabinet havolasi: /?page=member
+  // Har bir bo‘lim uchun qayta ochiladigan havola.
   const url = new URL(window.location.href)
-  if (nextPage === 'member') url.searchParams.set('page', 'member')
-  else url.searchParams.delete('page')
+  if (nextPage === 'home') url.searchParams.delete('page')
+  else url.searchParams.set('page', nextPage)
   window.history.replaceState({}, document.title, url.pathname + url.search + url.hash)
 
   window.scrollTo({ top: 0, behavior: 'smooth' })
@@ -587,8 +601,9 @@ async function login(event) {
   }
 
   setPassword('')
-  setNotice('Tizimga muvaffaqiyatli kirdingiz. Shaxsiy kabinetingiz yuklanmoqda.')
-  go('member')
+  const isAdmin = email.trim().toLowerCase() === 'obidofich@gmail.com'
+  setNotice(isAdmin ? 'Admin panelga kirildi.' : 'Tizimga muvaffaqiyatli kirdingiz. Shaxsiy kabinetingiz yuklanmoqda.')
+  go(isAdmin ? 'admin' : 'member')
 }
 async function googleLogin() {
   setBusy(true)
@@ -1679,6 +1694,7 @@ desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
         {resetBusy ? 'Saqlanmoqda...' : 'Parolni saqlash'}
       </button>
     </form>
+    {notice && <p className="admin-notice" role="status">{notice}</p>}
   </>
 )}
 {page === 'member' && (
@@ -1854,7 +1870,11 @@ required
   <label>Tadbirni tanlang</label>
   <select
     value={selectedAttendanceEvent}
-    onChange={(e) => setSelectedAttendanceEvent(e.target.value)}
+    onChange={(e) => {
+      setSelectedAttendanceEvent(e.target.value)
+      setActiveEventQR(null)
+      setNotice('')
+    }}
   >
     <option value="">Tadbirni tanlang</option>
     {attendanceEvents.map((event) => (
@@ -1864,17 +1884,14 @@ required
     ))}
   </select>
 
-  <button
+ <button
+  type="button"
   className="gold-btn"
-  onClick={() => {
-    alert('TUGMA ISHLADI');
-  }}
+  disabled={!selectedAttendanceEvent}
+  onClick={() => createEventQR(selectedAttendanceEvent)}
 >
   Tadbir QR-kodini yaratish
 </button>
-  >
-    Tadbir QR-kodini yaratish
-  </button>
 {notice && (
   <p className="admin-notice" role="status">
     {notice}
@@ -1984,6 +2001,7 @@ setDraft({ ...draft, [key]: event.target.value })
 ))}
 
 <button
+type="button"
 className="gold-btn"
 onClick={saveSettings}
 disabled={busy}
@@ -2028,7 +2046,7 @@ marginTop: '8px'
 </label>
 ))}
 
-<button className="ghost-btn" onClick={logout}>
+<button type="button" className="ghost-btn" onClick={logout}>
 <LogOut size={16} /> Chiqish
 </button>
 </div>
