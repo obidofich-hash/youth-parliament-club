@@ -417,26 +417,21 @@ async function loadApplications() {
   setAttendanceEvents(data || [])
 }
 async function createEventQR(eventId) {
+  setNotice('QR-kod yuklanmoqda...')
+
   const { data, error } = await supabase
     .from('club_event_qr')
-    .upsert(
-      {
-        event_id: Number(eventId),
-        is_active: true
-      },
-      { onConflict: 'event_id' }
-    )
-    .select()
+    .select('*')
+    .eq('event_id', Number(eventId))
     .single()
 
   if (error) {
-    setNotice('QR-kod xatoligi: ' + error.message)
+    setNotice('QR xatoligi: ' + error.message)
     return
   }
 
   setActiveEventQR(data)
-  setNotice('Tadbir QR-kodi tayyor!')
-  return data
+  setNotice('QR-kod tayyor!')
 }
   async function updateApplicationStatus(id, status) {
   if (status === 'Qabul qilindi') {
