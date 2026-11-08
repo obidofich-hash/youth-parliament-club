@@ -159,6 +159,8 @@ const [applicationSuccess, setApplicationSuccess] = useState('')
 const [applications, setApplications] = useState([])
 const [attendanceEvents, setAttendanceEvents] = useState([])
 const [selectedAttendanceEvent, setSelectedAttendanceEvent] = useState('')
+const [attendanceRecords, setAttendanceRecords] = useState([])
+const [attendanceLoading, setAttendanceLoading] = useState(false)
 const [activeEventQR, setActiveEventQR] = useState(null)
 const [qrBusy, setQrBusy] = useState(false)
 const [memberRecord, setMemberRecord] = useState(null)
@@ -456,11 +458,11 @@ async function loadApplications() {
 
     const rows = data || []
     setAttendanceEvents(rows)
-    setSelectedAttendanceEvent(current =>
-      current && rows.some(row => String(row.id) === String(current))
-        ? current
-        : rows.length ? String(rows[0].id) : ''
-    )
+    const initialEventId = rows.some(row => String(row.id) === String(selectedAttendanceEvent))
+      ? String(selectedAttendanceEvent)
+      : rows.length ? String(rows[0].id) : ''
+    setSelectedAttendanceEvent(initialEventId)
+    if (initialEventId) await loadAttendanceRecords(initialEventId)
 
     if (!rows.length) {
       setNotice('QR yaratish uchun avval kamida bitta tadbir qo‘shing.')
@@ -469,6 +471,47 @@ async function loadApplications() {
     setAttendanceEvents([])
     setSelectedAttendanceEvent('')
     setNotice('Tadbirlarni yuklashda xatolik: ' + (error?.message || 'Noma’lum xatolik'))
+  }
+}
+
+
+async function loadAttendanceRecords(eventId = selectedAttendanceEvent) {
+  if (session?.user?.email?.toLowerCase() !== 'obidofich@gmail.com') {
+    setAttendanceRecords([])
+    return
+  }
+
+  const numericEventId = Number(eventId)
+  if (!Number.isInteger(numericEventId) || numericEventId <= 0) {
+    setAttendanceRecords([])
+    return
+  }
+
+  setAttendanceLoading(true)
+  try {
+    const { data, error } = await supabase
+      .from('club_attendance')
+      .select(`
+        id,
+        attendance_time,
+        method,
+        status,
+        member:club_applications (
+          full_name,
+          application_code
+        )
+      `)
+      .eq('event_id', numericEventId)
+      .eq('status', 'Tasdiqlandi')
+      .order('attendance_time', { ascending: false })
+
+    if (error) throw error
+    setAttendanceRecords(data || [])
+  } catch (error) {
+    setAttendanceRecords([])
+    setNotice('Davomat ro‘yxatini yuklashda xatolik: ' + (error?.message || 'Noma’lum xatolik'))
+  } finally {
+    setAttendanceLoading(false)
   }
 }
 
@@ -1943,7 +1986,10 @@ required
   <label>Tadbirni tanlang</label>
   <select
     value={selectedAttendanceEvent}
-    onChange={(e) => setSelectedAttendanceEvent(e.target.value)}
+    onChange={(e) => {
+      setSelectedAttendanceEvent(e.target.value)
+      loadAttendanceRecords(e.target.value)
+    }}
   >
     <option value="">Tadbirni tanlang</option>
     {attendanceEvents.map((event) => (
@@ -1952,6 +1998,38 @@ required
       </option>
     ))}
   </select>
+
+  <div className="applications-heading" style={{ marginTop: '16px', marginBottom: '12px' }}>
+    <h3>Davomatdan o‘tganlar: {attendanceRecords.length} nafar</h3>
+    <button
+      type="button"
+      className="gold-btn"
+      onClick={() => loadAttendanceRecords()}
+      disabled={attendanceLoading || !selectedAttendanceEvent}
+    >
+      {attendanceLoading ? 'Yuklanmoqda...' : 'Ro‘yxatni yangilash'}
+    </button>
+  </div>
+
+  {attendanceLoading ? (
+    <p>Davomat ro‘yxati yuklanmoqda...</p>
+  ) : attendanceRecords.length === 0 ? (
+    <p>Ushbu tadbir uchun tasdiqlangan davomat yozuvi hozircha yo‘q.</p>
+  ) : (
+    <div className="applications-list">
+      {attendanceRecords.map((record, index) => (
+        <article className="application-item" key={record.id}>
+          <strong>{index + 1}. {record.member?.full_name || 'Ism topilmadi'}</strong>
+          <p><b>A’zolik raqami:</b> {record.member?.application_code || '—'}</p>
+          <p><b>Davomat vaqti:</b> {record.attendance_time
+            ? new Date(record.attendance_time).toLocaleString('uz-UZ', { dateStyle: 'short', timeStyle: 'short' })
+            : '—'}</p>
+          <p><b>Usul:</b> {record.method || '—'}</p>
+          <p><b>Holati:</b> {record.status || '—'}</p>
+        </article>
+      ))}
+    </div>
+  )}
 
  <button
   className="gold-btn"
