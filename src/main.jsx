@@ -1310,6 +1310,13 @@ exit={{ opacity: 0 }}
 {label}
 </button>
 ))}
+<button
+className={page === 'admin' ? 'active' : ''}
+onClick={() => go('admin')}
+>
+<ShieldCheck size={18} />
+Admin panel
+</button>
 </motion.div>
 )}
 </AnimatePresence>
