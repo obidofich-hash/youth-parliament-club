@@ -61,6 +61,11 @@ const nav = [
 
 const formUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSfBwqF-1CtsNfkWS9x8p5-1JMFbD8jIHB7Zf9z9e8pm3zbzMA/viewform?usp=dialog'
 
+const allowedPages = new Set([
+  'home', 'about', 'membership', 'member', 'documents', 'feedback',
+  'events', 'news', 'gallery', 'contact', 'admin', 'reset-password'
+])
+
 function Brand({ logo }) {
 return (
 <span className="brand">
@@ -108,7 +113,7 @@ return (
 
 function App() {
 const requestedPage = new URLSearchParams(window.location.search).get('page')
-const [page, setPage] = useState(requestedPage === 'member' ? 'member' : 'home')
+const [page, setPage] = useState(allowedPages.has(requestedPage) ? requestedPage : 'home')
 const [menu, setMenu] = useState(false)
 const [memberApplication, setMemberApplication] = useState(null)
 const [scannerOpen, setScannerOpen] = useState(false)
