@@ -2150,6 +2150,126 @@ html[data-yp-theme="dark"] .about-pill{
 }
 html[data-yp-theme="dark"] .about-section-art{background:#0b1d32!important}
 
+
+
+/* V9.3 — site-wide readable typography in both themes */
+:root{
+  --yp-text-light:#172b45;
+  --yp-muted-light:#52657c;
+  --yp-text-dark:#f3f6fb;
+  --yp-muted-dark:#cbd6e2;
+}
+/* Light theme: consistent ink on pale surfaces */
+html:not([data-yp-theme="dark"]) .home-live-heading h2,
+html:not([data-yp-theme="dark"]) .home-upcoming-heading h2,
+html:not([data-yp-theme="dark"]) .page-head h1,
+html:not([data-yp-theme="dark"]) .page-head h2,
+html:not([data-yp-theme="dark"]) .section-heading h2,
+html:not([data-yp-theme="dark"]) .section-title,
+html:not([data-yp-theme="dark"]) .home-section h2{
+  color:#142b45!important;
+}
+html:not([data-yp-theme="dark"]) .home-live-heading p,
+html:not([data-yp-theme="dark"]) .home-upcoming-heading p,
+html:not([data-yp-theme="dark"]) .page-head p,
+html:not([data-yp-theme="dark"]) .section-heading p{
+  color:#52657c!important;
+}
+html:not([data-yp-theme="dark"]) .home-live-section,
+html:not([data-yp-theme="dark"]) .home-upcoming-section{
+  background:linear-gradient(145deg,#f8fafc,#eaf0f6)!important;
+  border-color:#cbd7e3!important;
+}
+html:not([data-yp-theme="dark"]) .home-upcoming-grid article h3,
+html:not([data-yp-theme="dark"]) .home-upcoming-grid article b{
+  color:#142b45!important;
+}
+html:not([data-yp-theme="dark"]) .home-upcoming-grid article p,
+html:not([data-yp-theme="dark"]) .home-upcoming-grid article small{
+  color:#52657c!important;
+}
+
+/* Dark theme: override inherited dark navy heading colors on navy panels */
+html[data-yp-theme="dark"] .home-live-heading h2,
+html[data-yp-theme="dark"] .home-upcoming-heading h2,
+html[data-yp-theme="dark"] .page-head h1,
+html[data-yp-theme="dark"] .page-head h2,
+html[data-yp-theme="dark"] .section-heading h1,
+html[data-yp-theme="dark"] .section-heading h2,
+html[data-yp-theme="dark"] .section-title,
+html[data-yp-theme="dark"] .home-section h1,
+html[data-yp-theme="dark"] .home-section h2,
+html[data-yp-theme="dark"] .home-section h3,
+html[data-yp-theme="dark"] .home-live-section h1,
+html[data-yp-theme="dark"] .home-live-section h2,
+html[data-yp-theme="dark"] .home-upcoming-section h1,
+html[data-yp-theme="dark"] .home-upcoming-section h2{
+  color:#f2d7a2!important;
+  opacity:1!important;
+  text-shadow:0 1px 8px rgba(0,0,0,.18);
+}
+html[data-yp-theme="dark"] .home-live-heading p,
+html[data-yp-theme="dark"] .home-upcoming-heading p,
+html[data-yp-theme="dark"] .page-head p,
+html[data-yp-theme="dark"] .section-heading p,
+html[data-yp-theme="dark"] .home-live-section p,
+html[data-yp-theme="dark"] .home-upcoming-section p{
+  color:#d1dce8!important;
+}
+html[data-yp-theme="dark"] .home-live-section,
+html[data-yp-theme="dark"] .home-upcoming-section{
+  background:linear-gradient(145deg,#0d2239,#102944)!important;
+  border-color:rgba(200,166,107,.32)!important;
+  color:#edf2f8!important;
+}
+html[data-yp-theme="dark"] .home-live-stats article{
+  background:linear-gradient(145deg,#173653,#214563)!important;
+  color:#f5f7fa!important;
+}
+html[data-yp-theme="dark"] .home-live-stats article span{
+  color:#f3f6fb!important;
+}
+html[data-yp-theme="dark"] .home-live-stats article small{
+  color:#cbd6e2!important;
+}
+html[data-yp-theme="dark"] .home-upcoming-grid article{
+  background:#0a1d33!important;
+  color:#edf2f8!important;
+  border-color:rgba(200,166,107,.3)!important;
+}
+html[data-yp-theme="dark"] .home-upcoming-grid article h3,
+html[data-yp-theme="dark"] .home-upcoming-grid article b{
+  color:#f2d7a2!important;
+}
+html[data-yp-theme="dark"] .home-upcoming-grid article p,
+html[data-yp-theme="dark"] .home-upcoming-grid article small{
+  color:#cbd6e2!important;
+}
+
+/* Common page headings and supporting copy */
+html[data-yp-theme="dark"] .form-card h1,
+html[data-yp-theme="dark"] .form-card h2,
+html[data-yp-theme="dark"] .form-card h3,
+html[data-yp-theme="dark"] .info-panel h1,
+html[data-yp-theme="dark"] .info-panel h2,
+html[data-yp-theme="dark"] .doc-card h2,
+html[data-yp-theme="dark"] .contact-card h2,
+html[data-yp-theme="dark"] .event-card h3,
+html[data-yp-theme="dark"] .news-card h3{
+  color:#f2d7a2!important;
+}
+html[data-yp-theme="dark"] .form-card p,
+html[data-yp-theme="dark"] .info-panel p,
+html[data-yp-theme="dark"] .doc-card p,
+html[data-yp-theme="dark"] .contact-card p,
+html[data-yp-theme="dark"] .event-card p,
+html[data-yp-theme="dark"] .news-card p{
+  color:#d1dce8!important;
+}
+html[data-yp-theme="dark"] .eyebrow{
+  color:#e4c17f!important;
+}
+
 `}</style>
 <div className="about-modern">
   <section className="about-hero">
