@@ -2215,11 +2215,49 @@ desc="Klub a’zoligiga ariza topshiring."
 {page === 'events' && (
 <>
 <PageHead
-kicker="KLUB KALENDARi"
-title="G‘oyalar uchrashadigan maydon."
-desc="Klub tadbirlari va uchrashuvlarini kalendar orqali kuzating."
+kicker="KLUB HAYOTI · TADBIRLAR"
+title="Uchrashuvlar, tashabbuslar va yangi imkoniyatlar."
+desc="Klubimizda bo‘lib o‘tadigan uchrashuvlar, muhokamalar va loyihalarni kuzating. O‘zingizga qiziq tadbirni tanlang."
 />
-<section className="events-calendar form-card">
+<section style={{margin:'8px 0 30px'}}>
+  <div style={{display:'flex',justifyContent:'space-between',alignItems:'end',gap:12,flexWrap:'wrap',marginBottom:16}}>
+    <div><div className="eyebrow">OLDINDA KUTILAYOTGANLAR</div><h2 style={{margin:'5px 0',fontSize:26}}>Yaqinlashayotgan tadbirlar</h2></div>
+    <span style={{color:'#8a6a35',fontWeight:700,fontSize:13}}>{upcomingEvents.length} ta yaqin tadbir</span>
+  </div>
+  {upcomingEvents.length ? (
+    <div className="two-col" style={{gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,300px),1fr))',gap:18}}>
+      {upcomingEvents.map((row,index)=>{
+        const eventDate = row.event_date ? new Date(row.event_date) : null;
+        const dateLabel = eventDate && !Number.isNaN(eventDate.getTime()) ? eventDate.toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric'}) : 'Sana belgilanmagan';
+        const timeLabel = eventDate && !Number.isNaN(eventDate.getTime()) ? eventDate.toLocaleTimeString('uz-UZ',{hour:'2-digit',minute:'2-digit'}) : '';
+        return <motion.article key={row.id} className="info-panel" initial={{opacity:0,y:18}} animate={{opacity:1,y:0}} transition={{delay:index*.07,duration:.35}} style={{padding:0,overflow:'hidden',borderRadius:20,border:'1px solid #e8eaf0',background:'#fff',boxShadow:'0 12px 30px rgba(16,36,61,.06)'}}>
+          {row.image_url ? <img src={row.image_url} alt={row.title} style={{width:'100%',height:190,objectFit:'cover',display:'block'}}/> : <div style={{height:150,display:'grid',placeItems:'center',background:'linear-gradient(135deg,#10243d,#284b70)',color:'#e5c58b'}}><CalendarDays size={42}/></div>}
+          <div style={{padding:20}}>
+            <div style={{display:'flex',alignItems:'center',gap:8,flexWrap:'wrap',color:'#9b7638',fontSize:12,fontWeight:800,marginBottom:10}}><CalendarDays size={15}/>{dateLabel}{timeLabel && <><span>·</span>{timeLabel}</>}</div>
+            <h3 style={{fontSize:20,lineHeight:1.3,margin:'0 0 9px',color:'#17263a'}}>{row.title}</h3>
+            <p style={{fontSize:14,lineHeight:1.7,color:'#667085',margin:'0 0 16px',whiteSpace:'pre-line'}}>{row.description || 'Tadbir tafsilotlari tez orada e’lon qilinadi.'}</p>
+            <button type="button" className="gold-btn" onClick={()=>{setSelectedCalendarDate(String(row.event_date||'').slice(0,10));setCalendarMonth(new Date(eventDate && !Number.isNaN(eventDate.getTime()) ? eventDate.getFullYear() : new Date().getFullYear(),eventDate && !Number.isNaN(eventDate.getTime()) ? eventDate.getMonth() : new Date().getMonth(),1));document.getElementById('events-calendar')?.scrollIntoView({behavior:'smooth',block:'center'})}} style={{display:'inline-flex',alignItems:'center',gap:8}}>Kalendar orqali ko‘rish <ArrowRight size={16}/></button>
+          </div>
+        </motion.article>
+      })}
+    </div>
+  ) : <div className="form-card" style={{textAlign:'center',padding:'30px 20px'}}><CalendarDays size={34} color="#a47b35"/><h3 style={{margin:'12px 0 6px'}}>Hozircha yaqin tadbirlar yo‘q</h3><p style={{color:'#667085',margin:0}}>Yangi tadbirlar e’lon qilinganda shu yerda paydo bo‘ladi.</p></div>}
+</section>
+<section style={{margin:'0 0 34px'}}>
+  <div style={{marginBottom:15}}><div className="eyebrow">TADBIRLAR ARXIVI</div><h2 style={{margin:'5px 0',fontSize:25}}>Barcha tadbirlar</h2><p style={{margin:0,color:'#667085'}}>Klub faoliyatidagi uchrashuvlar va tadbirlar ro‘yxati.</p></div>
+  {events.length ? <div className="two-col" style={{gridTemplateColumns:'repeat(auto-fit,minmax(min(100%,280px),1fr))',gap:14}}>{[...events].sort((a,b)=>String(b.event_date||'').localeCompare(String(a.event_date||''))).map(row=>{
+    const d=row.event_date?new Date(row.event_date):null;
+    const valid=d&&!Number.isNaN(d.getTime());
+    const isPast=valid&&d<new Date();
+    return <article className="info-panel" key={row.id} style={{borderRadius:16}}>
+      {row.image_url&&<img src={row.image_url} alt={row.title} style={{width:'100%',height:160,objectFit:'cover',borderRadius:12,marginBottom:12}}/>}
+      <div style={{display:'flex',justifyContent:'space-between',gap:8,alignItems:'center',marginBottom:9}}><span style={{fontSize:12,fontWeight:800,color:'#9b7638'}}>{valid?d.toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric'}):'Sana belgilanmagan'}</span><span style={{fontSize:10,fontWeight:800,padding:'5px 8px',borderRadius:20,background:isPast?'#f1f2f4':'#edf7f1',color:isPast?'#667085':'#23734a'}}>{isPast?'YAKUNLANGAN':'REJADA'}</span></div>
+      <h3 style={{margin:'0 0 8px',fontSize:18}}>{row.title}</h3><p style={{margin:0,color:'#667085',fontSize:13,lineHeight:1.65,whiteSpace:'pre-line'}}>{row.description||'Tadbir haqida qo‘shimcha ma’lumot mavjud emas.'}</p>
+    </article>
+  })}</div> : <p className="empty-state">Hozircha tadbirlar joylashtirilmagan.</p>}
+</section>
+<section id="events-calendar" className="events-calendar form-card" style={{scrollMarginTop:100}}>
+  <div style={{marginBottom:15}}><div className="eyebrow">SANALAR BO‘YICHA</div><h2 style={{margin:'5px 0'}}>Tadbirlar kalendari</h2><p style={{margin:0,color:'#667085'}}>Nuqta bilan belgilangan sanalarda tadbir bor. Sanani tanlab, tafsilotlarini ko‘ring.</p></div>
   <div className="calendar-heading">
     <button type="button" className="ghost-btn" onClick={()=>setCalendarMonth(new Date(calendarYear,calendarMonthIndex-1,1))} aria-label="Oldingi oy">‹</button>
     <h2>{calendarMonth.toLocaleDateString('uz-UZ',{month:'long',year:'numeric'})}</h2>
@@ -2239,7 +2277,6 @@ desc="Klub tadbirlari va uchrashuvlarini kalendar orqali kuzating."
     {selectedCalendarDate ? (selectedDateEvents.length ? selectedDateEvents.map(row=><article key={row.id}><b>{row.title}</b><p>{row.description || ''}</p></article>) : <p>Bu sanada rejalashtirilgan tadbir yo‘q.</p>) : <p>Nuqta bilan belgilangan kunlarda tadbir mavjud.</p>}
   </div>
 </section>
-{contentList('events', events)}
 </>
 )}
 
