@@ -163,6 +163,9 @@ const requestedPage = new URLSearchParams(window.location.search).get('page')
 const [page, setPage] = useState(allowedPages.has(requestedPage) ? requestedPage : 'home')
 const [adminTab, setAdminTab] = useState('overview')
 const [adminSearch, setAdminSearch] = useState('')
+const [publicSearch, setPublicSearch] = useState('')
+const [calendarMonth, setCalendarMonth] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1))
+const [selectedCalendarDate, setSelectedCalendarDate] = useState('')
 const [galleryPreview, setGalleryPreview] = useState(null)
 const [applicationLookupCode, setApplicationLookupCode] = useState('')
 const [applicationLookupResult, setApplicationLookupResult] = useState(null)
@@ -254,6 +257,21 @@ const filteredNews = news.filter(row =>
 const filteredGallery = gallery.filter(row =>
   [row.title, row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedAdminSearch)
 )
+const normalizedPublicSearch = publicSearch.trim().toLocaleLowerCase('uz')
+const publicSearchResults = normalizedPublicSearch ? [
+  ...nav.filter(([id, label]) => label.toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(([id,label]) => ({ type:'Bo‘lim', title:label, page:id, key:`page-${id}` })),
+  ...events.filter(row => [row.title,row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(row => ({ type:'Tadbir', title:row.title, page:'events', key:`event-${row.id}` })),
+  ...news.filter(row => [row.title,row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(row => ({ type:'Yangilik', title:row.title, page:'news', key:`news-${row.id}` })),
+  ...gallery.filter(row => [row.title,row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(row => ({ type:'Galereya', title:row.title || 'Galereya rasmi', page:'gallery', key:`gallery-${row.id}` }))
+].slice(0, 8) : []
+const calendarYear = calendarMonth.getFullYear()
+const calendarMonthIndex = calendarMonth.getMonth()
+const calendarMonthDays = new Date(calendarYear, calendarMonthIndex + 1, 0).getDate()
+const calendarOffset = (new Date(calendarYear, calendarMonthIndex, 1).getDay() + 6) % 7
+const calendarCells = [...Array(calendarOffset).fill(null), ...Array.from({length:calendarMonthDays}, (_,i)=>i+1)]
+const calendarEventDates = new Set(events.map(row => String(row.event_date || '').slice(0,10)).filter(Boolean))
+const selectedDateEvents = selectedCalendarDate ? events.filter(row => String(row.event_date || '').slice(0,10) === selectedCalendarDate) : []
+
 const pendingApplicationsCount = applications.filter(app =>
   !['Qabul qilindi', 'Rad etildi'].includes(app.status)
 ).length
@@ -854,7 +872,7 @@ async function checkApplicationStatus(event) {
   setApplicationLookupBusy(true)
   setApplicationLookupResult(null)
   try {
-    const { data, error } = await supabase.functions.invoke('check-application-status', {
+    const { data, error } = await supabase.functions.invoke('rapid-processor', {
       body: { applicationCode: code }
     })
     if (error || data?.error) throw new Error(data?.error || error?.message || 'Tekshirib bo‘lmadi.')
@@ -1480,6 +1498,16 @@ return (
 .status-check-result{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.1);color:#fff}
 .status-check-result strong{color:#f1ce8e}
 @media(max-width:600px){.application-status-check form{flex-direction:column}.application-status-check button{width:100%}}
+.site-global-search{position:relative;display:flex;align-items:center;min-width:180px;max-width:230px;margin:0 12px}
+.site-global-search input{width:100%;border:1px solid #e2e6ec!important;border-radius:10px;padding:9px 12px!important;background:#fff!important;color:#17283e!important;font-size:12px}
+.site-global-search>button{border:0;background:transparent;color:#8a6a36;font-size:20px;cursor:pointer}
+.site-search-results{position:absolute;top:calc(100% + 8px);left:0;right:0;z-index:2000;background:#fff;border:1px solid #e3e7ed;border-radius:13px;box-shadow:0 14px 35px rgba(12,30,52,.16);padding:7px;max-height:300px;overflow:auto}
+.site-search-results button{display:flex;width:100%;flex-direction:column;align-items:flex-start;gap:3px;padding:9px 10px;border:0;border-radius:8px;background:#fff;color:#17283e;text-align:left;cursor:pointer}
+.site-search-results button:hover{background:#f5f2eb}.site-search-results small{font-size:10px;color:#a47b3d}.site-search-results p{padding:8px;color:#667;margin:0;font-size:12px}
+.admin-global-results{margin:16px 0}.admin-result-shortcuts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;margin:12px 0}.admin-result-shortcuts button{display:flex;justify-content:space-between;gap:8px;border:1px solid #e4e8ef;border-radius:10px;background:#f8f9fb;padding:11px;color:#17283e;cursor:pointer}
+.events-calendar{margin:12px 0 24px}.calendar-heading{display:flex;align-items:center;justify-content:space-between;gap:12px}.calendar-heading h2{text-transform:capitalize;margin:0;font-size:19px}.calendar-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:7px;margin:18px 0}.calendar-grid>b{text-align:center;color:#9b7a45;font-size:12px;padding:6px}.calendar-grid>button,.calendar-empty{min-height:42px;border:1px solid #e7eaf0;border-radius:10px;background:#fff;color:#1c2e45;position:relative}.calendar-grid>button{cursor:pointer}.calendar-grid>button.selected{background:#162d48;color:#fff;border-color:#162d48}.calendar-grid>button.has-event:after{content:'';position:absolute;bottom:5px;left:50%;width:5px;height:5px;border-radius:50%;background:#c49a52;transform:translateX(-50%)}.calendar-grid>button.selected.has-event:after{background:#fff}.calendar-event-list{border-top:1px solid #e8ebf0;padding-top:12px}.calendar-event-list article{padding:10px 12px;border-radius:10px;background:#f7f8fa;margin-top:8px}.calendar-event-list p{margin:5px 0 0;color:#657286;font-size:13px}
+@media(max-width:900px){.site-global-search{order:4;max-width:none;width:100%;margin:8px 0}.admin-result-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:600px){.calendar-grid{gap:4px}.calendar-grid>button,.calendar-empty{min-height:36px}.calendar-heading h2{font-size:16px}}
 /* Unified platform improvements */
 .admin-search-wrap{display:flex;align-items:center;gap:10px;margin-top:16px;padding:10px 13px;border:1px solid #e4e8ef;border-radius:14px;background:#fff}
 .admin-search-wrap>span{font-size:24px;color:#a47b3d;line-height:1}
@@ -1575,6 +1603,13 @@ onClick={() => setMenu(!menu)}
 <button className="brand-button" onClick={() => go('home')}>
 <Brand logo={settings.club_logo} />
 </button>
+<div className="site-global-search">
+  <input value={publicSearch} onChange={event=>setPublicSearch(event.target.value)} placeholder="Saytdan qidirish..." aria-label="Sayt bo‘ylab qidirish" />
+  {publicSearch && <button type="button" onClick={()=>setPublicSearch('')} aria-label="Qidiruvni tozalash">×</button>}
+  {normalizedPublicSearch && <div className="site-search-results">
+    {publicSearchResults.length ? publicSearchResults.map(result=><button type="button" key={result.key} onClick={()=>{go(result.page);setPublicSearch('')}}><small>{result.type}</small><strong>{result.title}</strong></button>) : <p>Hech qanday natija topilmadi.</p>}
+  </div>}
+</div>
 
         <div className="top-links">
           <span>RASMIY KLUB PLATFORMASI</span>
@@ -2145,8 +2180,28 @@ desc="Klub a’zoligiga ariza topshiring."
 <PageHead
 kicker="KLUB KALENDARi"
 title="G‘oyalar uchrashadigan maydon."
-desc="Klub tadbirlari va uchrashuvlari."
+desc="Klub tadbirlari va uchrashuvlarini kalendar orqali kuzating."
 />
+<section className="events-calendar form-card">
+  <div className="calendar-heading">
+    <button type="button" className="ghost-btn" onClick={()=>setCalendarMonth(new Date(calendarYear,calendarMonthIndex-1,1))} aria-label="Oldingi oy">‹</button>
+    <h2>{calendarMonth.toLocaleDateString('uz-UZ',{month:'long',year:'numeric'})}</h2>
+    <button type="button" className="ghost-btn" onClick={()=>setCalendarMonth(new Date(calendarYear,calendarMonthIndex+1,1))} aria-label="Keyingi oy">›</button>
+  </div>
+  <div className="calendar-grid">
+    {['Du','Se','Ch','Pa','Ju','Sh','Ya'].map(day=><b key={day}>{day}</b>)}
+    {calendarCells.map((day,index)=>{
+      if(!day) return <span className="calendar-empty" key={`empty-${index}`}/>;
+      const dateKey=`${calendarYear}-${String(calendarMonthIndex+1).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
+      const hasEvent=calendarEventDates.has(dateKey);
+      return <button type="button" key={dateKey} className={`${selectedCalendarDate===dateKey?'selected':''} ${hasEvent?'has-event':''}`} onClick={()=>setSelectedCalendarDate(dateKey)}>{day}{hasEvent&&<i/>}</button>
+    })}
+  </div>
+  <div className="calendar-event-list">
+    <h3>{selectedCalendarDate ? `Tadbirlar — ${new Date(`${selectedCalendarDate}T00:00:00`).toLocaleDateString('uz-UZ')}` : 'Tadbir sanasini tanlang'}</h3>
+    {selectedCalendarDate ? (selectedDateEvents.length ? selectedDateEvents.map(row=><article key={row.id}><b>{row.title}</b><p>{row.description || ''}</p></article>) : <p>Bu sanada rejalashtirilgan tadbir yo‘q.</p>) : <p>Nuqta bilan belgilangan kunlarda tadbir mavjud.</p>}
+  </div>
+</section>
 {contentList('events', events)}
 </>
 )}
@@ -2468,6 +2523,18 @@ required
     {adminSearch && <button type="button" onClick={() => setAdminSearch('')}>Tozalash</button>}
   </div>
 </section>
+{adminTab === 'overview' && normalizedAdminSearch && (
+  <section className="form-card admin-global-results">
+    <h3>Qidiruv natijalari: “{adminSearch}”</h3>
+    <div className="admin-result-shortcuts">
+      <button type="button" onClick={()=>setAdminTab('applications')}>Arizalar <b>{filteredApplications.length}</b></button>
+      <button type="button" onClick={()=>setAdminTab('feedback')}>Murojaatlar <b>{filteredFeedbackRows.length}</b></button>
+      <button type="button" onClick={()=>setAdminTab('attendance')}>Davomat <b>{filteredAttendanceRecords.length}</b></button>
+      <button type="button" onClick={()=>setAdminTab('content')}>Kontent <b>{filteredEvents.length + filteredNews.length + filteredGallery.length}</b></button>
+    </div>
+    {filteredApplications.length + filteredFeedbackRows.length + filteredAttendanceRecords.length + filteredEvents.length + filteredNews.length + filteredGallery.length === 0 && <p>Mos ma’lumot topilmadi. Boshqa kalit so‘z bilan urinib ko‘ring.</p>}
+  </section>
+)}
 {adminTab === 'overview' && (
   <section className="admin-overview-grid">
     <button type="button" onClick={() => setAdminTab('applications')}><Users size={21}/><strong>Arizalarni ko‘rib chiqish</strong><span>Yangi a’zolik arizalarini qabul qilish yoki rad etish</span><b>Bo‘limni ochish →</b></button>
