@@ -163,6 +163,7 @@ const requestedPage = new URLSearchParams(window.location.search).get('page')
 const [page, setPage] = useState(allowedPages.has(requestedPage) ? requestedPage : 'home')
 const [assistantOpen, setAssistantOpen] = useState(false)
 const [assistantInput, setAssistantInput] = useState('')
+const [assistantBusy, setAssistantBusy] = useState(false)
 const [assistantMessages, setAssistantMessages] = useState([{role:'assistant',text:'Assalomu alaykum! Men Youth Parliament Club sayt yordamchisiman. Saytdagi ochiq ma’lumotlar bo‘yicha yordam beraman.'}])
 const [theme, setTheme] = useState(() => {
   try { return localStorage.getItem('ypc-theme') || 'light' } catch { return 'light' }
@@ -1471,10 +1472,58 @@ function answerSiteAssistant(question) {
  if(/rahmat|tashakkur/i.test(q)) return 'Marhamat! Yana savolingiz bo‘lsa, yozing.'
  return 'Bu savol bo‘yicha saytda tasdiqlangan ochiq ma’lumot topilmadi. “Klub haqida”, “Hujjatlar”, “Tadbirlar” yoki “Bog‘lanish” bo‘limlarini ko‘rib chiqing. Taxminiy javob bermayman.'
 }
-function sendAssistantMessage(text=assistantInput) {
- const question=(text||'').trim(); if(!question)return
- setAssistantMessages(current=>[...current,{role:'user',text:question},{role:'assistant',text:answerSiteAssistant(question)}])
+async function sendAssistantMessage(text=assistantInput) {
+ const question=(text||'').trim()
+ if(!question || assistantBusy) return
+ const containsSensitive = /(?:\b\d{14}\b|\b[A-ZА-Я]{2}\s?\d{7}\b|\+?998[\s()-]?\d{2}[\s()-]?\d{3}[\s()-]?\d{2}[\s()-]?\d{2}|[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,})/i.test(question)
+ if(containsSensitive) {
+   setAssistantInput('')
+   setAssistantMessages(current=>[...current,{role:'assistant',text:'Xavfsizlik uchun telefon, email, pasport yoki JShShIR kabi shaxsiy ma’lumotlarni chatga yubormang. Savolingizni ushbu ma’lumotlarsiz qayta yozing.'}])
+   return
+ }
  setAssistantInput('')
+ setAssistantMessages(current=>[...current,{role:'user',text:question}])
+ setAssistantBusy(true)
+ try {
+   // Faqat saytda hammaga ochiq bo‘lgan ma’lumotlar yuboriladi.
+   // Arizalar, a’zolar, QR-davomat, murojaatlar va login ma’lumotlari yuborilmaydi.
+   const publicContext = {
+     club: {
+       name: 'Youth Parliament Club',
+       about: settings.about_history || settings.about_intro || 'Yoshlar tashabbuslari va ijtimoiy faolligini qo‘llab-quvvatlovchi klub.',
+       today: settings.about_today || '',
+       future: settings.about_future || '',
+       university: 'Xalqaro ijtimoiy innovatsiyalar universiteti',
+       founded: '2026-yil noyabr'
+     },
+     events: (events || []).slice(0, 20).map(item=>({
+       title: item.title || '',
+       date: item.event_date || '',
+       description: item.description || ''
+     })),
+     news: (news || []).slice(0, 15).map(item=>({
+       title: item.title || '',
+       description: item.description || ''
+     })),
+     publicContact: {
+       phone: settings.phone || '',
+       email: settings.email || '',
+       telegram: settings.telegram || '',
+       address: settings.address || ''
+     },
+     publicSections: ['Bosh sahifa','Klub haqida','A’zolikka ariza','Tadbirlar','Yangiliklar','Hujjatlar','Galereya','Bog‘lanish']
+   }
+   const {data,error} = await supabase.functions.invoke('ypc-assistant',{body:{question,context:publicContext}})
+   if(error) throw error
+   const reply = data?.answer
+   if(typeof reply !== 'string' || !reply.trim()) throw new Error('AI javobi bo‘sh qaytdi')
+   setAssistantMessages(current=>[...current,{role:'assistant',text:reply.trim()}])
+ } catch(error) {
+   console.error('YPC assistant error:',error)
+   setAssistantMessages(current=>[...current,{role:'assistant',text:'AI yordamchi hozircha ulanmagan yoki vaqtincha javob bermayapti. Supabase’da ypc-assistant funksiyasi va OPENAI_API_KEY sozlamasini tekshiring. Shaxsiy ma’lumotlaringiz yuborilmadi.'}])
+ } finally {
+   setAssistantBusy(false)
+ }
 }
 
 return (
@@ -1577,6 +1626,41 @@ return (
 .home-live-stats strong{font-size:32px;line-height:1;color:#e7bd70}.home-live-stats span{font-weight:800}.home-live-stats small{color:rgba(255,255,255,.65);font-size:11px}
 .home-upcoming-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.home-upcoming-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}.home-upcoming-grid article{padding:18px;border:1px solid #e7eaf0;border-radius:15px;background:#fafbfc}.home-upcoming-grid small{color:#a47b3d;font-weight:800}.home-upcoming-grid h3{margin:9px 0;color:#172b45}.home-upcoming-grid p,.home-upcoming-empty{color:#647287;font-size:13px;line-height:1.6}.home-upcoming-empty{margin-top:18px;padding:18px;border-radius:14px;background:#f7f8fa}
 @media(max-width:760px){.home-live-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.home-upcoming-grid{grid-template-columns:1fr}.home-live-section,.home-upcoming-section{padding:19px}.home-upcoming-heading{align-items:flex-start;flex-direction:column}}\n
+
+/* Accessible contrast corrections for both themes */
+.about-section-copy h2{color:#102744!important}
+.about-section-copy p{color:#43546b!important}
+.about-team h2,.about-future h2{color:#102744!important}
+.about-team p,.about-future p{color:#53647a!important}
+.about-metric{background:#fffdf8!important;border-color:#d9c69e!important}
+.about-metric strong{color:#9a7134!important}
+.about-metric span{color:#40516a!important}
+.about-role{background:#fffdf8!important;color:#172b45!important;border-color:#d8c49a!important}
+.about-role span{color:#172b45!important}
+.about-role small{color:#66758a!important}
+.about-pill{color:#946b2e!important;background:#f5ecd9!important}
+html[data-yp-theme="dark"] .about-modern{color:#edf2f8!important}
+html[data-yp-theme="dark"] .about-section-copy h2,
+html[data-yp-theme="dark"] .about-team h2,
+html[data-yp-theme="dark"] .about-future h2{color:#f4dba9!important}
+html[data-yp-theme="dark"] .about-section-copy p,
+html[data-yp-theme="dark"] .about-team p,
+html[data-yp-theme="dark"] .about-future p{color:#d0dae6!important}
+html[data-yp-theme="dark"] .about-metric{background:linear-gradient(145deg,#132f4c,#0d233b)!important;border-color:rgba(200,166,107,.38)!important}
+html[data-yp-theme="dark"] .about-metric strong{color:#f0cc86!important}
+html[data-yp-theme="dark"] .about-metric span{color:#d0dae6!important}
+html[data-yp-theme="dark"] .about-role{background:#102944!important;color:#f0f3f7!important;border-color:rgba(200,166,107,.38)!important}
+html[data-yp-theme="dark"] .about-role b{color:#e8c987!important}
+html[data-yp-theme="dark"] .about-role span{color:#f0f3f7!important}
+html[data-yp-theme="dark"] .about-role small{color:#c4d0de!important}
+html[data-yp-theme="dark"] .about-pill{color:#f0d39d!important;background:rgba(200,166,107,.16)!important;border:1px solid rgba(200,166,107,.32)!important}
+html[data-yp-theme="dark"] .about-section-art{background:#0a1b2d!important}
+html[data-yp-theme="dark"] .yp-assistant-messages{background:linear-gradient(180deg,#102944,#081a30)!important}
+html[data-yp-theme="dark"] .yp-assistant-bubble{color:#f1f4f8!important}
+.yp-assistant-quick button:disabled,.yp-assistant-compose button:disabled{opacity:.55;cursor:wait}
+.yp-assistant-privacy{color:#53647a!important}
+html[data-yp-theme="dark"] .yp-assistant-privacy{color:#c2cedb!important}
+
 /* Youth Parliament premium navy & champagne theme */
 :root{--yp-navy:#081a30;--yp-navy2:#102b49;--yp-gold:#c8a66b;--yp-gold2:#e7d2a5;--yp-ink:#152840;--yp-muted:#66758a;--yp-paper:#f4f1e9;--yp-card:#fffdf8}
 html,body{min-height:100%;background:var(--yp-paper)!important;color:var(--yp-ink)}
@@ -1625,6 +1709,19 @@ html[data-yp-theme="dark"] .yp-assistant-quick button{background:#142e49!importa
 html[data-yp-theme="dark"] .site-search-results{background:#102944!important;border-color:rgba(200,166,107,.3)!important}
 html[data-yp-theme="dark"] .site-search-results button{background:#102944!important;color:#edf1f6!important}
 html[data-yp-theme="dark"] .site-search-results button:hover{background:#193955!important}
+
+html[data-yp-theme="dark"] .about-modern h1,
+html[data-yp-theme="dark"] .about-modern h2,
+html[data-yp-theme="dark"] .about-modern h3{color:#f2d7a2!important}
+html[data-yp-theme="dark"] .about-modern p,
+html[data-yp-theme="dark"] .about-modern span,
+html[data-yp-theme="dark"] .about-modern small{color:#d0dae6}
+html[data-yp-theme="dark"] .about-hero h1,
+html[data-yp-theme="dark"] .about-hero p,
+html[data-yp-theme="dark"] .about-hero .about-tag{color:inherit}
+html[data-yp-theme="dark"] .page-head p{color:#d0dae6!important}
+html[data-yp-theme="dark"] .form-card label{color:#e4c98f!important}
+
 @media(max-width:900px){.yp-theme-toggle{order:5;margin:6px 0}}
 @media(max-width:600px){.yp-theme-toggle{font-size:10px!important;padding:8px 10px!important}.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box{border-radius:17px!important}}
 .yp-assistant-launch{position:fixed;right:25px;bottom:24px;z-index:11000;display:flex;align-items:center;gap:10px;padding:13px 18px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:linear-gradient(135deg,#102844,#07182d);color:#fff;box-shadow:0 16px 40px rgba(7,24,45,.28);font-weight:800;cursor:pointer}
@@ -1948,6 +2045,21 @@ Klub haqida <ArrowUpRight />
 <>
 <style>{`
 .about-modern{color:#17263a}.about-hero{position:relative;overflow:hidden;border-radius:28px;padding:clamp(28px,5vw,58px);background:radial-gradient(circle at 85% 15%,rgba(211,174,105,.28),transparent 30%),linear-gradient(120deg,#0c1d32,#183653 68%,#254664);color:#fff;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;min-height:330px;margin:18px 0 30px}.about-hero h1{font-size:clamp(34px,5vw,58px);line-height:1.05;letter-spacing:-.04em;margin:12px 0 16px}.about-hero p{max-width:620px;color:#d5dfeb;line-height:1.8}.about-tag{font-size:11px;letter-spacing:.2em;font-weight:800;color:#d8b574}.about-hero-mark{width:min(260px,100%);aspect-ratio:1;border:1px solid rgba(224,189,123,.45);border-radius:50%;display:grid;place-items:center;margin:auto;position:relative}.about-hero-mark:before,.about-hero-mark:after{content:'';position:absolute;inset:18px;border:1px solid rgba(224,189,123,.25);border-radius:50%}.about-hero-mark:after{inset:38px}.about-hero-mark svg{width:76px;height:76px;color:#e0bd7b;z-index:1}.about-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 38px}.about-metric{padding:20px;border:1px solid #e8eaf0;border-radius:18px;background:#fff;box-shadow:0 8px 26px rgba(16,34,56,.045)}.about-metric strong{display:block;font-size:30px;color:#b58b49}.about-metric span{font-size:12px;color:#667085}.about-section{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;margin:36px 0}.about-section.reverse .about-section-art{order:2}.about-section-art{min-height:280px;border-radius:24px;overflow:hidden;position:relative;background:#e9edf2}.about-section-art img{width:100%;height:100%;min-height:280px;object-fit:cover;display:block}.about-section-copy{padding:14px 4px}.about-section-copy h2{font-size:clamp(26px,3vw,38px);line-height:1.13;letter-spacing:-.03em;margin:10px 0 14px}.about-section-copy p{line-height:1.85;color:#667085}.about-pill{display:inline-flex;padding:7px 11px;border-radius:99px;background:#f5eddf;color:#9b7438;font-size:10px;font-weight:800;letter-spacing:.15em}.about-team{background:#f5f7fa;border-radius:26px;padding:clamp(22px,4vw,38px);margin:40px 0}.about-team h2,.about-future h2{font-size:clamp(26px,3vw,38px);margin:8px 0 12px}.about-team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}.about-role{background:#fff;border:1px solid #e7eaf0;border-radius:16px;padding:18px}.about-role b{display:block;font-size:25px;color:#b58b49}.about-role span{font-weight:700}.about-role small{display:block;color:#7b8492;margin-top:5px}.about-future{padding:34px;border-radius:26px;background:linear-gradient(120deg,#f7f2e9,#fff);margin:38px 0}.about-future-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}.about-future-card{padding:20px;background:#fff;border:1px solid #eee6d8;border-radius:18px}.about-future-card svg{color:#b58b49}.about-future-card h3{margin:12px 0 7px}.about-future-card p{font-size:13px;line-height:1.7;color:#667085;margin:0}.about-editor{margin-top:30px}@media(max-width:760px){.about-hero,.about-section{grid-template-columns:1fr}.about-hero-mark{width:150px}.about-metrics{grid-template-columns:1fr}.about-team-grid{grid-template-columns:repeat(2,1fr)}.about-future-grid{grid-template-columns:1fr}.about-section.reverse .about-section-art{order:0}}
+
+html[data-yp-theme="dark"] .about-section-copy h2,
+html[data-yp-theme="dark"] .about-team h2,
+html[data-yp-theme="dark"] .about-future h2{color:#f3d69d!important}
+html[data-yp-theme="dark"] .about-section-copy p,
+html[data-yp-theme="dark"] .about-team p,
+html[data-yp-theme="dark"] .about-future p{color:#d2dce8!important}
+html[data-yp-theme="dark"] .about-metric{background:linear-gradient(145deg,#132f4c,#0d233b)!important;border-color:rgba(200,166,107,.4)!important}
+html[data-yp-theme="dark"] .about-metric strong{color:#f0cc86!important}
+html[data-yp-theme="dark"] .about-metric span{color:#d2dce8!important}
+html[data-yp-theme="dark"] .about-role{background:#102944!important;color:#f0f3f7!important;border-color:rgba(200,166,107,.4)!important}
+html[data-yp-theme="dark"] .about-role b{color:#e8c987!important}
+html[data-yp-theme="dark"] .about-role span{color:#f0f3f7!important}
+html[data-yp-theme="dark"] .about-role small{color:#c4d0de!important}
+html[data-yp-theme="dark"] .about-pill{color:#f0d39d!important;background:rgba(200,166,107,.16)!important;border:1px solid rgba(200,166,107,.32)!important}
 `}</style>
 <div className="about-modern">
   <section className="about-hero">
@@ -3125,11 +3237,12 @@ marginTop: '8px'
 
 <section className="yp-assistant" aria-label="Sayt yordamchisi">
  {assistantOpen&&<div className="yp-assistant-panel" role="dialog" aria-label="Youth Parliament sayt yordamchisi">
-  <div className="yp-assistant-head"><div className="yp-assistant-avatar"><MessageCircle size={20}/></div><div><strong>YPC yordamchi</strong><small>Faqat saytdagi ochiq ma’lumotlar asosida</small></div><button type="button" className="yp-assistant-close" onClick={()=>setAssistantOpen(false)} aria-label="Chatni yopish">×</button></div>
+  <div className="yp-assistant-head"><div className="yp-assistant-avatar"><MessageCircle size={20}/></div><div><strong>YPC yordamchi</strong><small>AI yordamchi · faqat ochiq klub ma’lumotlari</small></div><button type="button" className="yp-assistant-close" onClick={()=>setAssistantOpen(false)} aria-label="Chatni yopish">×</button></div>
   <div className="yp-assistant-messages" aria-live="polite">{assistantMessages.map((m,i)=><div key={i} className={`yp-assistant-bubble ${m.role==='user'?'user':''}`}>{m.text}</div>)}</div>
-  <div className="yp-assistant-quick"><button type="button" onClick={()=>sendAssistantMessage('Klubga qanday a’zo bo‘laman?')}>A’zolik</button><button type="button" onClick={()=>sendAssistantMessage('Yaqin tadbirlar qachon?')}>Tadbirlar</button><button type="button" onClick={()=>sendAssistantMessage('Klub haqida ma’lumot ber')}>Klub haqida</button></div>
-  <form className="yp-assistant-compose" onSubmit={e=>{e.preventDefault();sendAssistantMessage()}}><input value={assistantInput} onChange={e=>setAssistantInput(e.target.value)} placeholder="Savolingizni yozing..." aria-label="Savolingiz"/><button type="submit" aria-label="Yuborish">➤</button></form>
-  <div className="yp-assistant-privacy">Xabarlar faqat brauzeringiz ichida qayta ishlanadi va serverga yuborilmaydi. Shaxsiy ma’lumot, parol yoki hujjat raqamini kiritmang.</div>
+  {assistantBusy && <div className="yp-assistant-bubble" role="status">AI javob tayyorlamoqda…</div>}
+  <div className="yp-assistant-quick"><button type="button" disabled={assistantBusy} onClick={()=>sendAssistantMessage('Klubga qanday a’zo bo‘laman?')}>A’zolik</button><button type="button" disabled={assistantBusy} onClick={()=>sendAssistantMessage('Yaqin tadbirlar qachon?')}>Tadbirlar</button><button type="button" disabled={assistantBusy} onClick={()=>sendAssistantMessage('Klub haqida ma’lumot ber')}>Klub haqida</button></div>
+  <form className="yp-assistant-compose" onSubmit={e=>{e.preventDefault();sendAssistantMessage()}}><input value={assistantInput} onChange={e=>setAssistantInput(e.target.value)} placeholder="Savolingizni yozing..." aria-label="Savolingiz" disabled={assistantBusy}/><button type="submit" aria-label="Yuborish" disabled={assistantBusy || !assistantInput.trim()}>➤</button></form>
+  <div className="yp-assistant-privacy">AI javobi OpenAI orqali yaratiladi. Faqat savolingiz va klubning hammaga ochiq ma’lumotlari yuboriladi. A’zolik arizalari, shaxsiy kabinet, davomat va maxfiy ma’lumotlar yuborilmaydi. Parol yoki shaxsiy hujjat raqamini yozmang.</div>
  </div>}
  <button type="button" className="yp-assistant-launch" onClick={()=>setAssistantOpen(o=>!o)} aria-expanded={assistantOpen}><span className="yp-assistant-launch-icon"><MessageCircle size={17}/></span>{assistantOpen?'Chatni yopish':'Yordam kerakmi?'}</button>
 </section>
