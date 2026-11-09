@@ -100,15 +100,47 @@ return (
 )
 }
 
-function Contact({ I, title, value }) {
+function Contact({ I, title, value, emoji, delay = 0 }) {
+const cleanValue = value || 'Kiritilmagan'
+const href = !value ? undefined
+  : title === 'TELEFON' ? `tel:${value.replace(/[^+\\d]/g, '')}`
+  : title === 'TELEGRAM' ? (value.startsWith('http') ? value : `https://t.me/${value.replace('@', '')}`)
+  : title === 'ELEKTRON POCHTA' ? `mailto:${value}`
+  : title === 'MANZIL' ? `https://maps.google.com/?q=${encodeURIComponent(value)}`
+  : undefined
 return (
-<article className="contact-card">
-<I size={22} />
-<div>
-<small>{title}</small>
-<p>{value || 'Kiritilmagan'}</p>
-</div>
-</article>
+<motion.article
+  className="contact-card"
+  initial={{ opacity: 0, y: 22 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true, amount: 0.2 }}
+  transition={{ duration: 0.55, delay }}
+  whileHover={{ y: -7, scale: 1.015 }}
+  style={{
+    position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center',
+    gap: 18, padding: '25px 24px', minHeight: 116, borderRadius: 22,
+    border: '1px solid rgba(196,157,91,.22)',
+    background: 'linear-gradient(135deg, rgba(255,255,255,.98), rgba(247,244,237,.96))',
+    boxShadow: '0 12px 30px rgba(15,31,53,.07)', transition: 'box-shadow .3s ease'
+  }}
+>
+  <span aria-hidden="true" style={{
+    width: 58, height: 58, flex: '0 0 58px', display: 'grid', placeItems: 'center',
+    borderRadius: 18, background: 'linear-gradient(145deg,#10243d,#1c3858)',
+    color: '#d8b36d', boxShadow: '0 8px 18px rgba(16,36,61,.18)'
+  }}>
+    <I size={25} strokeWidth={1.8} />
+  </span>
+  <div style={{ minWidth: 0, flex: 1 }}>
+    <small style={{ display: 'block', color: '#a17a3e', fontSize: 10, fontWeight: 800, letterSpacing: '1.8px', marginBottom: 7 }}>
+      {emoji} {title}
+    </small>
+    {href
+      ? <a href={href} target={title === 'MANZIL' || title === 'TELEGRAM' ? '_blank' : undefined} rel="noreferrer" style={{ color: '#14263e', fontSize: 15, fontWeight: 700, textDecoration: 'none', overflowWrap: 'anywhere' }}>{cleanValue}</a>
+      : <p style={{ margin: 0, color: '#14263e', fontSize: 15, fontWeight: 700, overflowWrap: 'anywhere' }}>{cleanValue}</p>}
+  </div>
+  <span aria-hidden="true" style={{ position: 'absolute', right: 13, top: 8, fontSize: 23, opacity: .45 }}>{emoji}</span>
+</motion.article>
 )
 }
 
@@ -1329,7 +1361,15 @@ return (
 .admin-section{display:grid;gap:16px;max-width:100%}
 .admin-section .form-card{margin:0;padding:20px;border-radius:16px}
 .admin-section .applications-list{display:grid;gap:10px}
-.admin-section .application-item{padding:15px;border:1px solid #e8ebf0;border-radius:13px;background:#fff}
+.admin-section .application-item{padding:15px;border:1px solid #e8ebf0;border-radius:13px;background:#fff;color:#172033}
+.admin-section .application-item summary,
+.admin-section .application-item strong,
+.admin-section .application-item p,
+.admin-section .application-item b,
+.admin-section .application-item small,
+.admin-section .application-item span{color:#172033}
+.admin-section .application-item summary{cursor:pointer}
+.admin-section .application-item .application-actions button{color:#172033}
 .admin-section .application-actions{display:flex;flex-wrap:wrap;gap:8px}
 .admin-section .application-actions button{min-height:38px;padding:8px 12px;border-radius:9px;font-size:12px}
 .admin-section .form-card h2{margin-top:0;font-size:18px}
@@ -2006,20 +2046,46 @@ desc="Klub tadbirlaridan fotolavhalar."
 {page === 'contact' && (
 <>
 <PageHead
-kicker="BIZ BILAN BOG‘LANING"
-title="Muloqotga doim ochiqmiz."
-desc="Savol, taklif yoki hamkorlik yuzasidan biz bilan bog‘laning."
+kicker="🤝 BIZ BILAN BOG‘LANING"
+title="Har bir fikr — yangi imkoniyat."
+desc="Savol, taklif yoki hamkorlik bo‘yicha bizga yozing. Jamoamiz siz bilan muloqot qilishdan mamnun."
 />
 
-<div className="contact-grid">
-<Contact I={Phone} title="TELEFON" value={settings.phone} />
-<Contact I={Send} title="TELEGRAM" value={settings.telegram} />
-<Contact I={Mail} title="ELEKTRON POCHTA" value={settings.email} />
-<Contact I={MapPin} title="MANZIL" value={settings.address} />
+<motion.div
+  initial={{ opacity: 0, y: 18 }}
+  animate={{ opacity: 1, y: 0 }}
+  transition={{ duration: .6 }}
+  style={{
+    margin: '8px 0 26px', padding: '22px 24px', borderRadius: 22,
+    background: 'linear-gradient(120deg,#10243d,#1b3858 65%,#294767)',
+    color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+    gap: 18, overflow: 'hidden', position: 'relative'
+  }}
+>
+  <div style={{ position: 'relative', zIndex: 1 }}>
+    <div style={{ color: '#e0bd7b', fontSize: 11, fontWeight: 800, letterSpacing: 2, marginBottom: 7 }}>YOUTH PARLIAMENT CLUB</div>
+    <div style={{ fontSize: 18, fontWeight: 750, lineHeight: 1.35 }}>Hamkorlikka va yangi tashabbuslarga ochiqmiz!</div>
+    <div style={{ color: 'rgba(255,255,255,.75)', fontSize: 13, marginTop: 6 }}>Sizning murojaatingiz biz uchun muhim.</div>
+  </div>
+  <motion.div aria-hidden="true" animate={{ y: [0,-7,0], rotate: [0,5,0] }} transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut' }} style={{ fontSize: 48, flex: '0 0 auto' }}>💬</motion.div>
+</motion.div>
+
+<div className="contact-grid" style={{ gap: 18 }}>
+<Contact I={Phone} title="TELEFON" value={settings.phone} emoji="📞" delay={0} />
+<Contact I={Send} title="TELEGRAM" value={settings.telegram} emoji="✈️" delay={.08} />
+<Contact I={Mail} title="ELEKTRON POCHTA" value={settings.email} emoji="✉️" delay={.16} />
+<Contact I={MapPin} title="MANZIL" value={settings.address} emoji="📍" delay={.24} />
 </div>
 
-{settings.instagram && <p><Instagram /> {settings.instagram}</p>}
-{settings.youtube && <p><Youtube /> {settings.youtube}</p>}
+{(settings.instagram || settings.youtube) && (
+  <div style={{ marginTop: 28, padding: '20px 22px', borderRadius: 20, background: '#f6f3ec', border: '1px solid rgba(196,157,91,.2)' }}>
+    <div style={{ color: '#a17a3e', fontSize: 11, fontWeight: 800, letterSpacing: 1.7, marginBottom: 13 }}>📲 IJTIMOIY TARMOQLAR</div>
+    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+      {settings.instagram && <a href={settings.instagram.startsWith('http') ? settings.instagram : `https://instagram.com/${settings.instagram.replace('@','')}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 16px', borderRadius: 13, background: '#fff', color: '#172a43', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(15,31,53,.06)' }}><Instagram size={18}/> Instagram ↗</a>}
+      {settings.youtube && <a href={settings.youtube.startsWith('http') ? settings.youtube : `https://youtube.com/${settings.youtube}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 16px', borderRadius: 13, background: '#fff', color: '#172a43', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(15,31,53,.06)' }}><Youtube size={18}/> YouTube ↗</a>}
+    </div>
+  </div>
+)}
 </>
 )}
 {page === 'reset-password' && (
