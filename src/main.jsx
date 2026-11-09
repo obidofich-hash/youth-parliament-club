@@ -175,6 +175,8 @@ const [feedbackMessage, setFeedbackMessage] = useState('')
 const [feedbackBusy, setFeedbackBusy] = useState(false)
 const [feedbackRows, setFeedbackRows] = useState([])
 const [feedbackLoading, setFeedbackLoading] = useState(false)
+const [feedbackReplyDrafts, setFeedbackReplyDrafts] = useState({})
+const [feedbackReplyBusy, setFeedbackReplyBusy] = useState(null)
 
 // Barcha amaliyotlar uchun yagona yuqori bildirishnoma.
 function setNotice(message) {
@@ -675,11 +677,70 @@ async function loadFeedback() {
   setFeedbackLoading(true)
   const { data, error } = await supabase
     .from('club_feedback')
-    .select('id, full_name, message, is_anonymous, created_at')
+    .select('id, full_name, message, is_anonymous, created_at, status, admin_reply, replied_at')
     .order('created_at', { ascending: false })
   if (error) setNotice('Murojaatlarni yuklashda xatolik: ' + error.message)
   else setFeedbackRows(data || [])
   setFeedbackLoading(false)
+}
+
+async function updateFeedbackStatus(id, status) {
+  const { error } = await supabase
+    .from('club_feedback')
+    .update({ status })
+    .eq('id', id)
+
+  if (error) {
+    setNotice('Murojaat holatini yangilashda xatolik: ' + error.message)
+    return
+  }
+
+  setFeedbackRows(rows => rows.map(row => row.id === id ? { ...row, status } : row))
+  setNotice(status === 'O‘qildi' ? 'Murojaat o‘qilgan deb belgilandi.' : 'Murojaat qayta yangi deb belgilandi.')
+}
+
+async function replyToFeedback(id) {
+  const reply = (feedbackReplyDrafts[id] || '').trim()
+  if (!reply) {
+    setNotice('Javob matnini kiriting.')
+    return
+  }
+
+  setFeedbackReplyBusy(id)
+  const { error } = await supabase
+    .from('club_feedback')
+    .update({ admin_reply: reply, replied_at: new Date().toISOString() })
+    .eq('id', id)
+
+  setFeedbackReplyBusy(null)
+  if (error) {
+    setNotice('Javobni saqlashda xatolik: ' + error.message)
+    return
+  }
+
+  setFeedbackRows(rows => rows.map(row => row.id === id
+    ? { ...row, admin_reply: reply, replied_at: new Date().toISOString() }
+    : row
+  ))
+  setFeedbackReplyDrafts(drafts => ({ ...drafts, [id]: '' }))
+  setNotice('Javob muvaffaqiyatli saqlandi.')
+}
+
+async function deleteFeedback(id) {
+  if (!window.confirm('Ushbu murojaatni butunlay o‘chirishni tasdiqlaysizmi?')) return
+
+  const { error } = await supabase
+    .from('club_feedback')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    setNotice('Murojaatni o‘chirishda xatolik: ' + error.message)
+    return
+  }
+
+  setFeedbackRows(rows => rows.filter(row => row.id !== id))
+  setNotice('Murojaat muvaffaqiyatli o‘chirildi.')
 }
 
 function go(nextPage) {
@@ -1243,6 +1304,13 @@ return (
 .toast-message{flex:1;line-height:1.4;overflow-wrap:anywhere}
 .toast-close{border:0;background:transparent;color:#fff;font-size:24px;line-height:1;cursor:pointer;padding:0 2px}
 .toast-progress{position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(255,255,255,.9);transform-origin:left center}
+.feedback-status{display:inline-flex;align-items:center;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}
+.feedback-status.is-new{background:#fff0d6;color:#8a5200}
+.feedback-status.is-read{background:#e2f4e9;color:#176b3a}
+.feedback-admin-reply{margin:14px 0;padding:12px 14px;border-left:3px solid #b58a43;background:rgba(181,138,67,.08);border-radius:8px}
+.feedback-admin-reply p{margin:7px 0}
+.feedback-admin-reply small{display:block;color:#777}
+
 @media(max-width:600px){.global-toast{top:50%;left:50%;translate:-50% -50%;padding:13px 14px 16px;font-size:13px;border-radius:13px;width:min(440px,calc(100vw - 34px))}}
 `}</style>
 {typeof document !== 'undefined' && createPortal(
@@ -2195,13 +2263,72 @@ required
     <h2>Kelgan murojaatlar</h2>
     <button className="gold-btn" type="button" onClick={loadFeedback} disabled={feedbackLoading}>{feedbackLoading?'Yuklanmoqda...':'Murojaatlarni ko‘rish'}</button>
   </div>
-  {feedbackRows.length === 0 ? <p>Hozircha murojaatlar yuklanmagan yoki mavjud emas.</p> : feedbackRows.map(row => (
-    <article className="application-item" key={row.id}>
-      <strong>{row.is_anonymous ? 'Anonim murojaat' : (row.full_name || 'Ism ko‘rsatilmagan')}</strong>
-      <p>{row.message}</p>
-      <small>{row.created_at ? new Date(row.created_at).toLocaleString('uz-UZ') : ''}</small>
-    </article>
-  ))}
+  {feedbackLoading ? (
+    <p>Murojaatlar yuklanmoqda...</p>
+  ) : feedbackRows.length === 0 ? (
+    <p>Hozircha murojaatlar mavjud emas. Ro‘yxatni yangilang.</p>
+  ) : (
+    <div className="applications-list">
+      {feedbackRows.map(row => (
+        <article className="application-item" key={row.id}>
+          <div className="applications-heading">
+            <strong>{row.is_anonymous ? 'Anonim murojaat' : (row.full_name || 'Ism ko‘rsatilmagan')}</strong>
+            <span className={`feedback-status ${row.status === 'O‘qildi' ? 'is-read' : 'is-new'}`}>
+              {row.status || 'Yangi'}
+            </span>
+          </div>
+          <p>{row.message}</p>
+          <small>{row.created_at ? new Date(row.created_at).toLocaleString('uz-UZ') : ''}</small>
+
+          {row.admin_reply && (
+            <div className="feedback-admin-reply">
+              <b>Administrator javobi:</b>
+              <p>{row.admin_reply}</p>
+              {row.replied_at && <small>{new Date(row.replied_at).toLocaleString('uz-UZ')}</small>}
+            </div>
+          )}
+
+          <label>
+            Javob yozish
+            <textarea
+              rows="3"
+              value={feedbackReplyDrafts[row.id] ?? row.admin_reply ?? ''}
+              onChange={event => setFeedbackReplyDrafts(drafts => ({
+                ...drafts,
+                [row.id]: event.target.value
+              }))}
+              placeholder="Murojaatga javobingizni yozing..."
+            />
+          </label>
+
+          <div className="application-actions">
+            <button
+              type="button"
+              className="gold-btn"
+              onClick={() => replyToFeedback(row.id)}
+              disabled={feedbackReplyBusy === row.id}
+            >
+              {feedbackReplyBusy === row.id ? 'Saqlanmoqda...' : 'Javobni saqlash'}
+            </button>
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => updateFeedbackStatus(row.id, row.status === 'O‘qildi' ? 'Yangi' : 'O‘qildi')}
+            >
+              {row.status === 'O‘qildi' ? 'Yangi deb belgilash' : 'O‘qildi deb belgilash'}
+            </button>
+            <button
+              type="button"
+              className="ghost-btn"
+              onClick={() => deleteFeedback(row.id)}
+            >
+              <Trash2 size={15} /> O‘chirish
+            </button>
+          </div>
+        </article>
+      ))}
+    </div>
+  )}
 </div>
 <div className="form-card applications-admin">
   <div className="applications-heading">
