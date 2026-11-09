@@ -170,6 +170,7 @@ const [toast, setToast] = useState(null)
 const [editing,setEditing] = useState(null)
 const [documentViewer, setDocumentViewer] = useState(null)
 const [feedbackName, setFeedbackName] = useState('')
+const [feedbackContact, setFeedbackContact] = useState('')
 const [feedbackAnonymous, setFeedbackAnonymous] = useState(false)
 const [feedbackMessage, setFeedbackMessage] = useState('')
 const [feedbackBusy, setFeedbackBusy] = useState(false)
@@ -657,11 +658,13 @@ async function submitFeedback(event) {
   try {
     const { error } = await supabase.from('club_feedback').insert({
       full_name: feedbackAnonymous ? null : (feedbackName.trim() || null),
+      contact_info: feedbackAnonymous ? null : (feedbackContact.trim() || null),
       message: feedbackMessage.trim(),
       is_anonymous: feedbackAnonymous
     })
     if (error) throw error
     setFeedbackName('')
+    setFeedbackContact('')
     setFeedbackMessage('')
     setFeedbackAnonymous(false)
     setNotice('Murojaatingiz muvaffaqiyatli yuborildi.')
@@ -677,7 +680,7 @@ async function loadFeedback() {
   setFeedbackLoading(true)
   const { data, error } = await supabase
     .from('club_feedback')
-    .select('id, full_name, message, is_anonymous, created_at, status, admin_reply, replied_at')
+    .select('id, full_name, contact_info, message, is_anonymous, created_at, status, admin_reply, replied_at')
     .order('created_at', { ascending: false })
   if (error) setNotice('Murojaatlarni yuklashda xatolik: ' + error.message)
   else setFeedbackRows(data || [])
@@ -1304,6 +1307,7 @@ return (
 .toast-message{flex:1;line-height:1.4;overflow-wrap:anywhere}
 .toast-close{border:0;background:transparent;color:#fff;font-size:24px;line-height:1;cursor:pointer;padding:0 2px}
 .toast-progress{position:absolute;bottom:0;left:0;width:100%;height:4px;background:rgba(255,255,255,.9);transform-origin:left center}
+.feedback-warning{background:#fff0f0;border:1px solid #efb0b0;color:#a32626;padding:13px 15px;border-radius:14px;font-size:13px;line-height:1.55;margin-bottom:16px}.feedback-warning strong{font-weight:800}
 .feedback-status{display:inline-flex;align-items:center;padding:5px 10px;border-radius:20px;font-size:12px;font-weight:700;white-space:nowrap}
 .feedback-status.is-new{background:#fff0d6;color:#8a5200}
 .feedback-status.is-read{background:#e2f4e9;color:#176b3a}
@@ -1914,8 +1918,12 @@ desc="Klub a’zoligiga ariza topshiring."
 <div className="feedback-layout">
   <div className="feedback-note"><MessageCircle size={28}/><h2>Talaba ovozi — muhim.</h2><p>Har bir taklif va murojaat klub faoliyatini yaxshilashga xizmat qiladi.</p><div className="note-line"/><span>FIKR · MULOQOT · TASHABBUS · YECHIM</span></div>
   <form className="form-card" onSubmit={submitFeedback}>
+    <div className="feedback-warning"><strong>Eslatma:</strong> Anonim yuborilgan murojaatlar o‘rganib chiqiladi, ammo ularga javob xati yuborilmaydi. Javob olishni istasangiz, anonim rejimni tanlamang, ism-familiyangiz va telefon raqamingiz yoki emailingizni kiriting. Javob siz ko‘rsatgan aloqa manziliga yuborish uchun tayyorlanadi.</div>
     <label className="feedback-anon"><input type="checkbox" checked={feedbackAnonymous} onChange={e=>setFeedbackAnonymous(e.target.checked)}/> Anonim murojaat qilish</label>
-    {!feedbackAnonymous && <label>Ism va familiya<input value={feedbackName} onChange={e=>setFeedbackName(e.target.value)} placeholder="Ism-familiyangiz"/></label>}
+    {!feedbackAnonymous && <>
+      <label>Ism va familiya<input value={feedbackName} onChange={e=>setFeedbackName(e.target.value)} placeholder="Ism-familiyangiz"/></label>
+      <label>Telefon raqami yoki email<input value={feedbackContact} onChange={e=>setFeedbackContact(e.target.value)} placeholder="+998 90 123 45 67 yoki email@example.com"/></label>
+    </>}
     <label>Murojaat matni<textarea rows="6" value={feedbackMessage} onChange={e=>setFeedbackMessage(e.target.value)} placeholder="Taklif yoki murojaatingizni yozing..." required/></label>
     <button className="gold-btn" type="submit" disabled={feedbackBusy}>{feedbackBusy?'Yuborilmoqda...':'Murojaatni yuborish'} <Send size={16}/></button>
   </form>
@@ -2278,6 +2286,7 @@ required
             </span>
           </div>
           <p>{row.message}</p>
+          {!row.is_anonymous && row.contact_info && <p><b>Aloqa:</b> {row.contact_info}</p>}
           <small>{row.created_at ? new Date(row.created_at).toLocaleString('uz-UZ') : ''}</small>
 
           {row.admin_reply && (
