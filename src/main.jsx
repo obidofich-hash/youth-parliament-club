@@ -101,47 +101,61 @@ return (
 }
 
 function Contact({ I, title, value, emoji, delay = 0 }) {
-const cleanValue = value || 'Kiritilmagan'
-const href = !value ? undefined
-  : title === 'TELEFON' ? `tel:${value.replace(/[^+\\d]/g, '')}`
-  : title === 'TELEGRAM' ? (value.startsWith('http') ? value : `https://t.me/${value.replace('@', '')}`)
-  : title === 'ELEKTRON POCHTA' ? `mailto:${value}`
-  : title === 'MANZIL' ? `https://maps.google.com/?q=${encodeURIComponent(value)}`
-  : undefined
-return (
-<motion.article
-  className="contact-card"
-  initial={{ opacity: 0, y: 22 }}
-  whileInView={{ opacity: 1, y: 0 }}
-  viewport={{ once: true, amount: 0.2 }}
-  transition={{ duration: 0.55, delay }}
-  whileHover={{ y: -7, scale: 1.015 }}
-  style={{
-    position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center',
-    gap: 18, padding: '25px 24px', minHeight: 116, borderRadius: 22,
-    border: '1px solid rgba(196,157,91,.22)',
-    background: 'linear-gradient(135deg, rgba(255,255,255,.98), rgba(247,244,237,.96))',
-    boxShadow: '0 12px 30px rgba(15,31,53,.07)', transition: 'box-shadow .3s ease'
-  }}
->
-  <span aria-hidden="true" style={{
-    width: 58, height: 58, flex: '0 0 58px', display: 'grid', placeItems: 'center',
-    borderRadius: 18, background: 'linear-gradient(145deg,#10243d,#1c3858)',
-    color: '#d8b36d', boxShadow: '0 8px 18px rgba(16,36,61,.18)'
-  }}>
-    <I size={25} strokeWidth={1.8} />
-  </span>
-  <div style={{ minWidth: 0, flex: 1 }}>
-    <small style={{ display: 'block', color: '#a17a3e', fontSize: 10, fontWeight: 800, letterSpacing: '1.8px', marginBottom: 7 }}>
-      {emoji} {title}
-    </small>
-    {href
-      ? <a href={href} target={title === 'MANZIL' || title === 'TELEGRAM' ? '_blank' : undefined} rel="noreferrer" style={{ color: '#14263e', fontSize: 15, fontWeight: 700, textDecoration: 'none', overflowWrap: 'anywhere' }}>{cleanValue}</a>
-      : <p style={{ margin: 0, color: '#14263e', fontSize: 15, fontWeight: 700, overflowWrap: 'anywhere' }}>{cleanValue}</p>}
-  </div>
-  <span aria-hidden="true" style={{ position: 'absolute', right: 13, top: 8, fontSize: 23, opacity: .45 }}>{emoji}</span>
-</motion.article>
-)
+  const cleanValue = value || 'Kiritilmagan'
+  const href = !value ? undefined
+    : title === 'TELEFON' ? `tel:${value.replace(/[^\d+]/g, '')}`
+    : title === 'TELEGRAM' ? (value.startsWith('http') ? value : `https://t.me/${value.replace('@', '')}`)
+    : title === 'ELEKTRON POCHTA' ? `mailto:${value}`
+    : title === 'MANZIL' ? `https://maps.google.com/?q=${encodeURIComponent(value)}`
+    : undefined
+  return (
+    <motion.article
+      className="contact-card"
+      initial={{ opacity: 0, y: 28, scale: .97 }}
+      whileInView={{ opacity: 1, y: 0, scale: 1 }}
+      viewport={{ once: true, amount: 0.2 }}
+      transition={{ duration: .65, delay, ease: 'easeOut' }}
+      whileHover={{ y: -8, scale: 1.018 }}
+      style={{
+        position: 'relative', overflow: 'hidden', display: 'flex', alignItems: 'center',
+        gap: 19, padding: '26px 25px', minHeight: 126, borderRadius: 23,
+        border: '1px solid rgba(216,179,109,.38)',
+        background: 'linear-gradient(135deg,#0d1d32 0%,#142d49 58%,#1d3b5b 100%)',
+        boxShadow: '0 15px 34px rgba(12,29,50,.17)', transition: 'box-shadow .3s ease',
+        color: '#f8fafc'
+      }}
+    >
+      <motion.div
+        aria-hidden="true"
+        animate={{ scale: [1, 1.07, 1], rotate: [0, 3, 0] }}
+        transition={{ duration: 3.2, repeat: Infinity, ease: 'easeInOut', delay }}
+        style={{
+          width: 62, height: 62, flex: '0 0 62px', display: 'grid', placeItems: 'center',
+          borderRadius: 19, background: 'linear-gradient(145deg,#203f60,#294d70)',
+          color: '#f0c879', boxShadow: '0 0 0 1px rgba(240,200,121,.22),0 9px 22px rgba(0,0,0,.2)'
+        }}
+      >
+        <I size={27} strokeWidth={1.9} />
+      </motion.div>
+      <div style={{ minWidth: 0, flex: 1, position: 'relative', zIndex: 1 }}>
+        <small style={{ display: 'block', color: '#e7bd70', fontSize: 10, fontWeight: 850, letterSpacing: '2px', marginBottom: 9 }}>
+          {title}
+        </small>
+        {href
+          ? <a href={href} target={title === 'MANZIL' || title === 'TELEGRAM' ? '_blank' : undefined}
+              rel="noreferrer" style={{ color: '#ffffff', fontSize: 16, lineHeight: 1.5, fontWeight: 750, textDecoration: 'none', overflowWrap: 'anywhere' }}>{cleanValue}</a>
+          : <p style={{ margin: 0, color: '#ffffff', fontSize: 16, lineHeight: 1.5, fontWeight: 750, overflowWrap: 'anywhere' }}>{cleanValue}</p>}
+        {href && <span style={{ display: 'block', color: 'rgba(255,255,255,.58)', fontSize: 11, marginTop: 7 }}>Bog‘lanish uchun bosing ↗</span>}
+      </div>
+      <motion.span aria-hidden="true"
+        animate={{ y: [0, -7, 0], rotate: [0, 8, 0] }}
+        transition={{ duration: 3.6, repeat: Infinity, ease: 'easeInOut', delay: delay + .2 }}
+        style={{ position: 'absolute', right: 16, top: 10, fontSize: 25, opacity: .82, filter: 'drop-shadow(0 3px 7px rgba(0,0,0,.25))' }}>
+        {emoji}
+      </motion.span>
+      <div aria-hidden="true" style={{ position: 'absolute', width: 130, height: 130, borderRadius: '50%', right: -55, bottom: -85, background: 'rgba(231,189,112,.09)', filter: 'blur(2px)' }} />
+    </motion.article>
+  )
 }
 
 function App() {
@@ -2078,11 +2092,11 @@ desc="Savol, taklif yoki hamkorlik bo‘yicha bizga yozing. Jamoamiz siz bilan m
 </div>
 
 {(settings.instagram || settings.youtube) && (
-  <div style={{ marginTop: 28, padding: '20px 22px', borderRadius: 20, background: '#f6f3ec', border: '1px solid rgba(196,157,91,.2)' }}>
-    <div style={{ color: '#a17a3e', fontSize: 11, fontWeight: 800, letterSpacing: 1.7, marginBottom: 13 }}>📲 IJTIMOIY TARMOQLAR</div>
+  <div style={{ marginTop: 28, padding: '20px 22px', borderRadius: 20, background: 'linear-gradient(135deg,#10243d,#1b3858)', border: '1px solid rgba(216,179,109,.35)' }}>
+    <div style={{ color: '#e7bd70', fontSize: 11, fontWeight: 850, letterSpacing: 1.9, marginBottom: 13 }}>📲 IJTIMOIY TARMOQLAR</div>
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
-      {settings.instagram && <a href={settings.instagram.startsWith('http') ? settings.instagram : `https://instagram.com/${settings.instagram.replace('@','')}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 16px', borderRadius: 13, background: '#fff', color: '#172a43', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(15,31,53,.06)' }}><Instagram size={18}/> Instagram ↗</a>}
-      {settings.youtube && <a href={settings.youtube.startsWith('http') ? settings.youtube : `https://youtube.com/${settings.youtube}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 16px', borderRadius: 13, background: '#fff', color: '#172a43', fontWeight: 700, textDecoration: 'none', boxShadow: '0 4px 14px rgba(15,31,53,.06)' }}><Youtube size={18}/> YouTube ↗</a>}
+      {settings.instagram && <a href={settings.instagram.startsWith('http') ? settings.instagram : `https://instagram.com/${settings.instagram.replace('@','')}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 16px', borderRadius: 13, background: 'rgba(255,255,255,.97)', color: '#14263e', fontWeight: 800, textDecoration: 'none', boxShadow: '0 7px 20px rgba(0,0,0,.16)' }}><Instagram size={18}/> Instagram ↗</a>}
+      {settings.youtube && <a href={settings.youtube.startsWith('http') ? settings.youtube : `https://youtube.com/${settings.youtube}`} target="_blank" rel="noreferrer" style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '11px 16px', borderRadius: 13, background: 'rgba(255,255,255,.97)', color: '#14263e', fontWeight: 800, textDecoration: 'none', boxShadow: '0 7px 20px rgba(0,0,0,.16)' }}><Youtube size={18}/> YouTube ↗</a>}
     </div>
   </div>
 )}
