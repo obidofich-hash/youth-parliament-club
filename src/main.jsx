@@ -164,6 +164,14 @@ const [page, setPage] = useState(allowedPages.has(requestedPage) ? requestedPage
 const [assistantOpen, setAssistantOpen] = useState(false)
 const [assistantInput, setAssistantInput] = useState('')
 const [assistantMessages, setAssistantMessages] = useState([{role:'assistant',text:'Assalomu alaykum! Men Youth Parliament Club sayt yordamchisiman. Saytdagi ochiq ma’lumotlar bo‘yicha yordam beraman.'}])
+const [theme, setTheme] = useState(() => {
+  try { return localStorage.getItem('ypc-theme') || 'light' } catch { return 'light' }
+})
+useEffect(() => {
+  document.documentElement.setAttribute('data-yp-theme', theme)
+  try { localStorage.setItem('ypc-theme', theme) } catch {}
+}, [theme])
+
 
 const [adminTab, setAdminTab] = useState('overview')
 const [adminSearch, setAdminSearch] = useState('')
@@ -1569,15 +1577,56 @@ return (
 .home-live-stats strong{font-size:32px;line-height:1;color:#e7bd70}.home-live-stats span{font-weight:800}.home-live-stats small{color:rgba(255,255,255,.65);font-size:11px}
 .home-upcoming-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.home-upcoming-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}.home-upcoming-grid article{padding:18px;border:1px solid #e7eaf0;border-radius:15px;background:#fafbfc}.home-upcoming-grid small{color:#a47b3d;font-weight:800}.home-upcoming-grid h3{margin:9px 0;color:#172b45}.home-upcoming-grid p,.home-upcoming-empty{color:#647287;font-size:13px;line-height:1.6}.home-upcoming-empty{margin-top:18px;padding:18px;border-radius:14px;background:#f7f8fa}
 @media(max-width:760px){.home-live-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.home-upcoming-grid{grid-template-columns:1fr}.home-live-section,.home-upcoming-section{padding:19px}.home-upcoming-heading{align-items:flex-start;flex-direction:column}}\n
-/* Unified pearl / midnight / champagne visual system */
-:root{--yp-ink:#14263d;--yp-muted:#65748a;--yp-gold:#c9a86e}
-html,body{min-height:100%;background:#eef2f6!important;color:var(--yp-ink)}
-body{background:radial-gradient(ellipse at 12% 8%,rgba(211,224,239,.72),transparent 38%),radial-gradient(ellipse at 88% 30%,rgba(232,221,199,.42),transparent 34%),linear-gradient(145deg,#f5f7fa,#edf1f5 52%,#f7f5f0)!important;background-attachment:fixed!important}
-.app,.main,.page{background:transparent!important}
-.topbar,.sidebar{background:rgba(250,252,254,.9)!important;backdrop-filter:blur(18px);border-color:rgba(173,188,205,.45)!important}
-.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box,.home-live-section,.home-upcoming-section,.events-calendar{border:1px solid rgba(191,202,215,.55)!important;border-radius:22px!important;box-shadow:0 14px 38px rgba(28,48,74,.065)!important;background:rgba(255,255,255,.88)!important;backdrop-filter:blur(12px)}
-.footer{border-top:1px solid rgba(174,188,204,.45)!important;background:rgba(249,251,253,.78)!important;border-radius:20px 20px 0 0}
-.gold-btn{border-radius:12px!important}
+/* Youth Parliament premium navy & champagne theme */
+:root{--yp-navy:#081a30;--yp-navy2:#102b49;--yp-gold:#c8a66b;--yp-gold2:#e7d2a5;--yp-ink:#152840;--yp-muted:#66758a;--yp-paper:#f4f1e9;--yp-card:#fffdf8}
+html,body{min-height:100%;background:var(--yp-paper)!important;color:var(--yp-ink)}
+body{background:radial-gradient(ellipse at 8% 0%,rgba(200,166,107,.13),transparent 30%),linear-gradient(145deg,#f4f1e9,#e9edf2 58%,#f5f1e8)!important;background-attachment:fixed!important;color:var(--yp-ink)}
+.app,.main,.page{background:transparent!important;color:var(--yp-ink)}
+.topbar{background:rgba(8,26,48,.97)!important;color:#f8f4eb!important;border-bottom:1px solid rgba(200,166,107,.42)!important;box-shadow:0 10px 35px rgba(8,26,48,.18)!important;backdrop-filter:blur(18px)}
+.topbar .brand-copy strong,.topbar .brand-copy small,.topbar .top-links,.topbar .top-links button{color:#f2e8d2!important}
+.topbar .top-links button.top-link-active{color:#e7c98f!important}
+.topbar .top-links button.top-join{background:linear-gradient(135deg,#d9bd83,#b58d4d)!important;color:#10243c!important}
+.sidebar{background:rgba(248,246,239,.96)!important;border-right:1px solid rgba(181,145,83,.28)!important}
+.sidebar button{color:#34465e}
+.sidebar button.active,.sidebar button[aria-current="page"]{background:#eee6d6!important;color:#0b2039!important}
+.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box,.home-live-section,.home-upcoming-section,.events-calendar{border:1px solid rgba(173,146,101,.28)!important;border-radius:20px!important;box-shadow:0 16px 42px rgba(8,26,48,.09)!important;background:linear-gradient(145deg,rgba(255,253,248,.98),rgba(246,243,235,.98))!important;backdrop-filter:blur(12px)}
+.form-card h1,.form-card h2,.form-card h3,.info-panel h2,.doc-card h2,.contact-card h2,.event-card h3,.news-card h3,.page-head h1{color:#102744}
+.form-card p,.info-panel p,.doc-card p,.contact-card p,.event-card p,.news-card p{color:#53647a}
+.form-card input,.form-card textarea,.form-card select,.yp-assistant-compose input{background:#fffdf8!important;color:#152840!important;border:1px solid #cdb783!important}
+.gold-btn,.top-join{background:linear-gradient(135deg,#d9bd83,#b58d4d)!important;color:#10243c!important;border:1px solid #b58d4d!important}
+.footer{border-top:1px solid rgba(181,145,83,.35)!important;background:rgba(8,26,48,.97)!important;color:#e9dfcc!important;border-radius:18px 18px 0 0}
+.footer span,.footer button{color:#e9dfcc!important}
+.yp-theme-toggle{display:inline-flex!important;align-items:center;justify-content:center;gap:6px;padding:9px 12px!important;border:1px solid rgba(231,210,165,.55)!important;border-radius:999px!important;background:rgba(255,255,255,.08)!important;color:#f3dfb8!important;font-size:11px!important;font-weight:800!important;white-space:nowrap}
+.yp-theme-toggle:hover{background:rgba(231,210,165,.18)!important}
+html[data-yp-theme="dark"],html[data-yp-theme="dark"] body{background:#071426!important;color:#e8edf4!important}
+html[data-yp-theme="dark"] body{background:radial-gradient(ellipse at 10% 0%,rgba(200,166,107,.12),transparent 32%),linear-gradient(145deg,#071426,#0b1d33 55%,#10243b)!important;background-attachment:fixed!important}
+html[data-yp-theme="dark"] .app,html[data-yp-theme="dark"] .main,html[data-yp-theme="dark"] .page{background:transparent!important;color:#e8edf4!important}
+html[data-yp-theme="dark"] .topbar{background:rgba(5,16,30,.97)!important}
+html[data-yp-theme="dark"] .sidebar{background:rgba(9,27,47,.97)!important;border-color:rgba(200,166,107,.25)!important}
+html[data-yp-theme="dark"] .sidebar button{color:#c6d0dc!important}
+html[data-yp-theme="dark"] .sidebar button.active,html[data-yp-theme="dark"] .sidebar button[aria-current="page"]{background:rgba(200,166,107,.18)!important;color:#f1d7a4!important}
+html[data-yp-theme="dark"] .form-card,html[data-yp-theme="dark"] .info-panel,html[data-yp-theme="dark"] .doc-card,html[data-yp-theme="dark"] .contact-card,html[data-yp-theme="dark"] .news-card,html[data-yp-theme="dark"] .event-card,html[data-yp-theme="dark"] .membership-box,html[data-yp-theme="dark"] .home-live-section,html[data-yp-theme="dark"] .home-upcoming-section,html[data-yp-theme="dark"] .events-calendar{background:linear-gradient(145deg,#102944,#0b2038)!important;border:1px solid rgba(200,166,107,.3)!important;box-shadow:0 18px 45px rgba(0,0,0,.24)!important;color:#e8edf4!important}
+html[data-yp-theme="dark"] .form-card h1,html[data-yp-theme="dark"] .form-card h2,html[data-yp-theme="dark"] .form-card h3,html[data-yp-theme="dark"] .info-panel h2,html[data-yp-theme="dark"] .doc-card h2,html[data-yp-theme="dark"] .contact-card h2,html[data-yp-theme="dark"] .event-card h3,html[data-yp-theme="dark"] .news-card h3,html[data-yp-theme="dark"] .page-head h1{color:#f1d7a4!important}
+html[data-yp-theme="dark"] .form-card p,html[data-yp-theme="dark"] .info-panel p,html[data-yp-theme="dark"] .doc-card p,html[data-yp-theme="dark"] .contact-card p,html[data-yp-theme="dark"] .event-card p,html[data-yp-theme="dark"] .news-card p,html[data-yp-theme="dark"] .page-head p{color:#c0ccda!important}
+html[data-yp-theme="dark"] .form-card label,html[data-yp-theme="dark"] .info-panel label{color:#e2c58e!important}
+html[data-yp-theme="dark"] .form-card input,html[data-yp-theme="dark"] .form-card textarea,html[data-yp-theme="dark"] .form-card select,html[data-yp-theme="dark"] .yp-assistant-compose input{background:#081a30!important;color:#f3f5f8!important;border:1px solid rgba(200,166,107,.55)!important}
+html[data-yp-theme="dark"] .calendar-grid>button,html[data-yp-theme="dark"] .calendar-empty{background:#0b2038!important;color:#e9edf4!important;border-color:rgba(200,166,107,.25)!important}
+html[data-yp-theme="dark"] .calendar-grid>button.selected{background:#c8a66b!important;color:#10243c!important}
+html[data-yp-theme="dark"] .calendar-event-list article,html[data-yp-theme="dark"] .home-upcoming-grid article{background:#0a1d33!important;border-color:rgba(200,166,107,.28)!important;color:#edf1f6!important}
+html[data-yp-theme="dark"] .calendar-event-list article b,html[data-yp-theme="dark"] .home-upcoming-grid h3{color:#f1d7a4!important}
+html[data-yp-theme="dark"] .calendar-event-list p,html[data-yp-theme="dark"] .home-upcoming-grid p{color:#c0ccda!important}
+html[data-yp-theme="dark"] .footer{background:#050f1d!important;border-color:rgba(200,166,107,.3)!important}
+html[data-yp-theme="dark"] .yp-assistant-panel{background:#0b2038!important;border-color:rgba(200,166,107,.5)!important}
+html[data-yp-theme="dark"] .yp-assistant-messages{background:linear-gradient(180deg,#0b2038,#081a30)!important}
+html[data-yp-theme="dark"] .yp-assistant-bubble{background:#142e49!important;color:#eaf0f6!important;border-color:rgba(200,166,107,.22)!important}
+html[data-yp-theme="dark"] .yp-assistant-bubble.user{background:#c8a66b!important;color:#10243c!important}
+html[data-yp-theme="dark"] .yp-assistant-quick,html[data-yp-theme="dark"] .yp-assistant-compose,html[data-yp-theme="dark"] .yp-assistant-privacy{background:#0a1b30!important;border-color:rgba(200,166,107,.22)!important;color:#b8c5d3!important}
+html[data-yp-theme="dark"] .yp-assistant-quick button{background:#142e49!important;color:#f0d8a9!important;border-color:rgba(200,166,107,.35)!important}
+html[data-yp-theme="dark"] .site-search-results{background:#102944!important;border-color:rgba(200,166,107,.3)!important}
+html[data-yp-theme="dark"] .site-search-results button{background:#102944!important;color:#edf1f6!important}
+html[data-yp-theme="dark"] .site-search-results button:hover{background:#193955!important}
+@media(max-width:900px){.yp-theme-toggle{order:5;margin:6px 0}}
+@media(max-width:600px){.yp-theme-toggle{font-size:10px!important;padding:8px 10px!important}.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box{border-radius:17px!important}}
 .yp-assistant-launch{position:fixed;right:25px;bottom:24px;z-index:11000;display:flex;align-items:center;gap:10px;padding:13px 18px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:linear-gradient(135deg,#102844,#07182d);color:#fff;box-shadow:0 16px 40px rgba(7,24,45,.28);font-weight:800;cursor:pointer}
 .yp-assistant-launch-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(224,190,128,.18);color:#f0d39d}
 .yp-assistant-panel{position:fixed;right:24px;bottom:88px;z-index:11001;width:min(390px,calc(100vw - 28px));height:min(570px,calc(100vh - 125px));display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(205,174,119,.45);border-radius:22px;background:#f8fafc;box-shadow:0 24px 70px rgba(5,20,38,.28)}
@@ -1585,10 +1634,10 @@ body{background:radial-gradient(ellipse at 12% 8%,rgba(211,224,239,.72),transpar
 .yp-assistant-avatar{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(230,209,166,.55);border-radius:14px;color:#f0d39d}
 .yp-assistant-head strong{display:block;font-size:14px}.yp-assistant-head small{display:block;margin-top:3px;color:#c7d2df;font-size:11px}
 .yp-assistant-close{margin-left:auto;width:34px;height:34px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(255,255,255,.08);color:white;font-size:22px;cursor:pointer}
-.yp-assistant-messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:11px;padding:16px;background:linear-gradient(180deg,#f4f7fa,#edf2f6)}
+.yp-assistant-messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:11px;padding:16px;background:linear-gradient(180deg,#f6f2e9,#e9edf2)}
 .yp-assistant-bubble{max-width:88%;padding:11px 13px;border:1px solid #e0e6ed;border-radius:15px 15px 15px 4px;background:white;color:#23354c;font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
 .yp-assistant-bubble.user{align-self:flex-end;border-color:#183653;border-radius:15px 15px 4px 15px;background:#183653;color:white}
-.yp-assistant-quick{display:flex;gap:7px;flex-wrap:wrap;padding:0 13px 10px;background:#f8fafc}
+.yp-assistant-quick{display:flex;gap:7px;flex-wrap:wrap;padding:0 13px 10px;background:#f8f5ed}
 .yp-assistant-quick button{border:1px solid #d9e1ea;border-radius:999px;background:white;color:#314761;padding:7px 10px;font-size:11px;cursor:pointer}
 .yp-assistant-compose{display:flex;gap:8px;padding:12px;border-top:1px solid #e0e6ed;background:#fff}
 .yp-assistant-compose input{flex:1;min-width:0;border:1px solid #d8e0e9!important;border-radius:12px!important;background:#f8fafc!important;color:#172b45!important;padding:11px 12px!important;font-size:13px}
@@ -1713,6 +1762,9 @@ onClick={() => setMenu(!menu)}
   ))}
   <button className="top-join" onClick={() => go('membership')}>
     A’zo bo‘lish <ArrowUpRight size={16} />
+  </button>
+  <button type="button" className="yp-theme-toggle" onClick={() => setTheme(t => t === 'dark' ? 'light' : 'dark')} aria-label={theme === 'dark' ? 'Yorug‘ rejimga o‘tish' : 'Qorong‘i rejimga o‘tish'} title={theme === 'dark' ? 'Yorug‘ rejim' : 'Qorong‘i rejim'}>
+    {theme === 'dark' ? '☀ Yorug‘' : '☾ Qorong‘i'}
   </button>
 </div>
 
