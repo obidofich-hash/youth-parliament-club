@@ -162,6 +162,11 @@ function App() {
 const requestedPage = new URLSearchParams(window.location.search).get('page')
 const [page, setPage] = useState(allowedPages.has(requestedPage) ? requestedPage : 'home')
 const [adminTab, setAdminTab] = useState('overview')
+const [adminSearch, setAdminSearch] = useState('')
+const [galleryPreview, setGalleryPreview] = useState(null)
+const [applicationLookupCode, setApplicationLookupCode] = useState('')
+const [applicationLookupResult, setApplicationLookupResult] = useState(null)
+const [applicationLookupBusy, setApplicationLookupBusy] = useState(false)
 const [menu, setMenu] = useState(false)
 const [memberApplication, setMemberApplication] = useState(null)
 const [scannerOpen, setScannerOpen] = useState(false)
@@ -225,6 +230,21 @@ const [feedbackRows, setFeedbackRows] = useState([])
 const [feedbackLoading, setFeedbackLoading] = useState(false)
 const [feedbackReplyDrafts, setFeedbackReplyDrafts] = useState({})
 const [feedbackReplyBusy, setFeedbackReplyBusy] = useState(null)
+
+const normalizedAdminSearch = adminSearch.trim().toLocaleLowerCase('uz')
+const filteredApplications = applications.filter(app =>
+  [app.full_name, app.application_code, app.phone, app.email, app.status, app.university]
+    .filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedAdminSearch)
+)
+const filteredFeedbackRows = feedbackRows.filter(row =>
+  [row.full_name, row.contact_info, row.message, row.status]
+    .filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedAdminSearch)
+)
+const pendingApplicationsCount = applications.filter(app =>
+  !['Qabul qilindi', 'Rad etildi'].includes(app.status)
+).length
+const unreadFeedbackCount = feedbackRows.filter(row => row.status !== 'O‘qildi').length
+
 
 // Barcha amaliyotlar uchun yagona yuqori bildirishnoma.
 function setNotice(message) {
@@ -810,6 +830,28 @@ function go(nextPage) {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 
+async function checkApplicationStatus(event) {
+  event.preventDefault()
+  const code = applicationLookupCode.trim().toUpperCase()
+  if (!/^YPC-[A-Z0-9]{8}$/.test(code)) {
+    setNotice('Ariza raqamini YPC-XXXXXXXX shaklida kiriting.')
+    return
+  }
+  setApplicationLookupBusy(true)
+  setApplicationLookupResult(null)
+  try {
+    const { data, error } = await supabase.functions.invoke('check-application-status', {
+      body: { applicationCode: code }
+    })
+    if (error || data?.error) throw new Error(data?.error || error?.message || 'Tekshirib bo‘lmadi.')
+    setApplicationLookupResult(data)
+  } catch (error) {
+    setNotice('Ariza holatini tekshirishda xatolik: ' + (error?.message || 'Qayta urinib ko‘ring.'))
+  } finally {
+    setApplicationLookupBusy(false)
+  }
+}
+
 async function submitApplication(event) {
   event.preventDefault()
   setApplicationBusy(true)
@@ -1248,11 +1290,18 @@ function contentList(type, rows) {
             <img
               src={row.image_url}
               alt={row.title}
+              onClick={type === 'gallery' ? () => setGalleryPreview(row) : undefined}
+              role={type === 'gallery' ? 'button' : undefined}
+              tabIndex={type === 'gallery' ? 0 : undefined}
+              onKeyDown={type === 'gallery' ? event => { if (event.key === 'Enter' || event.key === ' ') setGalleryPreview(row) } : undefined}
               style={{
                 width: '100%',
                 maxHeight: '220px',
                 objectFit: 'cover',
-                marginBottom: '12px'
+                marginBottom: '12px',
+                cursor: type === 'gallery' ? 'zoom-in' : 'default',
+                borderRadius: 14,
+                transition: 'transform .25s ease'
               }}
             />
           )}
@@ -1405,7 +1454,33 @@ return (
 .feedback-admin-reply small{display:block;color:#777}
 
 @media(max-width:600px){.global-toast{top:50%;left:50%;translate:-50% -50%;padding:13px 14px 16px;font-size:13px;border-radius:13px;width:min(440px,calc(100vw - 34px))}}
-`}</style>
+/* Application status checker */
+.application-status-check{margin:0 0 22px;padding:22px;border-radius:20px;background:linear-gradient(130deg,#10243d,#244766);border:1px solid rgba(216,179,109,.35);box-shadow:0 14px 34px rgba(15,35,58,.12);color:#fff}
+.application-status-check .status-check-kicker{font-size:10px;font-weight:900;letter-spacing:2px;color:#e7bd70}
+.application-status-check h2{margin:7px 0;color:#fff;font-size:22px}
+.application-status-check p{margin:0 0 15px;color:rgba(255,255,255,.72);font-size:13px}
+.application-status-check form{display:flex;gap:10px}
+.application-status-check input{flex:1;min-width:0;background:#fff!important;color:#14243a!important;border:1px solid #d9e0e8!important;border-radius:11px;padding:12px 14px!important;font-weight:800;letter-spacing:1px}
+.application-status-check button{border:0;border-radius:11px;background:#d9b36d;color:#17283e;font-weight:850;padding:12px 16px;cursor:pointer}
+.application-status-check button:disabled{opacity:.6;cursor:wait}
+.status-check-result{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.1);color:#fff}
+.status-check-result strong{color:#f1ce8e}
+@media(max-width:600px){.application-status-check form{flex-direction:column}.application-status-check button{width:100%}}
+/* Unified platform improvements */
+.admin-search-wrap{display:flex;align-items:center;gap:10px;margin-top:16px;padding:10px 13px;border:1px solid #e4e8ef;border-radius:14px;background:#fff}
+.admin-search-wrap>span{font-size:24px;color:#a47b3d;line-height:1}
+.admin-search-wrap input{flex:1;min-width:0;border:0!important;outline:none!important;box-shadow:none!important;background:transparent!important;padding:8px 4px!important}
+.admin-search-wrap button{border:0;background:#f2eee5;color:#23354c;border-radius:9px;padding:8px 11px;font-weight:700;cursor:pointer}
+.admin-tab-count{display:inline-grid;place-items:center;min-width:19px;height:19px;margin-left:7px;padding:0 5px;border-radius:20px;background:#c99f58;color:#14243a;font-size:11px;font-weight:900}
+.gallery-lightbox{position:fixed;inset:0;z-index:10000;display:grid;place-items:center;padding:24px;background:rgba(5,14,27,.88);backdrop-filter:blur(8px)}
+.gallery-lightbox-panel{position:relative;width:min(100%,980px);max-height:90vh;overflow:auto;padding:14px;border-radius:22px;background:#10243d;border:1px solid rgba(231,189,112,.35);box-shadow:0 25px 80px rgba(0,0,0,.4)}
+.gallery-lightbox-panel img{display:block;width:100%;max-height:75vh;object-fit:contain;border-radius:14px;background:#071321}
+.gallery-lightbox-panel h3{color:#fff;margin:14px 8px 4px}
+.gallery-lightbox-panel p{color:rgba(255,255,255,.75);margin:4px 8px 10px}
+.gallery-lightbox-close{position:absolute;z-index:2;right:22px;top:22px;width:42px;height:42px;border:1px solid rgba(255,255,255,.35);border-radius:50%;background:rgba(5,14,27,.8);color:#fff;font-size:28px;line-height:1;cursor:pointer}
+@media(max-width:640px){.admin-search-wrap{align-items:stretch}.admin-search-wrap input{font-size:13px}.gallery-lightbox{padding:10px}.gallery-lightbox-panel{padding:9px}}
+\n`}
+</style>
 {typeof document !== 'undefined' && createPortal(
   <AnimatePresence>
     {toast && (
@@ -1849,6 +1924,33 @@ kicker="JAMOAMIZGA QO‘SHILING"
 title="O‘zgarishlar sizdan boshlanadi."
 desc="Klub a’zoligiga ariza topshiring."
 />
+
+<section className="application-status-check">
+  <div>
+    <span className="status-check-kicker">ARIZA HOLATI</span>
+    <h2>Arizangizni kuzatib boring</h2>
+    <p>Ariza yuborilganda berilgan raqamni kiriting. Faqat ariza holati ko‘rsatiladi.</p>
+  </div>
+  <form onSubmit={checkApplicationStatus}>
+    <input
+      value={applicationLookupCode}
+      onChange={event => setApplicationLookupCode(event.target.value.toUpperCase())}
+      placeholder="YPC-XXXXXXXX"
+      aria-label="Ariza raqami"
+      maxLength={12}
+      required
+    />
+    <button type="submit" disabled={applicationLookupBusy}>
+      {applicationLookupBusy ? 'Tekshirilmoqda...' : 'Holatni tekshirish'}
+    </button>
+  </form>
+  {applicationLookupResult && (
+    <div className="status-check-result" role="status">
+      <strong>{applicationLookupResult.status}</strong>
+      <span>Ariza raqami: {applicationLookupResult.applicationCode}</span>
+    </div>
+  )}
+</section>
 
 <form className="form-card application-form" onSubmit={submitApplication}>
   <h2>YOUTH PARLIAMENT CLUB</h2>
@@ -2320,8 +2422,8 @@ required
     }}><RefreshCw size={15}/> Ma’lumotlarni yangilash</button>
   </div>
   <div className="admin-stat-grid">
-    <button type="button" onClick={() => setAdminTab('applications')}><span>Arizalar</span><strong>{applications.length}</strong><small>Ko‘rib chiqish</small></button>
-    <button type="button" onClick={() => setAdminTab('feedback')}><span>Murojaatlar</span><strong>{feedbackRows.length}</strong><small>Javob berish</small></button>
+    <button type="button" onClick={() => setAdminTab('applications')}><span>Arizalar</span><strong>{applications.length}</strong><small>{pendingApplicationsCount} ta ko‘rib chiqilmoqda</small></button>
+    <button type="button" onClick={() => setAdminTab('feedback')}><span>Murojaatlar</span><strong>{feedbackRows.length}</strong><small>{unreadFeedbackCount} ta yangi / o‘qilmagan</small></button>
     <button type="button" onClick={() => setAdminTab('attendance')}><span>Davomat</span><strong>{attendanceRecords.length}</strong><small>Tanlangan tadbir</small></button>
     <button type="button" onClick={() => setAdminTab('content')}><span>Kontent</span><strong>{events.length + news.length + gallery.length}</strong><small>Tadbir · yangilik · foto</small></button>
   </div>
@@ -2334,9 +2436,23 @@ required
       ['content','Kontent'],
       ['settings','Sozlamalar']
     ].map(([key,label]) => (
-      <button key={key} type="button" className={adminTab === key ? 'active' : ''} onClick={() => setAdminTab(key)}>{label}</button>
+      <button key={key} type="button" className={adminTab === key ? 'active' : ''} onClick={() => setAdminTab(key)}>
+        {label}
+        {key === 'applications' && pendingApplicationsCount > 0 && <span className="admin-tab-count">{pendingApplicationsCount}</span>}
+        {key === 'feedback' && unreadFeedbackCount > 0 && <span className="admin-tab-count">{unreadFeedbackCount}</span>}
+      </button>
     ))}
   </nav>
+  <div className="admin-search-wrap">
+    <span aria-hidden="true">⌕</span>
+    <input
+      value={adminSearch}
+      onChange={event => setAdminSearch(event.target.value)}
+      placeholder="Ariza yoki murojaatni ism, raqam, telefon orqali qidiring..."
+      aria-label="Admin ma’lumotlarini qidirish"
+    />
+    {adminSearch && <button type="button" onClick={() => setAdminSearch('')}>Tozalash</button>}
+  </div>
 </section>
 {adminTab === 'overview' && (
   <section className="admin-overview-grid">
@@ -2440,10 +2556,10 @@ required
   {feedbackLoading ? (
     <p>Murojaatlar yuklanmoqda...</p>
   ) : feedbackRows.length === 0 ? (
-    <p>Hozircha murojaatlar mavjud emas. Ro‘yxatni yangilang.</p>
+    <p>{adminSearch ? 'Qidiruv bo‘yicha murojaat topilmadi.' : 'Hozircha murojaatlar mavjud emas. Ro‘yxatni yangilang.'}</p>
   ) : (
     <div className="applications-list">
-      {feedbackRows.map(row => (
+      {filteredFeedbackRows.map(row => (
         <article className="application-item" key={row.id}>
           <div className="applications-heading">
             <strong>{row.is_anonymous ? 'Anonim murojaat' : (row.full_name || 'Ism ko‘rsatilmagan')}</strong>
@@ -2523,10 +2639,10 @@ required
   <p>Jami arizalar: {applications.length} ta</p>
 
   {applications.length === 0 ? (
-    <p>Hozircha arizalar mavjud emas.</p>
+    <p>{adminSearch ? 'Qidiruv bo‘yicha ariza topilmadi.' : 'Hozircha arizalar mavjud emas.'}</p>
   ) : (
     <div className="applications-list">
-      {applications.map((app) => (
+      {filteredApplications.map((app) => (
        <details className="application-item" key={app.id}>
           <summary>
   <strong>{app.full_name}</strong> — {app.application_code} · {app.status}
@@ -2767,6 +2883,34 @@ marginTop: '8px'
 </>
 )}
 </motion.div>
+</AnimatePresence>
+
+<AnimatePresence>
+  {galleryPreview && (
+    <motion.div
+      className="gallery-lightbox"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Galereya rasmi"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      onClick={() => setGalleryPreview(null)}
+    >
+      <motion.div
+        className="gallery-lightbox-panel"
+        initial={{ scale: .94, y: 18 }}
+        animate={{ scale: 1, y: 0 }}
+        exit={{ scale: .96, y: 12 }}
+        onClick={event => event.stopPropagation()}
+      >
+        <button type="button" className="gallery-lightbox-close" onClick={() => setGalleryPreview(null)} aria-label="Yopish">×</button>
+        <img src={galleryPreview.image_url} alt={galleryPreview.title || 'Klub galereyasi'} />
+        {galleryPreview.title && <h3>{galleryPreview.title}</h3>}
+        {galleryPreview.description && <p>{galleryPreview.description}</p>}
+      </motion.div>
+    </motion.div>
+  )}
 </AnimatePresence>
 
 <footer className="footer">
