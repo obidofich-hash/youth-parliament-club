@@ -240,6 +240,20 @@ const filteredFeedbackRows = feedbackRows.filter(row =>
   [row.full_name, row.contact_info, row.message, row.status]
     .filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedAdminSearch)
 )
+const filteredAttendanceRecords = attendanceRecords.filter(record =>
+  [record.member?.full_name, record.member?.application_code, record.member?.phone,
+   record.member?.email, record.member?.university, record.method, record.status]
+    .filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedAdminSearch)
+)
+const filteredEvents = events.filter(row =>
+  [row.title, row.description, row.event_date].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedAdminSearch)
+)
+const filteredNews = news.filter(row =>
+  [row.title, row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedAdminSearch)
+)
+const filteredGallery = gallery.filter(row =>
+  [row.title, row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedAdminSearch)
+)
 const pendingApplicationsCount = applications.filter(app =>
   !['Qabul qilindi', 'Rad etildi'].includes(app.status)
 ).length
@@ -2499,9 +2513,11 @@ required
     <p>Davomat ro‘yxati yuklanmoqda...</p>
   ) : attendanceRecords.length === 0 ? (
     <p>Ushbu tadbir uchun tasdiqlangan davomat yozuvi hozircha yo‘q.</p>
+  ) : filteredAttendanceRecords.length === 0 ? (
+    <p>Qidiruv bo‘yicha davomat yozuvi topilmadi.</p>
   ) : (
     <div className="applications-list">
-      {attendanceRecords.map((record, index) => (
+      {filteredAttendanceRecords.map((record, index) => (
         <article className="application-item" key={record.id}>
           <strong>{index + 1}. {record.member?.full_name || 'Ism topilmadi'}</strong>
           <p><b>A’zolik raqami:</b> {record.member?.application_code || '—'}</p>
@@ -2556,7 +2572,9 @@ required
   {feedbackLoading ? (
     <p>Murojaatlar yuklanmoqda...</p>
   ) : feedbackRows.length === 0 ? (
-    <p>{adminSearch ? 'Qidiruv bo‘yicha murojaat topilmadi.' : 'Hozircha murojaatlar mavjud emas. Ro‘yxatni yangilang.'}</p>
+    <p>Hozircha murojaatlar mavjud emas. Ro‘yxatni yangilang.</p>
+  ) : filteredFeedbackRows.length === 0 ? (
+    <p>Qidiruv bo‘yicha murojaat topilmadi.</p>
   ) : (
     <div className="applications-list">
       {filteredFeedbackRows.map(row => (
@@ -2639,7 +2657,9 @@ required
   <p>Jami arizalar: {applications.length} ta</p>
 
   {applications.length === 0 ? (
-    <p>{adminSearch ? 'Qidiruv bo‘yicha ariza topilmadi.' : 'Hozircha arizalar mavjud emas.'}</p>
+    <p>Hozircha arizalar mavjud emas.</p>
+  ) : filteredApplications.length === 0 ? (
+    <p>Qidiruv bo‘yicha ariza topilmadi.</p>
   ) : (
     <div className="applications-list">
       {filteredApplications.map((app) => (
@@ -2873,6 +2893,20 @@ marginTop: '8px'
 {contentForm('news', 'Yangilik')}
 {contentForm('events', 'Tadbir')}
 {contentForm('gallery', 'Galereya rasmi')}
+</div>
+<div className="form-card" style={{marginTop:18}}>
+  <h2>Kontent bo‘yicha qidiruv natijalari</h2>
+  {!normalizedAdminSearch ? <p>Yuqoridagi qidiruv maydoniga tadbir, yangilik yoki galereya sarlavhasini yozing.</p> : (
+    <>
+      <h3>Tadbirlar ({filteredEvents.length})</h3>
+      {filteredEvents.map(row => <p key={row.id}><b>{row.title}</b> — {row.event_date || 'Sana ko‘rsatilmagan'}</p>)}
+      <h3>Yangiliklar ({filteredNews.length})</h3>
+      {filteredNews.map(row => <p key={row.id}><b>{row.title}</b> — {row.description || ''}</p>)}
+      <h3>Galereya ({filteredGallery.length})</h3>
+      {filteredGallery.map(row => <p key={row.id}><b>{row.title || 'Galereya rasmi'}</b> — {row.description || ''}</p>)}
+      {filteredEvents.length + filteredNews.length + filteredGallery.length === 0 && <p>Kontent bo‘yicha mos natija topilmadi.</p>}
+    </>
+  )}
 </div>
 </div>
 )}
