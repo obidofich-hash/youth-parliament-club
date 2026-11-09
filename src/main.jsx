@@ -2066,6 +2066,90 @@ html[data-yp-theme="dark"] .about-role b{color:#e8c987!important}
 html[data-yp-theme="dark"] .about-role span{color:#f0f3f7!important}
 html[data-yp-theme="dark"] .about-role small{color:#c4d0de!important}
 html[data-yp-theme="dark"] .about-pill{color:#f0d39d!important;background:rgba(200,166,107,.16)!important;border:1px solid rgba(200,166,107,.32)!important}
+
+
+/* V9.2 — coordinated About page palettes */
+.about-modern{color:#152b43!important}
+.about-team{
+  background:linear-gradient(135deg,#dce6f0 0%,#e8eef4 52%,#d5e0eb 100%)!important;
+  border:1px solid #c3d1df!important;
+  box-shadow:0 18px 42px rgba(18,43,68,.09)!important;
+}
+.about-team h2,.about-future h2{color:#102944!important}
+.about-team p,.about-future p{color:#465d75!important}
+.about-role{
+  background:linear-gradient(150deg,#fbfcfe,#eef3f8)!important;
+  border:1px solid #c5d2df!important;
+  box-shadow:0 8px 22px rgba(16,41,68,.07)!important;
+}
+.about-role b{color:#a77d3d!important}
+.about-role span{color:#152b43!important}
+.about-role small{color:#53677d!important}
+.about-metric{
+  background:linear-gradient(145deg,#e4ebf3,#d7e1ec)!important;
+  border-color:#c4d1df!important;
+}
+.about-metric strong{color:#a77d3d!important}
+.about-metric span{color:#40566e!important}
+.about-future{
+  background:linear-gradient(135deg,#dce6f0,#e9eff5)!important;
+  border:1px solid #c4d1df!important;
+  box-shadow:0 18px 42px rgba(18,43,68,.08)!important;
+}
+.about-future-card{
+  background:linear-gradient(145deg,#fbfcfe,#edf2f7)!important;
+  border:1px solid #c8d4e0!important;
+}
+.about-future-card h3{color:#142b44!important}
+.about-future-card p{color:#50657c!important}
+.about-section-copy h2{color:#142b44!important}
+.about-section-copy p{color:#465d75!important}
+.about-pill{background:#e9dfca!important;color:#8c672f!important;border:1px solid #d7c39b!important}
+
+/* Dark mode: all About page sections merge into the same navy environment */
+html[data-yp-theme="dark"] .about-team{
+  background:linear-gradient(135deg,#0b1d32 0%,#102944 55%,#0b2037 100%)!important;
+  border:1px solid rgba(200,166,107,.3)!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.2)!important;
+}
+html[data-yp-theme="dark"] .about-team h2,
+html[data-yp-theme="dark"] .about-future h2,
+html[data-yp-theme="dark"] .about-section-copy h2{color:#f0d39b!important}
+html[data-yp-theme="dark"] .about-team p,
+html[data-yp-theme="dark"] .about-future p,
+html[data-yp-theme="dark"] .about-section-copy p{color:#d0dbe7!important}
+html[data-yp-theme="dark"] .about-role{
+  background:linear-gradient(145deg,#142f4b,#0d2239)!important;
+  border:1px solid rgba(200,166,107,.3)!important;
+  box-shadow:0 8px 22px rgba(0,0,0,.16)!important;
+}
+html[data-yp-theme="dark"] .about-role b{color:#e4c17f!important}
+html[data-yp-theme="dark"] .about-role span{color:#f0f4f8!important}
+html[data-yp-theme="dark"] .about-role small{color:#bdcad8!important}
+html[data-yp-theme="dark"] .about-metric{
+  background:linear-gradient(145deg,#132f4c,#0d233b)!important;
+  border-color:rgba(200,166,107,.3)!important;
+}
+html[data-yp-theme="dark"] .about-metric strong{color:#e7c783!important}
+html[data-yp-theme="dark"] .about-metric span{color:#cbd6e2!important}
+html[data-yp-theme="dark"] .about-future{
+  background:linear-gradient(135deg,#0b1d32,#102944 60%,#0b2037)!important;
+  border:1px solid rgba(200,166,107,.3)!important;
+  box-shadow:0 18px 42px rgba(0,0,0,.2)!important;
+}
+html[data-yp-theme="dark"] .about-future-card{
+  background:linear-gradient(145deg,#142f4b,#0d2239)!important;
+  border-color:rgba(200,166,107,.28)!important;
+}
+html[data-yp-theme="dark"] .about-future-card h3{color:#f0d39b!important}
+html[data-yp-theme="dark"] .about-future-card p{color:#cbd6e2!important}
+html[data-yp-theme="dark"] .about-pill{
+  background:rgba(200,166,107,.14)!important;
+  color:#efd39e!important;
+  border:1px solid rgba(200,166,107,.35)!important;
+}
+html[data-yp-theme="dark"] .about-section-art{background:#0b1d32!important}
+
 `}</style>
 <div className="about-modern">
   <section className="about-hero">
