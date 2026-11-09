@@ -161,6 +161,10 @@ function Contact({ I, title, value, emoji, delay = 0 }) {
 function App() {
 const requestedPage = new URLSearchParams(window.location.search).get('page')
 const [page, setPage] = useState(allowedPages.has(requestedPage) ? requestedPage : 'home')
+const [assistantOpen, setAssistantOpen] = useState(false)
+const [assistantInput, setAssistantInput] = useState('')
+const [assistantMessages, setAssistantMessages] = useState([{role:'assistant',text:'Assalomu alaykum! Men Youth Parliament Club sayt yordamchisiman. Saytdagi ochiq ma’lumotlar bo‘yicha yordam beraman.'}])
+
 const [adminTab, setAdminTab] = useState('overview')
 const [adminSearch, setAdminSearch] = useState('')
 const [publicSearch, setPublicSearch] = useState('')
@@ -1442,6 +1446,29 @@ function contentList(type, rows) {
     </div>
 )
 }
+
+function answerSiteAssistant(question) {
+ const q=(question||'').toLocaleLowerCase('uz-UZ').trim()
+ if(/parol|password|pasport|karta raqam|maxfiy|shaxsiy ma.?lumot/i.test(q)) return 'Xavfsizlik uchun parol, pasport, karta yoki boshqa shaxsiy ma’lumotlarni chatga yozmang. Bu yordamchi bunday ma’lumotlarni so‘ramaydi.'
+ if(/a.?zolik|a.?zo bo|ariza|qabul/i.test(q)) return 'Klubga a’zo bo‘lish uchun “A’zolikka ariza” bo‘limiga o‘ting va shaklni to‘ldiring. Ariza holatini tekshirish ham shu bo‘limda mavjud.'
+ if(/tadbir|uchrashuv|kalend|qachon|sana/i.test(q)) {
+  const rows=(events||[]).filter(e=>e.event_date&&new Date(e.event_date)>=new Date()).sort((a,b)=>new Date(a.event_date)-new Date(b.event_date)).slice(0,5)
+  return rows.length?'Saytdagi yaqin tadbirlar:\n'+rows.map(e=>'• '+e.title+' — '+new Date(e.event_date).toLocaleString('uz-UZ',{dateStyle:'medium',timeStyle:'short'})).join('\n'):'Saytda hozircha kelgusi tadbirlar sanasi ko‘rsatilmagan. “Tadbirlar” sahifasidagi kalendardan tekshiring.'
+ }
+ if(/yangilik|xabar/i.test(q)) return (news||[]).length?'Yangiliklar:\n'+news.slice(0,5).map(n=>'• '+n.title).join('\n'):'Saytda hozircha yangilik e’lon qilinmagan.'
+ if(/hujjat|nizom|konsepsiya|ustav/i.test(q)) return 'Rasmiy hujjatlarni “Hujjatlar” bo‘limidan ko‘rishingiz mumkin.'
+ if(/murojaat|taklif|shikoyat|fikr/i.test(q)) return 'Taklif yoki murojaat yuborish uchun “Murojaatlar” bo‘limidan foydalaning. Maxfiy ma’lumotlarni yubormang.'
+ if(/aloqa|bog.?lan|telefon|telegram|email|pochta|manzil/i.test(q)) return `Bog‘lanish: ${settings.phone||'telefon ko‘rsatilmagan'}; ${settings.telegram||'Telegram ko‘rsatilmagan'}; ${settings.email||'email ko‘rsatilmagan'}; ${settings.address||'manzil ko‘rsatilmagan'}. Batafsil “Bog‘lanish” sahifasida.`
+ if(/klub haqida|tarix|maqsad|vazifa|faoliyat/i.test(q)) return settings.about_intro||settings.about_today||'Klub yoshlarning huquqiy bilimini, yetakchiligini va tashabbuslarini qo‘llab-quvvatlashga qaratilgan. “Klub haqida” sahifasida batafsil ma’lumot bor.'
+ if(/rahmat|tashakkur/i.test(q)) return 'Marhamat! Yana savolingiz bo‘lsa, yozing.'
+ return 'Bu savol bo‘yicha saytda tasdiqlangan ochiq ma’lumot topilmadi. “Klub haqida”, “Hujjatlar”, “Tadbirlar” yoki “Bog‘lanish” bo‘limlarini ko‘rib chiqing. Taxminiy javob bermayman.'
+}
+function sendAssistantMessage(text=assistantInput) {
+ const question=(text||'').trim(); if(!question)return
+ setAssistantMessages(current=>[...current,{role:'user',text:question},{role:'assistant',text:answerSiteAssistant(question)}])
+ setAssistantInput('')
+}
+
 return (
 <div className="app">
 <style>{`
@@ -1541,7 +1568,34 @@ return (
 .home-live-stats article{padding:18px;border-radius:15px;background:linear-gradient(145deg,#10243d,#254867);color:#fff;display:flex;flex-direction:column;gap:5px;min-width:0}
 .home-live-stats strong{font-size:32px;line-height:1;color:#e7bd70}.home-live-stats span{font-weight:800}.home-live-stats small{color:rgba(255,255,255,.65);font-size:11px}
 .home-upcoming-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.home-upcoming-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}.home-upcoming-grid article{padding:18px;border:1px solid #e7eaf0;border-radius:15px;background:#fafbfc}.home-upcoming-grid small{color:#a47b3d;font-weight:800}.home-upcoming-grid h3{margin:9px 0;color:#172b45}.home-upcoming-grid p,.home-upcoming-empty{color:#647287;font-size:13px;line-height:1.6}.home-upcoming-empty{margin-top:18px;padding:18px;border-radius:14px;background:#f7f8fa}
-@media(max-width:760px){.home-live-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.home-upcoming-grid{grid-template-columns:1fr}.home-live-section,.home-upcoming-section{padding:19px}.home-upcoming-heading{align-items:flex-start;flex-direction:column}}\n`}
+@media(max-width:760px){.home-live-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.home-upcoming-grid{grid-template-columns:1fr}.home-live-section,.home-upcoming-section{padding:19px}.home-upcoming-heading{align-items:flex-start;flex-direction:column}}\n
+/* Unified pearl / midnight / champagne visual system */
+:root{--yp-ink:#14263d;--yp-muted:#65748a;--yp-gold:#c9a86e}
+html,body{min-height:100%;background:#eef2f6!important;color:var(--yp-ink)}
+body{background:radial-gradient(ellipse at 12% 8%,rgba(211,224,239,.72),transparent 38%),radial-gradient(ellipse at 88% 30%,rgba(232,221,199,.42),transparent 34%),linear-gradient(145deg,#f5f7fa,#edf1f5 52%,#f7f5f0)!important;background-attachment:fixed!important}
+.app,.main,.page{background:transparent!important}
+.topbar,.sidebar{background:rgba(250,252,254,.9)!important;backdrop-filter:blur(18px);border-color:rgba(173,188,205,.45)!important}
+.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box,.home-live-section,.home-upcoming-section,.events-calendar{border:1px solid rgba(191,202,215,.55)!important;border-radius:22px!important;box-shadow:0 14px 38px rgba(28,48,74,.065)!important;background:rgba(255,255,255,.88)!important;backdrop-filter:blur(12px)}
+.footer{border-top:1px solid rgba(174,188,204,.45)!important;background:rgba(249,251,253,.78)!important;border-radius:20px 20px 0 0}
+.gold-btn{border-radius:12px!important}
+.yp-assistant-launch{position:fixed;right:25px;bottom:24px;z-index:11000;display:flex;align-items:center;gap:10px;padding:13px 18px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:linear-gradient(135deg,#102844,#07182d);color:#fff;box-shadow:0 16px 40px rgba(7,24,45,.28);font-weight:800;cursor:pointer}
+.yp-assistant-launch-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(224,190,128,.18);color:#f0d39d}
+.yp-assistant-panel{position:fixed;right:24px;bottom:88px;z-index:11001;width:min(390px,calc(100vw - 28px));height:min(570px,calc(100vh - 125px));display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(205,174,119,.45);border-radius:22px;background:#f8fafc;box-shadow:0 24px 70px rgba(5,20,38,.28)}
+.yp-assistant-head{display:flex;align-items:center;gap:11px;padding:16px;background:linear-gradient(130deg,#07182d,#173956);color:white}
+.yp-assistant-avatar{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(230,209,166,.55);border-radius:14px;color:#f0d39d}
+.yp-assistant-head strong{display:block;font-size:14px}.yp-assistant-head small{display:block;margin-top:3px;color:#c7d2df;font-size:11px}
+.yp-assistant-close{margin-left:auto;width:34px;height:34px;border:1px solid rgba(255,255,255,.18);border-radius:50%;background:rgba(255,255,255,.08);color:white;font-size:22px;cursor:pointer}
+.yp-assistant-messages{flex:1;overflow:auto;display:flex;flex-direction:column;gap:11px;padding:16px;background:linear-gradient(180deg,#f4f7fa,#edf2f6)}
+.yp-assistant-bubble{max-width:88%;padding:11px 13px;border:1px solid #e0e6ed;border-radius:15px 15px 15px 4px;background:white;color:#23354c;font-size:13px;line-height:1.55;white-space:pre-wrap;overflow-wrap:anywhere}
+.yp-assistant-bubble.user{align-self:flex-end;border-color:#183653;border-radius:15px 15px 4px 15px;background:#183653;color:white}
+.yp-assistant-quick{display:flex;gap:7px;flex-wrap:wrap;padding:0 13px 10px;background:#f8fafc}
+.yp-assistant-quick button{border:1px solid #d9e1ea;border-radius:999px;background:white;color:#314761;padding:7px 10px;font-size:11px;cursor:pointer}
+.yp-assistant-compose{display:flex;gap:8px;padding:12px;border-top:1px solid #e0e6ed;background:#fff}
+.yp-assistant-compose input{flex:1;min-width:0;border:1px solid #d8e0e9!important;border-radius:12px!important;background:#f8fafc!important;color:#172b45!important;padding:11px 12px!important;font-size:13px}
+.yp-assistant-compose button{width:42px;flex:none;border:0;border-radius:12px;background:#c9a86e;color:#13263c;font-weight:900;cursor:pointer}
+.yp-assistant-privacy{padding:0 13px 11px;background:#fff;color:#8290a1;font-size:10px;line-height:1.4}
+@media(max-width:600px){.yp-assistant-launch{right:14px;bottom:14px;padding:10px 14px}.yp-assistant-panel{right:10px;bottom:72px;width:calc(100vw - 20px);height:min(600px,calc(100vh - 92px))}.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box{border-radius:17px!important}}
+\n`}
 
 </style>
 {typeof document !== 'undefined' && createPortal(
@@ -3015,6 +3069,18 @@ marginTop: '8px'
     </motion.div>
   )}
 </AnimatePresence>
+
+
+<section className="yp-assistant" aria-label="Sayt yordamchisi">
+ {assistantOpen&&<div className="yp-assistant-panel" role="dialog" aria-label="Youth Parliament sayt yordamchisi">
+  <div className="yp-assistant-head"><div className="yp-assistant-avatar"><MessageCircle size={20}/></div><div><strong>YPC yordamchi</strong><small>Faqat saytdagi ochiq ma’lumotlar asosida</small></div><button type="button" className="yp-assistant-close" onClick={()=>setAssistantOpen(false)} aria-label="Chatni yopish">×</button></div>
+  <div className="yp-assistant-messages" aria-live="polite">{assistantMessages.map((m,i)=><div key={i} className={`yp-assistant-bubble ${m.role==='user'?'user':''}`}>{m.text}</div>)}</div>
+  <div className="yp-assistant-quick"><button type="button" onClick={()=>sendAssistantMessage('Klubga qanday a’zo bo‘laman?')}>A’zolik</button><button type="button" onClick={()=>sendAssistantMessage('Yaqin tadbirlar qachon?')}>Tadbirlar</button><button type="button" onClick={()=>sendAssistantMessage('Klub haqida ma’lumot ber')}>Klub haqida</button></div>
+  <form className="yp-assistant-compose" onSubmit={e=>{e.preventDefault();sendAssistantMessage()}}><input value={assistantInput} onChange={e=>setAssistantInput(e.target.value)} placeholder="Savolingizni yozing..." aria-label="Savolingiz"/><button type="submit" aria-label="Yuborish">➤</button></form>
+  <div className="yp-assistant-privacy">Xabarlar faqat brauzeringiz ichida qayta ishlanadi va serverga yuborilmaydi. Shaxsiy ma’lumot, parol yoki hujjat raqamini kiritmang.</div>
+ </div>}
+ <button type="button" className="yp-assistant-launch" onClick={()=>setAssistantOpen(o=>!o)} aria-expanded={assistantOpen}><span className="yp-assistant-launch-icon"><MessageCircle size={17}/></span>{assistantOpen?'Chatni yopish':'Yordam kerakmi?'}</button>
+</section>
 
 <footer className="footer">
 <Brand logo={settings.club_logo} />
