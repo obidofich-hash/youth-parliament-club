@@ -1118,6 +1118,13 @@ setNotice('Sarlavhani kiriting.')
 return
 }
 
+// Kontent faqat tizimga kirgan administrator tomonidan qo‘shiladi.
+const { data: authData, error: authError } = await supabase.auth.getUser()
+if (authError || !authData?.user || authData.user.email?.toLowerCase() !== 'obidofich@gmail.com') {
+  setNotice('Saqlash uchun administrator akkauntiga qayta kiring.')
+  return
+}
+
 setBusy(true)
 setNotice('')
 
@@ -1143,7 +1150,10 @@ const { error } = await supabase.from(table).insert(payload)
 setBusy(false)
 
 if (error) {
-setNotice('Saqlashda xatolik: ' + error.message)
+const message = error.code === '42501' || /row-level security|RLS/i.test(error.message || '')
+  ? 'Supabase RLS ruxsati yo‘q. SQL Editor’da administrator INSERT/UPDATE/DELETE siyosatini yoqing.'
+  : error.message
+setNotice('Saqlashda xatolik: ' + message)
 return
 }
 
@@ -1829,179 +1839,66 @@ Klub haqida <ArrowUpRight />
 
 
 {page === 'about' && (
-<div className="about-v2">
-<PageHead
-kicker="YOSHLAR PARLAMENTI KLUBI"
-title="G‘oyadan — kelajakka."
-desc="Bilim, tashabbus va yetakchilikni birlashtirgan yoshlar platformasi."
-/>
-
-<motion.section
-className="av-intro"
-initial={{ opacity: 0, y: 55 }}
-whileInView={{ opacity: 1, y: 0 }}
-viewport={{ once: true, amount: 0.2 }}
-transition={{ duration: 0.85 }}
->
-<div className="av-intro-copy">
-<span className="av-kicker">BIZNING MISSIYAMIZ</span>
-<h2>Yoshlar ovozi — <em>jamiyat kelajagi.</em></h2>
-<p>
-{settings.about_intro || 'Yoshlarning huquqiy bilimini oshirish, ijtimoiy faolligini kuchaytirish va yangi tashabbuslarini qo‘llab-quvvatlash — klub faoliyatining asosiy yo‘nalishidir.'}
-</p>
-<div className="av-meta">
-<span><CalendarDays size={17}/> 2026-yil, noyabr</span>
-<span><Users size={17}/> 12 nafar jamoa a’zosi</span>
-</div>
-</div>
-
-<div className="av-visual av-visual-one">
-<div className="av-image-frame">
-<img
-  src={settings.about_image || "https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=85"}
-  alt="Universitet binosi"
-/>
-</div>
-<div className="av-image-caption">
-<Landmark size={19}/>
-<span>XALQARO IJTIMOIY INNOVATSIYALAR UNIVERSITETI</span>
-</div>
-<span className="av-number">01</span>
-</div>
-</motion.section>
-
-<div className="av-divider">
-<span>01</span><i/><b>O‘TMISH</b>
-</div>
-
-<motion.section
-className="av-history"
-initial={{ opacity: 0, y: 55 }}
-whileInView={{ opacity: 1, y: 0 }}
-viewport={{ once: true, amount: 0.2 }}
-transition={{ duration: 0.8 }}
->
-<div className="av-history-art">
-<div className="av-history-frame">
-<img
-src={settings.about_history_image || "https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=85"}
-alt="Parlament majlisi zali"
-/>
-</div>
-<div className="av-photo-stamp">YOSHLAR<br/>TASHABBUSI</div>
-</div>
-
-<motion.div
-className="av-history-copy"
-initial={{ opacity: 0, x: 55 }}
-whileInView={{ opacity: 1, x: 0 }}
-viewport={{ once: true, amount: 0.3 }}
-transition={{ duration: 0.9, delay: 0.15 }}
->
-<span className="av-kicker">TASHKIL TOPISH TARIXI</span>
-<h2>Har bir katta o‘zgarish <em>bir g‘oyadan</em> boshlanadi.</h2>
-<p>
-{settings.about_history || '2026-yil noyabr oyida Xalqaro ijtimoiy innovatsiyalar universiteti hududida Yoshlar parlamenti klubi ochilgan. Klub yoshlarning fikr va takliflarini ilgari surish, ularning ijtimoiy hayotdagi ishtirokini kuchaytirish maqsadida tashkil etilgan.'}
-</p>
-<div className="av-date">
-<CalendarDays size={19}/>
-<div>
-<small>TASHKIL TOPGAN SANA</small>
-<strong>2026 / NOYABR</strong>
-</div>
-</div>
-</motion.div>
-</motion.section>
-
-<div className="av-divider">
-<span>02</span><i/><b>BUGUN</b>
-</div>
-
-<motion.section
-className="av-today"
-initial={{ opacity: 0, y: 50 }}
-whileInView={{ opacity: 1, y: 0 }}
-viewport={{ once: true, amount: 0.2 }}
-transition={{ duration: 0.8 }}
->
-<div className="av-today-copy">
-<span className="av-kicker">BUGUNGI FAOLIYAT</span>
-<h2>Bir maqsad — <em>yagona jamoa.</em></h2>
-<p>
-{settings.about_today || 'Klub faoliyati vazifalar taqsimoti, hamkorlik va mas’uliyat tamoyillariga asoslanadi. Har bir ishtirokchi umumiy maqsad yo‘lida o‘z yo‘nalishi bo‘yicha faoliyat olib boradi.'}
-</p>
-</div>
-
-<div className="av-roles">
-<div><strong>01</strong><span>Spiker</span><b>1 nafar</b></div>
-<div><strong>02</strong><span>Koordinatorlar</span><b>2 nafar</b></div>
-<div><strong>03</strong><span>Media bo‘limi</span><b>2 nafar</b></div>
-<div><strong>04</strong><span>Klub a’zolari</span><b>7 nafar</b></div>
-<div className="av-total">
-<strong>12</strong>
-<span>Jami jamoa a’zolari</span>
-</div>
-</div>
-</motion.section>
-
-<div className="av-divider">
-<span>03</span><i/><b>KELAJAK</b>
-</div>
-
-<motion.section
-className="av-future"
-initial={{ opacity: 0, y: 50 }}
-whileInView={{ opacity: 1, y: 0 }}
-viewport={{ once: true, amount: 0.2 }}
-transition={{ duration: 0.85 }}
->
-<div className="av-future-heading">
-<span className="av-kicker">ISTIQBOL VA RIVOJLANISH</span>
-<h2>Kelajakni bugundan <em>birgalikda quramiz.</em></h2>
-<p>
-{settings.about_future || 'Klubning istiqboldagi maqsadi — universitet miqyosida yoshlar tashabbuslarini kengaytirish, huquqiy va intellektual loyihalarni amalga oshirish hamda faol yoshlar hamkorligini rivojlantirish.'}
-</p>
-</div>
-
-<div className="av-future-grid">
-<article>
-<span>01</span><Landmark/>
-<h3>Huquqiy bilim</h3>
-<p>Huquqiy savodxonlik va fuqarolik faolligini oshirish.</p>
-</article>
-<article>
-<span>02</span><Users/>
-<h3>Yoshlar hamkorligi</h3>
-<p>Tashabbuskor yoshlarni yagona maqsad atrofida birlashtirish.</p>
-</article>
-<article>
-<span>03</span><ArrowUpRight/>
-<h3>Yangi loyihalar</h3>
-<p>Innovatsion va ijtimoiy ahamiyatga ega g‘oyalarni ro‘yobga chiqarish.</p>
-</article>
-</div>
-
-<div className="av-final-line">
-YOSHLAR OVOZI. YANGI G‘OYALAR. YANGI KELAJAK.
-</div>
-</motion.section>
-{session?.user?.email?.toLowerCase() === 'obidofich@gmail.com' && (
-  <section className="form-card about-editor">
-    <h2>“Klub haqida” bo‘limini tahrirlash</h2>
-    <p>Matnlarni o‘zgartiring, rasmlarni yuklang va saqlang. O‘zgarishlar ommaga ko‘rinadi.</p>
-    <label>Kirish matni<textarea rows="3" value={draft.about_intro || ''} onChange={e=>setDraft({...draft,about_intro:e.target.value})} placeholder="Missiya matni"/></label>
-    <label>Tarix matni<textarea rows="4" value={draft.about_history || ''} onChange={e=>setDraft({...draft,about_history:e.target.value})} placeholder="Klub tashkil topishi tarixi"/></label>
-    <label>Bugungi faoliyat matni<textarea rows="3" value={draft.about_today || ''} onChange={e=>setDraft({...draft,about_today:e.target.value})} placeholder="Bugungi faoliyat"/></label>
-    <label>Kelajak matni<textarea rows="3" value={draft.about_future || ''} onChange={e=>setDraft({...draft,about_future:e.target.value})} placeholder="Istiqboldagi maqsadlar"/></label>
-    <label>Universitet rasmi<input type="file" accept="image/*" onChange={e=>uploadSettingImage('about_image',e.target.files?.[0])}/></label>
-    <label>Tarix rasmi<input type="file" accept="image/*" onChange={e=>uploadSettingImage('about_history_image',e.target.files?.[0])}/></label>
-    <button className="gold-btn" type="button" onClick={saveSettings} disabled={busy}>O‘zgarishlarni saqlash <Save size={16}/></button>
+<>
+<style>{`
+.about-modern{color:#17263a}.about-hero{position:relative;overflow:hidden;border-radius:28px;padding:clamp(28px,5vw,58px);background:radial-gradient(circle at 85% 15%,rgba(211,174,105,.28),transparent 30%),linear-gradient(120deg,#0c1d32,#183653 68%,#254664);color:#fff;display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center;min-height:330px;margin:18px 0 30px}.about-hero h1{font-size:clamp(34px,5vw,58px);line-height:1.05;letter-spacing:-.04em;margin:12px 0 16px}.about-hero p{max-width:620px;color:#d5dfeb;line-height:1.8}.about-tag{font-size:11px;letter-spacing:.2em;font-weight:800;color:#d8b574}.about-hero-mark{width:min(260px,100%);aspect-ratio:1;border:1px solid rgba(224,189,123,.45);border-radius:50%;display:grid;place-items:center;margin:auto;position:relative}.about-hero-mark:before,.about-hero-mark:after{content:'';position:absolute;inset:18px;border:1px solid rgba(224,189,123,.25);border-radius:50%}.about-hero-mark:after{inset:38px}.about-hero-mark svg{width:76px;height:76px;color:#e0bd7b;z-index:1}.about-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:0 0 38px}.about-metric{padding:20px;border:1px solid #e8eaf0;border-radius:18px;background:#fff;box-shadow:0 8px 26px rgba(16,34,56,.045)}.about-metric strong{display:block;font-size:30px;color:#b58b49}.about-metric span{font-size:12px;color:#667085}.about-section{display:grid;grid-template-columns:1fr 1fr;gap:28px;align-items:center;margin:36px 0}.about-section.reverse .about-section-art{order:2}.about-section-art{min-height:280px;border-radius:24px;overflow:hidden;position:relative;background:#e9edf2}.about-section-art img{width:100%;height:100%;min-height:280px;object-fit:cover;display:block}.about-section-copy{padding:14px 4px}.about-section-copy h2{font-size:clamp(26px,3vw,38px);line-height:1.13;letter-spacing:-.03em;margin:10px 0 14px}.about-section-copy p{line-height:1.85;color:#667085}.about-pill{display:inline-flex;padding:7px 11px;border-radius:99px;background:#f5eddf;color:#9b7438;font-size:10px;font-weight:800;letter-spacing:.15em}.about-team{background:#f5f7fa;border-radius:26px;padding:clamp(22px,4vw,38px);margin:40px 0}.about-team h2,.about-future h2{font-size:clamp(26px,3vw,38px);margin:8px 0 12px}.about-team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:22px}.about-role{background:#fff;border:1px solid #e7eaf0;border-radius:16px;padding:18px}.about-role b{display:block;font-size:25px;color:#b58b49}.about-role span{font-weight:700}.about-role small{display:block;color:#7b8492;margin-top:5px}.about-future{padding:34px;border-radius:26px;background:linear-gradient(120deg,#f7f2e9,#fff);margin:38px 0}.about-future-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:22px}.about-future-card{padding:20px;background:#fff;border:1px solid #eee6d8;border-radius:18px}.about-future-card svg{color:#b58b49}.about-future-card h3{margin:12px 0 7px}.about-future-card p{font-size:13px;line-height:1.7;color:#667085;margin:0}.about-editor{margin-top:30px}@media(max-width:760px){.about-hero,.about-section{grid-template-columns:1fr}.about-hero-mark{width:150px}.about-metrics{grid-template-columns:1fr}.about-team-grid{grid-template-columns:repeat(2,1fr)}.about-future-grid{grid-template-columns:1fr}.about-section.reverse .about-section-art{order:0}}
+`}</style>
+<div className="about-modern">
+  <section className="about-hero">
+    <div>
+      <span className="about-tag">YOUTH PARLIAMENT CLUB · 2026</span>
+      <h1>Yoshlar ovozi.<br/><span style={{color:'#e0bd7b'}}>Yangi imkoniyatlar.</span></h1>
+      <p>{settings.about_intro || 'Yoshlarning huquqiy bilimini, yetakchilik salohiyatini va ijtimoiy tashabbuslarini rivojlantiruvchi ochiq klub platformasi.'}</p>
+      <div style={{display:'flex',gap:10,flexWrap:'wrap',marginTop:22}}>
+        <button className="gold-btn" onClick={()=>go('membership')}>Klubga qo‘shilish <ArrowRight size={16}/></button>
+        <button className="ghost-btn" style={{color:'#fff',borderColor:'rgba(255,255,255,.35)'}} onClick={()=>go('events')}>Tadbirlarni ko‘rish</button>
+      </div>
+    </div>
+    <div className="about-hero-mark"><Landmark/></div>
   </section>
-)}
+
+  <div className="about-metrics">
+    <div className="about-metric"><strong>12</strong><span>Jamoa a’zosi</span></div>
+    <div className="about-metric"><strong>2026</strong><span>Tashkil topgan yil</span></div>
+    <div className="about-metric"><strong>3</strong><span>Asosiy yo‘nalish: o‘tmish · bugun · kelajak</span></div>
+  </div>
+
+  <section className="about-section">
+    <div className="about-section-art"><img src={settings.about_image || 'https://images.unsplash.com/photo-1562774053-701939374585?auto=format&fit=crop&w=1200&q=85'} alt="Universitet binosi"/></div>
+    <div className="about-section-copy"><span className="about-pill">KLUB HAQIDA</span><h2>Bir g‘oya atrofida birlashgan yoshlar.</h2><p>{settings.about_history || 'Yoshlar parlamenti klubi 2026-yil noyabr oyida Xalqaro ijtimoiy innovatsiyalar universiteti hududida tashkil etilgan. Klub yoshlarning fikr va takliflarini ilgari surish hamda ularning ijtimoiy hayotdagi ishtirokini kuchaytirish uchun maydon yaratadi.'}</p><p><b style={{color:'#b58b49'}}>Tashkil topgan sana:</b> 2026-yil, noyabr</p></div>
+  </section>
+
+  <section className="about-team">
+    <span className="about-pill">BUGUNGI JAMOA</span><h2>12 a’zo — yagona maqsad.</h2><p style={{color:'#667085',lineHeight:1.7}}>{settings.about_today || 'Klub faoliyati vazifalar taqsimoti, hamkorlik va mas’uliyat tamoyillariga asoslanadi.'}</p>
+    <div className="about-team-grid">
+      <div className="about-role"><b>01</b><span>Spiker</span><small>1 nafar</small></div>
+      <div className="about-role"><b>02</b><span>Koordinatorlar</span><small>2 nafar</small></div>
+      <div className="about-role"><b>03</b><span>Media jamoasi</span><small>2 nafar</small></div>
+      <div className="about-role"><b>04</b><span>Klub a’zolari</span><small>7 nafar</small></div>
+    </div>
+  </section>
+
+  <section className="about-section reverse">
+    <div className="about-section-art"><img src={settings.about_history_image || 'https://images.unsplash.com/photo-1529107386315-e1a2ed48a620?auto=format&fit=crop&w=1200&q=85'} alt="Majlislar zali"/></div>
+    <div className="about-section-copy"><span className="about-pill">BIZNING YONDASHUV</span><h2>Fikr bildirishdan — amaliy yechimgacha.</h2><p>Klub a’zolari dolzarb masalalarni muhokama qiladi, takliflar ishlab chiqadi va jamoaviy loyihalarni amalga oshiradi. Har bir tashabbus hamkorlik va mas’uliyat bilan rivojlantiriladi.</p></div>
+  </section>
+
+  <section className="about-future"><span className="about-pill">KELAJAK REJALARI</span><h2>G‘oyalarni natijaga aylantiramiz.</h2><p style={{color:'#667085',lineHeight:1.8,maxWidth:850}}>{settings.about_future || 'Klubning istiqboldagi maqsadi — universitet miqyosida yoshlar tashabbuslarini kengaytirish, huquqiy va intellektual loyihalarni amalga oshirish hamda faol yoshlar hamkorligini rivojlantirish.'}</p><div className="about-future-grid"><article className="about-future-card"><Landmark/><h3>Huquqiy bilim</h3><p>Huquqiy savodxonlik va fuqarolik faolligini oshirish.</p></article><article className="about-future-card"><Users/><h3>Hamkorlik</h3><p>Tashabbuskor yoshlarni yagona maqsad atrofida birlashtirish.</p></article><article className="about-future-card"><ArrowUpRight/><h3>Yangi loyihalar</h3><p>Ijtimoiy ahamiyatga ega g‘oyalarni ro‘yobga chiqarish.</p></article></div></section>
+  <div style={{textAlign:'center',padding:'18px 8px 30px',color:'#a47b35',fontSize:11,fontWeight:800,letterSpacing:'.18em'}}>YOSHLAR OVOZI · YANGI G‘OYALAR · YANGI KELAJAK</div>
+  {session?.user?.email?.toLowerCase() === 'obidofich@gmail.com' && (
+    <section className="form-card about-editor"><h2>“Klub haqida” bo‘limini tahrirlash</h2><p>Matnlarni o‘zgartiring, rasmlarni yuklang va saqlang.</p>
+      <label>Kirish matni<textarea rows="3" value={draft.about_intro || ''} onChange={e=>setDraft({...draft,about_intro:e.target.value})}/></label>
+      <label>Tarix matni<textarea rows="4" value={draft.about_history || ''} onChange={e=>setDraft({...draft,about_history:e.target.value})}/></label>
+      <label>Bugungi faoliyat matni<textarea rows="3" value={draft.about_today || ''} onChange={e=>setDraft({...draft,about_today:e.target.value})}/></label>
+      <label>Kelajak matni<textarea rows="3" value={draft.about_future || ''} onChange={e=>setDraft({...draft,about_future:e.target.value})}/></label>
+      <label>Universitet rasmi<input type="file" accept="image/*" onChange={e=>uploadSettingImage('about_image',e.target.files?.[0])}/></label>
+      <label>Tarix rasmi<input type="file" accept="image/*" onChange={e=>uploadSettingImage('about_history_image',e.target.files?.[0])}/></label>
+      <button className="gold-btn" type="button" onClick={saveSettings} disabled={busy}>O‘zgarishlarni saqlash <Save size={16}/></button>
+    </section>
+  )}
 </div>
+</>
 )}
-
-
 
 {page === 'membership' && (
 <>
@@ -3034,6 +2931,16 @@ marginTop: '8px'
 {contentForm('news', 'Yangilik')}
 {contentForm('events', 'Tadbir')}
 {contentForm('gallery', 'Galereya rasmi')}
+</div>
+<div className="form-card" style={{marginTop:18}}>
+  <h2>Tadbirlarni boshqarish</h2>
+  <p>Har bir tadbir kartochkasidagi Tahrirlash yoki O‘chirish tugmasidan foydalaning.</p>
+  {contentList('events', events)}
+</div>
+<div className="form-card" style={{marginTop:18}}>
+  <h2>Yangiliklar va galereyani boshqarish</h2>
+  {contentList('news', news)}
+  {contentList('gallery', gallery)}
 </div>
 <div className="form-card" style={{marginTop:18}}>
   <h2>Kontent bo‘yicha qidiruv natijalari</h2>
