@@ -2149,7 +2149,28 @@ desc="Klubimizda bo‘lib o‘tadigan uchrashuvlar, muhokamalar va loyihalarni k
     return <article className="info-panel" key={row.id} style={{borderRadius:16}}>
       {row.image_url&&<img src={row.image_url} alt={row.title} style={{width:'100%',height:160,objectFit:'cover',borderRadius:12,marginBottom:12}}/>}
       <div style={{display:'flex',justifyContent:'space-between',gap:8,alignItems:'center',marginBottom:9}}><span style={{fontSize:12,fontWeight:800,color:'#9b7638'}}>{valid?d.toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric'}):'Sana belgilanmagan'}</span><span style={{fontSize:10,fontWeight:800,padding:'5px 8px',borderRadius:20,background:isPast?'#f1f2f4':'#edf7f1',color:isPast?'#667085':'#23734a'}}>{isPast?'YAKUNLANGAN':'REJADA'}</span></div>
-      <h3 style={{margin:'0 0 8px',fontSize:18}}>{row.title}</h3><p style={{margin:0,color:'#667085',fontSize:13,lineHeight:1.65,whiteSpace:'pre-line'}}>{row.description||'Tadbir haqida qo‘shimcha ma’lumot mavjud emas.'}</p>
+      {editing?.id === row.id && editing?.type === 'events' ? (
+        <div style={{display:'grid',gap:10,marginTop:12}}>
+          <label style={{color:'#17263a'}}>Tadbir nomi<input value={editing.title} onChange={e=>setEditing({...editing,title:e.target.value})}/></label>
+          <label style={{color:'#17263a'}}>Sana va vaqt<input type="datetime-local" value={editing.event_date} onChange={e=>setEditing({...editing,event_date:e.target.value})}/></label>
+          <label style={{color:'#17263a'}}>Tavsif<textarea rows="3" value={editing.description} onChange={e=>setEditing({...editing,description:e.target.value})}/></label>
+          <div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+            <button type="button" className="gold-btn" disabled={busy} onClick={updateContent}><Save size={15}/> {busy?'Saqlanmoqda...':'Saqlash'}</button>
+            <button type="button" className="ghost-btn" onClick={()=>setEditing(null)}>Bekor qilish</button>
+          </div>
+        </div>
+      ) : (
+        <>
+          <h3 style={{margin:'0 0 8px',fontSize:18,color:'#17263a'}}>{row.title}</h3>
+          <p style={{margin:0,color:'#667085',fontSize:13,lineHeight:1.65,whiteSpace:'pre-line'}}>{row.description||'Tadbir haqida qo‘shimcha ma’lumot mavjud emas.'}</p>
+          {session?.user?.email?.toLowerCase() === 'obidofich@gmail.com' && (
+            <div style={{display:'flex',gap:8,flexWrap:'wrap',marginTop:14}}>
+              <button type="button" className="gold-btn" onClick={()=>startEdit('events',row)}><FileText size={15}/> Tahrirlash</button>
+              <button type="button" className="ghost-btn" onClick={()=>deleteContent('events',row.id)}><Trash2 size={15}/> O‘chirish</button>
+            </div>
+          )}
+        </>
+      )}
     </article>
   })}</div> : <p className="empty-state">Hozircha tadbirlar joylashtirilmagan.</p>}
 </section>
@@ -2171,7 +2192,7 @@ desc="Klubimizda bo‘lib o‘tadigan uchrashuvlar, muhokamalar va loyihalarni k
   </div>
   <div className="calendar-event-list">
     <h3>{selectedCalendarDate ? `Tadbirlar — ${new Date(`${selectedCalendarDate}T00:00:00`).toLocaleDateString('uz-UZ')}` : 'Tadbir sanasini tanlang'}</h3>
-    {selectedCalendarDate ? (selectedDateEvents.length ? selectedDateEvents.map(row=><article key={row.id}><b>{row.title}</b><p>{row.description || ''}</p></article>) : <p>Bu sanada rejalashtirilgan tadbir yo‘q.</p>) : <p>Nuqta bilan belgilangan kunlarda tadbir mavjud.</p>}
+    {selectedCalendarDate ? (selectedDateEvents.length ? selectedDateEvents.map(row=><article key={row.id} style={{background:'#fff',color:'#17263a',border:'1px solid #e4e8ef'}}><b style={{display:'block',color:'#17263a'}}>{row.title}</b><p style={{color:'#536174'}}>{row.description || ''}</p></article>) : <p style={{color:'#dce5ef'}}>Bu sanada rejalashtirilgan tadbir yo‘q.</p>) : <p style={{color:'#dce5ef'}}>Nuqta bilan belgilangan kunlarda tadbir mavjud.</p>}
   </div>
 </section>
 </>
