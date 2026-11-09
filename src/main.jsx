@@ -1724,8 +1724,14 @@ html[data-yp-theme="dark"] .form-card label{color:#e4c98f!important}
 
 @media(max-width:900px){.yp-theme-toggle{order:5;margin:6px 0}}
 @media(max-width:600px){.yp-theme-toggle{font-size:10px!important;padding:8px 10px!important}.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box{border-radius:17px!important}}
-.yp-assistant-launch{position:fixed;right:25px;bottom:24px;z-index:11000;display:flex;align-items:center;gap:10px;padding:13px 18px;border:1px solid rgba(255,255,255,.35);border-radius:999px;background:linear-gradient(135deg,#102844,#07182d);color:#fff;box-shadow:0 16px 40px rgba(7,24,45,.28);font-weight:800;cursor:pointer}
-.yp-assistant-launch-icon{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;background:rgba(224,190,128,.18);color:#f0d39d}
+.yp-assistant-launch{position:fixed;right:25px;bottom:24px;z-index:11000;display:flex;align-items:center;gap:11px;padding:7px 18px 7px 7px;min-height:76px;border:1px solid rgba(218,187,130,.72);border-radius:999px;background:linear-gradient(135deg,#102844,#07182d);color:#fff;box-shadow:0 16px 40px rgba(7,24,45,.34);font-weight:800;cursor:pointer;overflow:visible;transition:transform .25s ease,box-shadow .25s ease}
+.yp-assistant-launch:hover{transform:translateY(-3px);box-shadow:0 20px 48px rgba(7,24,45,.42)}
+.yp-assistant-launch-icon{display:grid;place-items:center;width:62px;height:62px;flex:none;border-radius:50%;overflow:hidden;background:radial-gradient(circle at 35% 25%,#284968,#07182d 72%);border:1px solid rgba(224,190,128,.55);box-shadow:0 0 0 3px rgba(200,166,107,.12);animation:ypRobotBob 3.2s ease-in-out infinite}
+.yp-assistant-launch-icon img{width:100%;height:100%;object-fit:cover;display:block}
+.yp-assistant-launch-label{display:inline-block;white-space:nowrap;animation:ypLabelPulse 4.8s ease-in-out infinite;transform-origin:left center}
+@keyframes ypRobotBob{0%,100%{transform:translateY(0) rotate(0)}50%{transform:translateY(-4px) rotate(-2deg)}}
+@keyframes ypLabelPulse{0%,12%,100%{opacity:1;transform:translateX(0)}5%{opacity:.45;transform:translateX(5px)}8%{opacity:1;transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){.yp-assistant-launch,.yp-assistant-launch-icon,.yp-assistant-launch-label{animation:none!important;transition:none!important}}
 .yp-assistant-panel{position:fixed;right:24px;bottom:88px;z-index:11001;width:min(390px,calc(100vw - 28px));height:min(570px,calc(100vh - 125px));display:flex;flex-direction:column;overflow:hidden;border:1px solid rgba(205,174,119,.45);border-radius:22px;background:#f8fafc;box-shadow:0 24px 70px rgba(5,20,38,.28)}
 .yp-assistant-head{display:flex;align-items:center;gap:11px;padding:16px;background:linear-gradient(130deg,#07182d,#173956);color:white}
 .yp-assistant-avatar{display:grid;place-items:center;width:40px;height:40px;border:1px solid rgba(230,209,166,.55);border-radius:14px;color:#f0d39d}
@@ -1740,7 +1746,7 @@ html[data-yp-theme="dark"] .form-card label{color:#e4c98f!important}
 .yp-assistant-compose input{flex:1;min-width:0;border:1px solid #d8e0e9!important;border-radius:12px!important;background:#f8fafc!important;color:#172b45!important;padding:11px 12px!important;font-size:13px}
 .yp-assistant-compose button{width:42px;flex:none;border:0;border-radius:12px;background:#c9a86e;color:#13263c;font-weight:900;cursor:pointer}
 .yp-assistant-privacy{padding:0 13px 11px;background:#fff;color:#8290a1;font-size:10px;line-height:1.4}
-@media(max-width:600px){.yp-assistant-launch{right:14px;bottom:14px;padding:10px 14px}.yp-assistant-panel{right:10px;bottom:72px;width:calc(100vw - 20px);height:min(600px,calc(100vh - 92px))}.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box{border-radius:17px!important}}
+@media(max-width:600px){.yp-assistant-launch{right:14px;bottom:14px;padding:6px 13px 6px 6px;min-height:66px}.yp-assistant-launch-icon{width:54px;height:54px}.yp-assistant-panel{right:10px;bottom:72px;width:calc(100vw - 20px);height:min(600px,calc(100vh - 92px))}.form-card,.info-panel,.doc-card,.contact-card,.news-card,.event-card,.membership-box{border-radius:17px!important}}
 \n`}
 
 </style>
@@ -3242,9 +3248,9 @@ marginTop: '8px'
   {assistantBusy && <div className="yp-assistant-bubble" role="status">AI javob tayyorlamoqda…</div>}
   <div className="yp-assistant-quick"><button type="button" disabled={assistantBusy} onClick={()=>sendAssistantMessage('Klubga qanday a’zo bo‘laman?')}>A’zolik</button><button type="button" disabled={assistantBusy} onClick={()=>sendAssistantMessage('Yaqin tadbirlar qachon?')}>Tadbirlar</button><button type="button" disabled={assistantBusy} onClick={()=>sendAssistantMessage('Klub haqida ma’lumot ber')}>Klub haqida</button></div>
   <form className="yp-assistant-compose" onSubmit={e=>{e.preventDefault();sendAssistantMessage()}}><input value={assistantInput} onChange={e=>setAssistantInput(e.target.value)} placeholder="Savolingizni yozing..." aria-label="Savolingiz" disabled={assistantBusy}/><button type="submit" aria-label="Yuborish" disabled={assistantBusy || !assistantInput.trim()}>➤</button></form>
-  <div className="yp-assistant-privacy">AI javobi OpenAI orqali yaratiladi. Faqat savolingiz va klubning hammaga ochiq ma’lumotlari yuboriladi. A’zolik arizalari, shaxsiy kabinet, davomat va maxfiy ma’lumotlar yuborilmaydi. Parol yoki shaxsiy hujjat raqamini yozmang.</div>
+  <div className="yp-assistant-privacy">AI javobi Google Gemini orqali yaratiladi. Faqat savolingiz va klubning hammaga ochiq ma’lumotlari yuboriladi. A’zolik arizalari, shaxsiy kabinet, davomat va maxfiy ma’lumotlar yuborilmaydi. Parol yoki shaxsiy hujjat raqamini yozmang.</div>
  </div>}
- <button type="button" className="yp-assistant-launch" onClick={()=>setAssistantOpen(o=>!o)} aria-expanded={assistantOpen}><span className="yp-assistant-launch-icon"><MessageCircle size={17}/></span>{assistantOpen?'Chatni yopish':'Yordam kerakmi?'}</button>
+ <button type="button" className="yp-assistant-launch" onClick={()=>setAssistantOpen(o=>!o)} aria-expanded={assistantOpen} aria-label={assistantOpen?'Chatni yopish':'AI yordamchini ochish'}><span className="yp-assistant-launch-icon"><img src="/diplomat-robot.gif" alt="Kostyum kiygan robot yordamchi"/></span><span className="yp-assistant-launch-label">{assistantOpen?'Chatni yopish':'Yordam kerakmi?'}</span></button>
 </section>
 
 <footer className="footer">
