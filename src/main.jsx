@@ -260,7 +260,7 @@ const filteredGallery = gallery.filter(row =>
 const normalizedPublicSearch = publicSearch.trim().toLocaleLowerCase('uz')
 const publicSearchResults = normalizedPublicSearch ? [
   ...nav.filter(([id, label]) => label.toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(([id,label]) => ({ type:'Bo‘lim', title:label, page:id, key:`page-${id}` })),
-  ...events.filter(row => [row.title,row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(row => ({ type:'Tadbir', title:row.title, page:'events', key:`event-${row.id}` })),
+  ...events.filter(row => [row.title,row.description,row.event_date].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(row => ({ type:'Tadbir', title:row.title, page:'events', key:`event-${row.id}` })),
   ...news.filter(row => [row.title,row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(row => ({ type:'Yangilik', title:row.title, page:'news', key:`news-${row.id}` })),
   ...gallery.filter(row => [row.title,row.description].filter(Boolean).join(' ').toLocaleLowerCase('uz').includes(normalizedPublicSearch)).map(row => ({ type:'Galereya', title:row.title || 'Galereya rasmi', page:'gallery', key:`gallery-${row.id}` }))
 ].slice(0, 8) : []
@@ -271,6 +271,9 @@ const calendarOffset = (new Date(calendarYear, calendarMonthIndex, 1).getDay() +
 const calendarCells = [...Array(calendarOffset).fill(null), ...Array.from({length:calendarMonthDays}, (_,i)=>i+1)]
 const calendarEventDates = new Set(events.map(row => String(row.event_date || '').slice(0,10)).filter(Boolean))
 const selectedDateEvents = selectedCalendarDate ? events.filter(row => String(row.event_date || '').slice(0,10) === selectedCalendarDate) : []
+const today = new Date()
+const todayKey = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`
+const upcomingEvents = events.filter(row => { const date = String(row.event_date || '').slice(0,10); return date && date >= todayKey }).sort((a,b) => String(a.event_date).localeCompare(String(b.event_date))).slice(0,3)
 
 const pendingApplicationsCount = applications.filter(app =>
   !['Qabul qilindi', 'Rad etildi'].includes(app.status)
@@ -1521,7 +1524,15 @@ return (
 .gallery-lightbox-panel p{color:rgba(255,255,255,.75);margin:4px 8px 10px}
 .gallery-lightbox-close{position:absolute;z-index:2;right:22px;top:22px;width:42px;height:42px;border:1px solid rgba(255,255,255,.35);border-radius:50%;background:rgba(5,14,27,.8);color:#fff;font-size:28px;line-height:1;cursor:pointer}
 @media(max-width:640px){.admin-search-wrap{align-items:stretch}.admin-search-wrap input{font-size:13px}.gallery-lightbox{padding:10px}.gallery-lightbox-panel{padding:9px}}
-\n`}
+
+.home-live-section,.home-upcoming-section{margin:34px 0;padding:28px;border:1px solid #e7eaf0;border-radius:22px;background:#fff;box-shadow:0 12px 34px rgba(15,35,58,.05)}
+.home-live-heading h2,.home-upcoming-heading h2{margin:8px 0 0;color:#172b45;font-size:clamp(20px,3vw,28px)}
+.home-live-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-top:22px}
+.home-live-stats article{padding:18px;border-radius:15px;background:linear-gradient(145deg,#10243d,#254867);color:#fff;display:flex;flex-direction:column;gap:5px;min-width:0}
+.home-live-stats strong{font-size:32px;line-height:1;color:#e7bd70}.home-live-stats span{font-weight:800}.home-live-stats small{color:rgba(255,255,255,.65);font-size:11px}
+.home-upcoming-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}.home-upcoming-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:18px}.home-upcoming-grid article{padding:18px;border:1px solid #e7eaf0;border-radius:15px;background:#fafbfc}.home-upcoming-grid small{color:#a47b3d;font-weight:800}.home-upcoming-grid h3{margin:9px 0;color:#172b45}.home-upcoming-grid p,.home-upcoming-empty{color:#647287;font-size:13px;line-height:1.6}.home-upcoming-empty{margin-top:18px;padding:18px;border-radius:14px;background:#f7f8fa}
+@media(max-width:760px){.home-live-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.home-upcoming-grid{grid-template-columns:1fr}.home-live-section,.home-upcoming-section{padding:19px}.home-upcoming-heading{align-items:flex-start;flex-direction:column}}\n`}
+
 </style>
 {typeof document !== 'undefined' && createPortal(
   <AnimatePresence>
@@ -1787,6 +1798,32 @@ Klub haqida <ArrowUpRight />
 </p>
   </div>
 </motion.section>
+
+<section className="home-live-section">
+  <div className="home-live-heading">
+    <span className="eyebrow">KLUB FAOLIYATI RAQAMLARDA</span>
+    <h2>Birgalikda amalga oshirilayotgan ishlar.</h2>
+  </div>
+  <div className="home-live-stats">
+    <article><strong>12</strong><span>Jamoa a’zosi</span><small>Klub tarkibi</small></article>
+    <article><strong>{events.length}</strong><span>Tadbir</span><small>Platformaga joylangan</small></article>
+    <article><strong>{news.length}</strong><span>Yangilik</span><small>Klub xabarlari</small></article>
+    <article><strong>{gallery.length}</strong><span>Foto lavha</span><small>Faoliyat galereyasi</small></article>
+  </div>
+</section>
+
+<section className="home-upcoming-section">
+  <div className="home-upcoming-heading">
+    <div><span className="eyebrow">KALENDAR</span><h2>Yaqinlashayotgan tadbirlar</h2></div>
+    <button className="ghost-btn" type="button" onClick={() => go('events')}>Barcha tadbirlar <ArrowRight size={16}/></button>
+  </div>
+  {upcomingEvents.length ? <div className="home-upcoming-grid">
+    {upcomingEvents.map(event => <article key={event.id}>
+      <small>{event.event_date ? new Date(`${String(event.event_date).slice(0,10)}T00:00:00`).toLocaleDateString('uz-UZ',{day:'numeric',month:'long',year:'numeric'}) : 'Sana belgilanmagan'}</small>
+      <h3>{event.title}</h3><p>{event.description || 'Klub tadbiri haqida batafsil ma’lumot.'}</p>
+    </article>)}
+  </div> : <div className="home-upcoming-empty">Hozircha yaqinlashayotgan tadbirlar e’lon qilinmagan. Yangiliklarni kuzatib boring.</div>}
+</section>
 </>
 )}
 
