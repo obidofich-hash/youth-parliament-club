@@ -7,7 +7,7 @@ import {
 Home, Landmark, Users, FileText, MessageCircle, CalendarDays, Newspaper,
 Camera, Phone, Menu, ArrowRight, ArrowUpRight, Send, Mail, MapPin,
 Instagram, Youtube, ShieldCheck, Save, LogOut, Plus, Trash2,
-Image as ImageIcon
+Image as ImageIcon, RefreshCw, QrCode, Settings
 } from 'lucide-react'
 import './style.css'
 import MembershipCertificate from './MembershipCertificate'
@@ -115,6 +115,7 @@ return (
 function App() {
 const requestedPage = new URLSearchParams(window.location.search).get('page')
 const [page, setPage] = useState(allowedPages.has(requestedPage) ? requestedPage : 'home')
+const [adminTab, setAdminTab] = useState('overview')
 const [menu, setMenu] = useState(false)
 const [memberApplication, setMemberApplication] = useState(null)
 const [scannerOpen, setScannerOpen] = useState(false)
@@ -268,6 +269,7 @@ useEffect(() => {
   if (session.user.email?.toLowerCase() === 'obidofich@gmail.com') {
     loadApplications()
     loadAttendanceEvents()
+    loadFeedback()
   }
 
   // Every authenticated member may load only their own approved record.
@@ -1087,6 +1089,9 @@ async function updateContent() {
   loadContent()
 }
 async function deleteContent(type, id) {
+const confirmed = window.confirm('Ushbu kontentni butunlay o‘chirishni tasdiqlaysizmi?')
+if (!confirmed) return
+
 const table =
 type === 'events'
 ? 'club_events'
@@ -1300,6 +1305,36 @@ function contentList(type, rows) {
 return (
 <div className="app">
 <style>{`
+.admin-dashboard{margin:0 0 22px;padding:22px;border:1px solid #e7eaf0;border-radius:20px;background:linear-gradient(135deg,#fff 0%,#f7f8fb 100%);box-shadow:0 12px 32px rgba(18,32,55,.06)}
+.admin-dashboard-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:18px}
+.admin-eyebrow{font-size:10px;font-weight:800;letter-spacing:.16em;color:#a47b35}
+.admin-dashboard-top h2{margin:5px 0 4px;font-size:25px;color:#17263a}
+.admin-dashboard-top p{margin:0;color:#667085;font-size:13px}
+.admin-refresh{display:inline-flex;align-items:center;gap:8px;padding:10px 13px;border:1px solid #e0e4eb;border-radius:11px;background:#fff;color:#344054;font-weight:700;cursor:pointer}
+.admin-stat-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:18px 0}
+.admin-stat-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px 15px;border:1px solid #e8ebf0;border-radius:14px;background:#fff;cursor:pointer}
+.admin-stat-grid button span{font-size:12px;color:#667085;font-weight:650}
+.admin-stat-grid button strong{font-size:27px;line-height:1.1;color:#17263a}
+.admin-stat-grid button small{font-size:11px;color:#98a2b3}
+.admin-tabs{display:flex;gap:7px;flex-wrap:wrap;padding-top:14px;border-top:1px solid #e9ecf1}
+.admin-tabs button{padding:9px 14px;border:1px solid transparent;border-radius:10px;background:#f0f2f6;color:#475467;font-size:13px;font-weight:700;cursor:pointer}
+.admin-tabs button.active{background:#172b45;color:#fff;box-shadow:0 5px 14px rgba(23,43,69,.16)}
+.admin-overview-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:24px}
+.admin-overview-grid button{display:flex;flex-direction:column;align-items:flex-start;gap:9px;padding:19px;border:1px solid #e7eaf0;border-radius:16px;background:#fff;text-align:left;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.admin-overview-grid button:hover{transform:translateY(-2px);box-shadow:0 12px 24px rgba(18,32,55,.08)}
+.admin-overview-grid button svg{color:#a47b35}
+.admin-overview-grid button strong{font-size:15px;color:#17263a}
+.admin-overview-grid button span{font-size:12px;color:#667085;line-height:1.5}
+.admin-overview-grid button b{font-size:12px;color:#9b742f;margin-top:3px}
+.admin-section{display:grid;gap:16px;max-width:100%}
+.admin-section .form-card{margin:0;padding:20px;border-radius:16px}
+.admin-section .applications-list{display:grid;gap:10px}
+.admin-section .application-item{padding:15px;border:1px solid #e8ebf0;border-radius:13px;background:#fff}
+.admin-section .application-actions{display:flex;flex-wrap:wrap;gap:8px}
+.admin-section .application-actions button{min-height:38px;padding:8px 12px;border-radius:9px;font-size:12px}
+.admin-section .form-card h2{margin-top:0;font-size:18px}
+.admin-section input,.admin-section textarea,.admin-section select{border-radius:10px}
+@media(max-width:760px){.admin-dashboard{padding:15px;border-radius:15px}.admin-dashboard-top{flex-direction:column}.admin-dashboard-top h2{font-size:21px}.admin-stat-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.admin-overview-grid{grid-template-columns:1fr}.admin-tabs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}.admin-tabs button{padding:9px 5px;font-size:11px}.admin-section .form-card{padding:15px}.admin-section .application-actions button{flex:1 1 auto}}
 .global-toast{position:fixed;top:18px;left:50%;transform:translateX(-50%);z-index:2147483647;display:flex;align-items:center;gap:12px;width:min(560px,calc(100vw - 28px));min-height:58px;padding:13px 18px 16px;border-radius:13px;color:#fff;box-shadow:0 12px 36px rgba(0,0,0,.22);overflow:hidden;font-size:14px;font-weight:600}
 .global-toast.success{background:#168447;border:1px solid #36b56f}
 .global-toast.error{background:#c83232;border:1px solid #ed6666}
@@ -1444,6 +1479,7 @@ exit={{ opacity: 0 }}
 {label}
 </button>
 ))}
+{session?.user?.email?.toLowerCase() === 'obidofich@gmail.com' && (
 <button
 className={page === 'admin' ? 'active' : ''}
 onClick={() => go('admin')}
@@ -1451,6 +1487,7 @@ onClick={() => go('admin')}
 <ShieldCheck size={18} />
 Admin panel
 </button>
+)}
 </motion.div>
 )}
 </AnimatePresence>
@@ -1469,6 +1506,7 @@ onClick={() => go(id)}
 <span>{label}</span>
 </button>
 ))}
+{session?.user?.email?.toLowerCase() === 'obidofich@gmail.com' && (
 <button
 className={`nav-item ${page === 'admin' ? 'active' : ''}`}
 onClick={() => go('admin')}
@@ -1476,6 +1514,7 @@ onClick={() => go('admin')}
 <ShieldCheck size={18} />
 <span>Admin panel</span>
 </button>
+)}
 
 <div className="side-card">
 <div className="side-emblem"><Landmark /></div>
@@ -2186,6 +2225,49 @@ required
 </form>
   ) : (
 <>
+<section className="admin-dashboard">
+  <div className="admin-dashboard-top">
+    <div>
+      <span className="admin-eyebrow">YOSHLAR PARLAMENTI · BOSHQARUV</span>
+      <h2>Boshqaruv markazi</h2>
+      <p>Kerakli bo‘limni tanlang va ishni bir joydan boshqaring.</p>
+    </div>
+    <button type="button" className="admin-refresh" onClick={() => {
+      loadApplications()
+      loadAttendanceEvents()
+      loadFeedback()
+      loadContent()
+    }}><RefreshCw size={15}/> Ma’lumotlarni yangilash</button>
+  </div>
+  <div className="admin-stat-grid">
+    <button type="button" onClick={() => setAdminTab('applications')}><span>Arizalar</span><strong>{applications.length}</strong><small>Ko‘rib chiqish</small></button>
+    <button type="button" onClick={() => setAdminTab('feedback')}><span>Murojaatlar</span><strong>{feedbackRows.length}</strong><small>Javob berish</small></button>
+    <button type="button" onClick={() => setAdminTab('attendance')}><span>Davomat</span><strong>{attendanceRecords.length}</strong><small>Tanlangan tadbir</small></button>
+    <button type="button" onClick={() => setAdminTab('content')}><span>Kontent</span><strong>{events.length + news.length + gallery.length}</strong><small>Tadbir · yangilik · foto</small></button>
+  </div>
+  <nav className="admin-tabs" aria-label="Admin bo‘limlari">
+    {[
+      ['overview','Umumiy'],
+      ['attendance','Davomat'],
+      ['applications','Arizalar'],
+      ['feedback','Murojaatlar'],
+      ['content','Kontent'],
+      ['settings','Sozlamalar']
+    ].map(([key,label]) => (
+      <button key={key} type="button" className={adminTab === key ? 'active' : ''} onClick={() => setAdminTab(key)}>{label}</button>
+    ))}
+  </nav>
+</section>
+{adminTab === 'overview' && (
+  <section className="admin-overview-grid">
+    <button type="button" onClick={() => setAdminTab('applications')}><Users size={21}/><strong>Arizalarni ko‘rib chiqish</strong><span>Yangi a’zolik arizalarini qabul qilish yoki rad etish</span><b>Bo‘limni ochish →</b></button>
+    <button type="button" onClick={() => setAdminTab('feedback')}><MessageCircle size={21}/><strong>Murojaatlarni boshqarish</strong><span>Kelgan murojaatlarni o‘qish va javob tayyorlash</span><b>Bo‘limni ochish →</b></button>
+    <button type="button" onClick={() => setAdminTab('attendance')}><QrCode size={21}/><strong>Davomat va QR-kod</strong><span>Tadbirni tanlash va qatnashuvchilarni ko‘rish</span><b>Bo‘limni ochish →</b></button>
+    <button type="button" onClick={() => setAdminTab('settings')}><Settings size={21}/><strong>Sayt sozlamalari</strong><span>Aloqa, rasmlar va guvohnoma ko‘rinishi</span><b>Bo‘limni ochish →</b></button>
+  </section>
+)}
+{adminTab === 'attendance' && (
+<div className="admin-section">
 <div className="form-card">
   <h2>Davomat boshqaruvi</h2>
 
@@ -2266,6 +2348,10 @@ required
     </div>
   )}
 </div>
+</div>
+)}
+{adminTab === 'feedback' && (
+<div className="admin-section">
 <div className="form-card">
   <div className="applications-heading">
     <h2>Kelgan murojaatlar</h2>
@@ -2339,6 +2425,10 @@ required
     </div>
   )}
 </div>
+</div>
+)}
+{adminTab === 'applications' && (
+<div className="admin-section">
 <div className="form-card applications-admin">
   <div className="applications-heading">
     <h2>Klubga a’zolik arizalari</h2>
@@ -2408,6 +2498,10 @@ required
     </div>
   )}
 </div>
+</div>
+)}
+{adminTab === 'settings' && (
+<div className="admin-section">
   <div className="form-card">
 <h2>Aloqa ma’lumotlari</h2>
 
@@ -2575,11 +2669,17 @@ marginTop: '8px'
     <Save size={16} /> Matnlarni saqlash
   </button>
 </div>
+</div>
+)}
+{adminTab === 'content' && (
+<div className="admin-section">
 <div className="two-col">
 {contentForm('news', 'Yangilik')}
 {contentForm('events', 'Tadbir')}
 {contentForm('gallery', 'Galereya rasmi')}
 </div>
+</div>
+)}
 </>
 )}
 
